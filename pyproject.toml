@@ -14,7 +14,7 @@ repository = "https://github.com/thegraphnetwork/epigraphhub_py"
 homepage = "https://github.com/thegraphnetwork/epigraphhub_py"
 
 # Keywords description https://python-poetry.org/docs/pyproject/#keywords
-keywords = []  #! Update me
+keywords = ['epidemiology']  #! Update me
 
 # Pypi classifiers: https://pypi.org/classifiers/
 classifiers = [  #! Update me
