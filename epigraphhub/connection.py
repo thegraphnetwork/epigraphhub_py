@@ -1,5 +1,6 @@
 import atexit
 
+from sqlalchemy import create_engine
 from sshtunnel import SSHTunnelForwarder
 
 
@@ -12,6 +13,10 @@ class Tunnel:
     def open_tunnel(self, user="epigraph", ssh_key_passphrase=""):
         """
         Opens a tunnel to EpigraphHub database
+
+        Args:
+            user: user to use for the connection
+            ssh_key_passphrase: your SSH key passphrase
         """
         self.server = SSHTunnelForwarder(
             self.host,
@@ -34,3 +39,14 @@ class Tunnel:
             print("Closing Tunnel...")
             self.server.stop()
             self.server = None
+
+
+def get_engine(dbuser="epigraph", dbpass="epigraph", db="sandbox"):
+    """
+    returns an engine connected to the Epigraphhub database
+    Args:
+        dbuser:
+        dbpass:
+    """
+    engine = create_engine(f"postgresql://{dbuser}:{dbpass}@localhost/{db}")
+    return engine

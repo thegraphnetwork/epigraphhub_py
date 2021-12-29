@@ -24,7 +24,7 @@ Epigraphhub Python package
 1. Initialize `git` inside your repo:
 
 ```bash
-cd epigraphhub_py && git init
+cd epigraphhub && git init
 ```
 
 2. If you don't have `Poetry` installed run:
@@ -141,25 +141,25 @@ Articles:
 ## Installation
 
 ```bash
-pip install -U epigraphhub_py
+pip install -U epigraphhub
 ```
 
 or install with `Poetry`
 
 ```bash
-poetry add epigraphhub_py
+poetry add epigraphhub
 ```
 
 Then you can run
 
 ```bash
-epigraphhub_py --help
+epigraphhub --help
 ```
 
 or with `Poetry`:
 
 ```bash
-poetry run epigraphhub_py --help
+poetry run epigraphhub --help
 ```
 
 ### Makefile usage

@@ -1,7 +1,7 @@
 """Tests for hello function."""
 import pytest
 
-from epigraphhub_py.example import hello
+from epigraphhub.example import hello
 
 
 @pytest.mark.parametrize(

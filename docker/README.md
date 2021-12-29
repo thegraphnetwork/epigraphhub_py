@@ -27,7 +27,7 @@ make docker-build IMAGE=some_name VERSION=0.1.0
 ```bash
 docker run -it --rm \
    -v $(pwd):/workspace \
-   epigraphhub_py bash
+   epigraphhub bash
 ```
 
 ## How to clean up
