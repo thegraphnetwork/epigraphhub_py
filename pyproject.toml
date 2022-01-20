@@ -45,7 +45,7 @@ matplotlib = "^3.5.1"
 plotly = "^5.5.0"
 geopandas = "^0.10.2"
 sshtunnel = "^0.4.0"
-SQLAlchemy = "^1.4.29"
+SQLAlchemy = "^1.4.30"
 psycopg2-binary = "^2.9.2"
 GeoAlchemy2 = "^0.10.0"
 
