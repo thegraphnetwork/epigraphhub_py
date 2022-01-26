@@ -46,3 +46,41 @@ def interest_over_time(keywords: list[str], **kwargs):
     trends = _build_payload(keywords, **kwargs)
     interest_over_time_df = trends.interest_over_time()
     return interest_over_time_df
+
+
+def interest_by_region(keywords: list[str], resolution: str = "country", **kwargs):
+    trends = _build_payload(keywords, **kwargs)
+    df = trends.interest_by_region(
+        resolution=resolution, inc_low_vol=True, inc_geo_code=True
+    )
+    return df
+
+
+def related_topics(keywords: list[str], **kwargs) -> dict:
+    """
+    Get related topics to keywords provided
+    Args:
+        keywords: list of keywords to find topics related to.
+        **kwargs:
+
+    Returns: dictionary of dataframes
+
+    """
+    trends = _build_payload(keywords, **kwargs)
+    dic = trends.related_topics()
+    return dic
+
+
+def related_queries(keywords: list[str], **kwargs) -> dict:
+    """
+    Get related queries to keywords provided
+    Args:
+        keywords: list of keywords to find queries related to.
+        **kwargs:
+
+    Returns: dictionary of dataframes
+
+    """
+    trends = _build_payload(keywords, **kwargs)
+    dic = trends.related_queries()
+    return dic
