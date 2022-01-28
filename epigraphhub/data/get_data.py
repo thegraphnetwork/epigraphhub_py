@@ -1,9 +1,5 @@
 import pandas as pd
-import streamlit as st
-import numpy as np
 from sqlalchemy import create_engine
-import matplotlib.pyplot as plt
-#import streamlit as st
 
 engine_public = create_engine("postgresql://epigraph:epigraph@localhost:5432/epigraphhub")
 engine_private = create_engine("postgresql://epigraph:epigraph@localhost:5432/privatehub")
@@ -16,7 +12,8 @@ def get_georegion_data(country,georegion, curve, columns):
     params country: string. Country that you want get the data, for now, the unique option is
     'Switzerland'. 
 
-    param georegion: array with all the subregions of the country of interest.
+    param georegion: array with all the subregions of the country of interest or string 'All'
+    to return all the georegions.
 
     param curve: string. One of the following options are accepted: ['cases', 'casesVaccPersons', 'covidCertificates', 'death',
                                                              'deathVaccPersons', 'hosp', 'hospCapacity', 'hospVaccPersons',
@@ -46,13 +43,14 @@ def get_georegion_data(country,georegion, curve, columns):
         raise Exception(f'Error. The only curves accepted are: {accepted_curves[country]}.')
     
     
-    if type(georegion) != list:
+    if type(georegion) != list and georegion != 'All':
         
-        raise Exception(f'Error. The georegion param should be a list.')
+        raise Exception('''Error. The georegion param should be a list or the string All to 
+        return all the georegions.''')
         
     if type(columns) != list and columns != None:
         
-        raise Exception(f'Error. The columns param should be a list or None. If None all the columns will be returned.')
+        raise Exception('Error. The columns param should be a list or None. If None all the columns will be returned.')
         
     # name of the table according to the country 
     table_names = {'switzerland': 'foph_'}
@@ -73,10 +71,13 @@ def get_georegion_data(country,georegion, curve, columns):
     # getting the data from the database
     
     #defining the SQL query to get the data
+    if georegion == 'All':
+        query = f"select {s_columns} from {country}.{table_names[country] + curve}"
+
     if len(georegion) == 1:
         query = f"select {s_columns}  from {country}.{table_names[country] + curve} where \"geoRegion\" = '{georegion[0]}' ;"
 
-    if len(georegion) > 1:
+    if len(georegion) > 1 and type(georegion) == list:
         georegion_tuple = tuple(i for i in georegion)
         query = f"select {s_columns} from {country}.{table_names[country] + curve} where \"geoRegion\" in {georegion_tuple} ;"
 
