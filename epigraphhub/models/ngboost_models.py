@@ -407,9 +407,9 @@ def rolling_forecast(target_name, data, ini_date, horizon_forecast = 14, maxlag=
             forecasts95.append(forecast95)
 
     else: # return a dataframe with values equal 0
-        forecasts5 = np.array([0.0]*14)
-        forecasts50 = np.array([0.0]*14)
-        forecasts95 = np.array([0.0]*14)
+        forecasts5 = np.repeat(0, 14)
+        forecasts50 = np.repeat(0, 14)
+        forecasts95 = np.repeat(0, 14)
 
 
     # transformando preds em um array
