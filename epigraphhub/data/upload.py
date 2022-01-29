@@ -16,4 +16,4 @@ def upload_geo_file(fname, table_name, schema, db):
     eng = get_engine(db=db)
     gdf.to_postgis(table_name, con=eng, schema=schema, if_exists="replace", index=False)
 
-    return 
+    return
