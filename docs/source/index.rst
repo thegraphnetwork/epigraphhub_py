@@ -10,6 +10,10 @@ Welcome to epigraphhub's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   overview
+   Google Trends<trends.ipynb>
+   
+
 
 
 Indices and tables

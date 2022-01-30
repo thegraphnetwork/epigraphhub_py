@@ -49,6 +49,7 @@ SQLAlchemy = "^1.4.29"
 psycopg2-binary = "^2.9.3"
 GeoAlchemy2 = "^0.10.0"
 Theano-PyMC = "^1.1.2"
+jupyter = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.1"
@@ -70,6 +71,7 @@ pytest-cov = "^3.0.0"
 Sphinx = "^4.4.0"
 myst-parser = "^0.16.1"
 sphinx-pyproject = "^0.1.0"
+nbsphinx = "^0.8.8"
 
 [tool.black]
 # https://github.com/psf/black
