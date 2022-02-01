@@ -5,9 +5,9 @@ def _get_connection(language="en-US", timezone=360, **kwargs):
     return TrendReq(hl=language, tz=timezone)
 
 
-def _build_payload(keywords: list[str], **kwargs) -> object:
+def _build_payload(keywords: list[str], timeframe="today 12-m", **kwargs) -> object:
     trends = _get_connection(**kwargs)
-    trends.build_payload(keywords, cat=0, timeframe="today 12-m")
+    trends.build_payload(keywords, cat=0, timeframe=timeframe, **kwargs)
     return trends
 
 
@@ -43,15 +43,27 @@ def historical_interest(
 
 
 def interest_over_time(keywords: list[str], **kwargs):
+    """
+    Fetch trend time series for the `keywords` specified.
+    """
     trends = _build_payload(keywords, **kwargs)
     interest_over_time_df = trends.interest_over_time()
     return interest_over_time_df
 
 
 def interest_by_region(keywords: list[str], resolution: str = "country", **kwargs):
+    """
+    Fetch trends by region
+    Args:
+        keywords (list[str]): List of keywords
+        resolution (str, optional): spatial resolution can be one of ["country", "region", "city", "dma"]. Defaults to "country".
+
+    Returns:
+        [type]: [description]
+    """
     trends = _build_payload(keywords, **kwargs)
     df = trends.interest_by_region(
-        resolution=resolution, inc_low_vol=True, inc_geo_code=True
+        resolution=resolution.upper(), inc_low_vol=True, inc_geo_code=True
     )
     return df
 

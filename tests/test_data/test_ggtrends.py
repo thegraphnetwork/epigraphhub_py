@@ -28,7 +28,7 @@ def test_interest_over_time():
 
 def test_interest_region():
     keywords = ["coronavirus", "covid"]
-    df = ggtrends.interest_by_region(keywords, resolution="country")
+    df = ggtrends.interest_by_region(keywords, resolution="country", geo="CH")
     assert df.index.name == "geoName"
 
 
