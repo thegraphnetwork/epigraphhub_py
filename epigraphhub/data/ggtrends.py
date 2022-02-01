@@ -42,7 +42,7 @@ def historical_interest(
     return df
 
 
-def interest_over_time(keywords: list[str], **kwargs):
+def interest_over_time(keywords: list[str], **kwargs) -> object:
     """
     Fetch trend time series for the `keywords` specified.
     """
@@ -51,7 +51,9 @@ def interest_over_time(keywords: list[str], **kwargs):
     return interest_over_time_df
 
 
-def interest_by_region(keywords: list[str], resolution: str = "country", **kwargs):
+def interest_by_region(
+    keywords: list[str], resolution: str = "country", **kwargs
+) -> object:
     """
     Fetch trends by region
     Args:
