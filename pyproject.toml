@@ -52,7 +52,7 @@ Theano-PyMC = "^1.1.2"
 jupyter = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
-bandit = "^1.7.1"
+bandit = "^1.7.2"
 black = {version = "^22.1", allow-prereleases = true}
 darglint = "^1.8.1"
 isort = {extras = ["colors"], version = "^5.10.1"}
