@@ -533,7 +533,7 @@ test = ["pytest (>=3)", "pytest-cov", "boto3 (>=1.2.4)", "mock"]
 
 [[package]]
 name = "fonttools"
-version = "4.29.0"
+version = "4.29.1"
 description = "Tools to manipulate font files"
 category = "main"
 optional = false
@@ -2694,8 +2694,8 @@ fiona = [
     {file = "Fiona-1.8.20.tar.gz", hash = "sha256:a70502d2857b82f749c09cb0dea3726787747933a2a1599b5ab787d74e3c143b"},
 ]
 fonttools = [
-    {file = "fonttools-4.29.0-py3-none-any.whl", hash = "sha256:ed9496e5650b977a697c50ac99c8e8331f9eae3f99e5ae649623359103306dfe"},
-    {file = "fonttools-4.29.0.zip", hash = "sha256:f4834250db2c9855c3385459579dbb5cdf74349ab059ea0e619359b65ae72037"},
+    {file = "fonttools-4.29.1-py3-none-any.whl", hash = "sha256:1933415e0fbdf068815cb1baaa1f159e17830215f7e8624e5731122761627557"},
+    {file = "fonttools-4.29.1.zip", hash = "sha256:2b18a172120e32128a80efee04cff487d5d140fe7d817deb648b2eee023a40e4"},
 ]
 geoalchemy2 = [
     {file = "GeoAlchemy2-0.10.2-py2.py3-none-any.whl", hash = "sha256:22350c34c4c31faead91b2f0146b68835dcd66c34122ba1f2277a9dfb6543baa"},
