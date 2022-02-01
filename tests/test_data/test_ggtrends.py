@@ -16,7 +16,7 @@ def test_payload():
 def test_historical_interest():
     keywords = ["coronavirus", "covid"]
     df = ggtrends.historical_interest(keywords)
-    assert len(df) > 0
+    assert not df.empty
 
 
 def test_interest_over_time():
