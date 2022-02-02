@@ -1,11 +1,18 @@
+from typing import Dict, ParamSpecKwargs
+
+import pandas as pd
 from pytrends.request import TrendReq
 
 
-def _get_connection(language="en-US", timezone=360, **kwargs):
-    return TrendReq(hl=language, tz=timezone)
+def _get_connection(
+    language: str = "en-US", timezone: int = 360, **kwargs: ParamSpecKwargs
+) -> TrendReq:
+    return TrendReq(hl=language, tz=timezone, **kwargs)
 
 
-def _build_payload(keywords: list[str], timeframe="today 12-m", **kwargs) -> object:
+def _build_payload(
+    keywords: list[str], timeframe: str = "today 12-m", **kwargs: ParamSpecKwargs
+) -> TrendReq:
     trends = _get_connection(**kwargs)
     trends.build_payload(keywords, cat=0, timeframe=timeframe, **kwargs)
     return trends
@@ -23,8 +30,8 @@ def historical_interest(
     hour_end: int = 0,
     cat: int = 0,
     sleep: int = 0,
-    **kwargs,
-) -> object:
+    **kwargs: ParamSpecKwargs,
+) -> pd.DataFrame:
     trends = _build_payload(keywords, **kwargs)
     df = trends.get_historical_interest(
         keywords,
@@ -42,7 +49,7 @@ def historical_interest(
     return df
 
 
-def interest_over_time(keywords: list[str], **kwargs) -> object:
+def interest_over_time(keywords: list[str], **kwargs: ParamSpecKwargs) -> pd.DataFrame:
     """
     Fetch trend time series for the `keywords` specified.
     """
@@ -52,8 +59,8 @@ def interest_over_time(keywords: list[str], **kwargs) -> object:
 
 
 def interest_by_region(
-    keywords: list[str], resolution: str = "country", **kwargs
-) -> object:
+    keywords: list[str], resolution: str = "country", **kwargs: ParamSpecKwargs
+) -> pd.DataFrame:
     """
     Fetch trends by region
     Args:
@@ -70,7 +77,7 @@ def interest_by_region(
     return df
 
 
-def related_topics(keywords: list[str], **kwargs) -> dict:
+def related_topics(keywords: list[str], **kwargs: ParamSpecKwargs) -> dict:
     """
     Get related topics to keywords provided
     Args:
@@ -81,11 +88,11 @@ def related_topics(keywords: list[str], **kwargs) -> dict:
 
     """
     trends = _build_payload(keywords, **kwargs)
-    dic = trends.related_topics()
+    dic: dict = trends.related_topics()
     return dic
 
 
-def related_queries(keywords: list[str], **kwargs) -> dict:
+def related_queries(keywords: list[str], **kwargs: ParamSpecKwargs) -> dict:
     """
     Get related queries to keywords provided
     Args:
@@ -96,5 +103,5 @@ def related_queries(keywords: list[str], **kwargs) -> dict:
 
     """
     trends = _build_payload(keywords, **kwargs)
-    dic = trends.related_queries()
+    dic: dict = trends.related_queries()
     return dic
