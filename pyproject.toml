@@ -48,6 +48,7 @@ sshtunnel = "^0.4.0"
 SQLAlchemy = "^1.4.29"
 psycopg2-binary = "^2.9.3"
 GeoAlchemy2 = "^0.10.0"
+pytrends = "^4.7.3"
 Theano-PyMC = "^1.1.2"
 jupyter = "^1.0.0"
 
