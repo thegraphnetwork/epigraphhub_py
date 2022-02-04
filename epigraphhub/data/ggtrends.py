@@ -1,4 +1,10 @@
-from typing import Dict, ParamSpecKwargs
+from typing import Dict
+
+try:
+    from typing import ParamSpecKwargs
+except ImportError:
+    # https://github.com/PyCQA/pylint/issues/5032#issuecomment-933886900
+    from typing_extensions import ParamSpecKwargs
 
 import pandas as pd
 from pytrends.request import TrendReq
