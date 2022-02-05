@@ -444,7 +444,7 @@ toml = ">=0.10.2"
 
 [[package]]
 name = "domdf-python-tools"
-version = "3.2.1"
+version = "3.2.2"
 description = "Helpful functions for Python 🐍 🛠️"
 category = "dev"
 optional = false
@@ -2686,8 +2686,8 @@ dom-toml = [
     {file = "dom_toml-0.5.1.tar.gz", hash = "sha256:9a518e7d0e47be960edfc54a1043867f8955a98ccb687ed2269dc2841d4fa428"},
 ]
 domdf-python-tools = [
-    {file = "domdf-python-tools-3.2.1.tar.gz", hash = "sha256:e283e6f439e2709d6dc993a9410a4232db4744925950575e4841b44a7de0b183"},
-    {file = "domdf_python_tools-3.2.1-py3-none-any.whl", hash = "sha256:cb2770dbeef6ec7babb19c3bf08fd115370c0186adc73b6c4155062602ca8291"},
+    {file = "domdf-python-tools-3.2.2.tar.gz", hash = "sha256:eb6aa7f3dcd0c7540be3eee7c3d7b9aba245ebe9005fc06e8ff0c6cde65ba7ae"},
+    {file = "domdf_python_tools-3.2.2-py3-none-any.whl", hash = "sha256:fa9f4bb5fc06bfa2bbea960d57e7255872ee45450858209e81f823be2d8a1ce4"},
 ]
 dparse = [
     {file = "dparse-0.5.1-py3-none-any.whl", hash = "sha256:e953a25e44ebb60a5c6efc2add4420c177f1d8404509da88da9729202f306994"},
