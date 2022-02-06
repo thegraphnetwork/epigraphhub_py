@@ -58,6 +58,7 @@ jobs:
           echo "MUST_BE_GREEN=${{ github.event.inputs.mustBeGreen }}" >> $GITHUB_ENV
           echo "COMBINE_BRANCH_NAME=${{ github.event.inputs.combineBranchName }}" >> $GITHUB_ENV
           echo "IGNORE_LABEL=${{ github.event.inputs.ignoreLabel }}" >> $GITHUB_ENV
+
       - name: Create env variable static
         if: ${{ github.event_name == 'pull_request' }}
         run: |
@@ -65,12 +66,17 @@ jobs:
           echo "MUST_BE_GREEN=true" >> $GITHUB_ENV
           echo "COMBINE_BRANCH_NAME=combine-prs-branch" >> $GITHUB_ENV
           echo "IGNORE_LABEL=nocombine" >> $GITHUB_ENV
+
       - uses: actions/github-script@v3
         id: fetch-branch-names
         name: Fetch branch names
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
+            console.log("BRANCH_PREFIX=${{ env.BRANCH_PREFIX }}");
+            console.log("MUST_BE_GREEN=${{ env.MUST_BE_GREEN }}");
+            console.log("COMBINE_BRANCH_NAME=${{ env.COMBINE_BRANCH_NAME }}");
+            console.log("IGNORE_LABEL=${{ env.IGNORE_LABEL }}");
             const pulls = await github.paginate('GET /repos/:owner/:repo/pulls', {
               owner: context.repo.owner,
               repo: context.repo.repo
@@ -128,10 +134,12 @@ jobs:
             combined = branches.join(' ')
             console.log('Combined: ' + combined);
             return combined
+      
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2.3.3
         with:
           fetch-depth: 0
+      
       # Creates a branch with other PR branches merged together
       - name: Created combined branch
         env:
@@ -154,6 +162,7 @@ jobs:
           git checkout $COMBINE_BRANCH_NAME
           git pull origin $sourcebranches --no-edit
           git push origin $COMBINE_BRANCH_NAME
+
       # Creates a PR with the new combined branch
       - uses: actions/github-script@v3
         name: Create Combined Pull Request
