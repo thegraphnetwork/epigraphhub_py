@@ -30,13 +30,13 @@ jobs:
       run: |
         poetry install
 
-    - name: Run style checks
-      run: |
-        make check-codestyle
-
     - name: Run tests
       run: |
         make test
+
+    - name: Run style checks
+      run: |
+        make check-codestyle
 
     - name: Run safety checks
       run: |
