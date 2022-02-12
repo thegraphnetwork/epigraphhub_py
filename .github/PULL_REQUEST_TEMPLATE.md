@@ -16,7 +16,7 @@
 - [ ] I've used pre-commit hook locally.
 - [ ] I've written tests for all new methods and classes that I created.
 - [ ] I've written the docstring in Google format for all the methods and classes that I used.
-- [ ] Semantic release title used:
+- [ ] Semantic-release prefix title used:
   - Use the prefix `chore(docs):` for Examples / docs / tutorials / dependencies update
   - Use the prefix `fix:` for a bug fix 
     (non-breaking change which fixes an issue).
