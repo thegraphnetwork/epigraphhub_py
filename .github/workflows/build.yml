@@ -8,6 +8,9 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.9"]
+    concurrency:
+      group: ci-${{ github.ref }}
+      cancel-in-progress: true
     
     defaults:
       run:
