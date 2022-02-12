@@ -70,7 +70,7 @@ coverage-badge = "^1.1.0"
 pytest-html = "^3.1.1"
 pytest-cov = "^3.0.0"
 Sphinx = "^4.4.0"
-myst-parser = "^0.16.1"
+myst-parser = "^0.17.0"
 sphinx-pyproject = "^0.1.0"
 nbsphinx = "^0.8.8"
 
