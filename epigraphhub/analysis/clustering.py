@@ -1,3 +1,10 @@
+"""
+The functions in this file allow the user to compute the hierarchical 
+clusterization between time series curves of all the regions of the 
+specified country.
+"""
+
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -9,6 +16,9 @@ from epigraphhub.data.get_data import get_georegion_data
 
 
 def get_lag(x, y, maxlags=5, smooth=True):
+    """
+    Compute the lag and correlation between the curves
+    """
     if smooth:
         x = pd.Series(x).rolling(7).mean().dropna().values
         y = pd.Series(y).rolling(7).mean().dropna().values
@@ -54,7 +64,7 @@ def compute_clusters(
     plot=False,
 ):
     """
-    Function to compute the clusters od the data
+    Function to compute the clusters of the data
 
     params country: contry that we want to make the cluster.
 
@@ -133,19 +143,32 @@ def compute_clusters(
 
     all_regions = df.geoRegion.unique()
 
-    return clusters, all_regions, fig
+    return inc_canton, clusters, all_regions, fig
 
 
 def plot_clusters(
-    country, curve, columns, clusters, ini_date=None, normalize=False, smooth=True
+    curve, inc_canton, clusters, ini_date=None, normalize=False, smooth=True
 ):
+    """
+    This function plot the curves of the clusters computed in the function compute_clusters
 
-    country = country.lower()
+    :param curve: string with the name of the curve used to compute the clusters. Will
+                  be used in the title of the plot
+    :param inc_canton: dataframe (table) where each column is the name of the georegion and your
+                        values is the time series of the curve selected. This param is
+                        the first return of the function compute_clusters.
+    :param cluster: list or array of the georegions that will want to see in the
+                    same plot.
+    :param ini_date: string. Filter the interval that the times series start to be plotted.
+    :param normalize: Boolean. Decides when normalize the times serie by your biggest
+                      value or not.
+    :param smooth: Boolean. If True, a rolling average of seven days will be applied
+                   in the data.
 
-    df = get_georegion_data(country, "All", curve, columns)
-    df.index = pd.to_datetime(df[columns[0]])
+    :returns: matplotlib figure.
 
-    inc_canton = df.pivot(columns=columns[1][1:-1], values=columns[2])
+
+    """
 
     if smooth:
         inc_canton = inc_canton.rolling(7).mean().dropna()
@@ -165,7 +188,7 @@ def plot_clusters(
 
         fig.show()
 
-    return
+    return fig
 
 
 # if __name__ == '__main__':

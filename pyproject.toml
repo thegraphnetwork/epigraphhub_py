@@ -51,6 +51,7 @@ GeoAlchemy2 = "^0.10.0"
 pytrends = "^4.7.3"
 Theano-PyMC = "^1.1.2"
 jupyter = "^1.0.0"
+joblib = "^1.1.0"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.2"

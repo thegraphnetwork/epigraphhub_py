@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """
-Created on Fri Jan 28 14:55:40 2022
 
-@author: eduardoaraujo
+The functions in this file allow the application of the 
+ngboost regressor model. There are separate functions to train and evaluate (separate 
+the data in train and test datasets), train with all the data available, and make
+forecasts. Also, there are functions to apply these methods in just one canton or all the cantons. 
+
 """
 
 import copy
-import os
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -22,10 +24,50 @@ from epigraphhub.analysis.clustering import compute_clusters
 from epigraphhub.data.get_data import get_cluster_data, get_updated_data
 from epigraphhub.data.preprocessing import build_lagged_features
 
+params_model = {
+    "Base": default_tree_learner,
+    "Dist": LogNormal,
+    "Score": LogScore,
+    "natural_gradient": True,
+    "verbose": False,
+    "col_sample": 0.9,
+    "n_estimators": 300,
+    "learning_rate": 0.1,
+    "validation_fraction": 0.25,
+    "early_stopping_rounds": 50,
+}
+
 
 def rolling_predictions(
-    target_name, data, ini_date="2020-03-01", split=0.75, horizon_forecast=14, maxlag=14
+    target_name,
+    data,
+    ini_date="2020-03-01",
+    split=0.75,
+    horizon_forecast=14,
+    maxlag=14,
+    kwargs=params_model,
 ):
+
+    """
+    Function to apply a ngboost regressor model given a dataset and a target column.
+    This function will train multiple models, each one specilist in predict the X + n
+    days, of the target column, where n is in the range (1, number of days that you
+                                                         want predict).
+    This function split the data in train and test dataset and returns the predictions
+    made using the test dataset.
+    Important:
+
+    params target_name:string. Name of the target column.
+    params data: dataframe. Dataframe with features and target column.
+    params ini_date: string. Determines the beggining of the train dataset
+    params split: float. Determines which percentage of the data will be used to train the model
+    params horizon_forecast: int. Number of days that will be predicted
+    params max_lag: int. Number of the last days that will be used to forecast the next days
+    params parameters_model: dict with the params that will be used in the ngboost
+                             regressor model.
+
+    returns: DataFrame.
+    """
 
     target = data[target_name]
 
@@ -58,7 +100,9 @@ def rolling_predictions(
 
     if np.sum(target) > 0.0:
 
-        idx = pd.period_range(start=df_lag.index[0], end=df_lag.index[-1], freq="14D")
+        idx = pd.period_range(
+            start=df_lag.index[0], end=df_lag.index[-1], freq=f"{horizon_forecast}D"
+        )
 
         idx = idx.to_timestamp()
 
@@ -79,20 +123,13 @@ def rolling_predictions(
                     tgt[i] = 0.01
                 i = i + 1
 
-            model = NGBRegressor(
-                Base=default_tree_learner,
-                Dist=LogNormal,
-                Score=LogScore,
-                natural_gradient=True,
-                verbose=False,
-                col_sample=0.9,
-                n_estimators=300,
-                learning_rate=0.1,
-                validation_fraction=0.25,
-                early_stopping_rounds=50,
-            )
+            model = NGBRegressor(**kwargs)
 
+            # start = time.time()
             model.fit(X_train, tgt)
+
+            # end = time.time()
+            # print('Time elapsed', end - start)
 
             pred = model.pred_dist(df_lag.loc[idx])
 
@@ -170,6 +207,8 @@ def train_eval_single_canton(
     smooth=True,
     ini_date="2020-03-01",
     updated_data=True,
+    split=0.75,
+    parameters_model=params_model,
 ):
 
     """
@@ -182,21 +221,28 @@ def train_eval_single_canton(
     params canton: canton of interest
     params predictors: variables that  will be used in model
     params vaccine: It determines if the vaccine data from owid will be used or not
-    params smooth: It determines if data will be smoothed or not
+    params smooth: It determines if data will be smoothed (7 day moving average) or not
     params ini_date: Determines the beggining of the train dataset
-    params title: If none the title will be: Hospitalizations - canton
-    params path: If none the plot will be save in the directory: images/hosp_{canton}
+    params update_data: Determines if the data from the Geneva hospital will be used.
+                        this params only is used when canton = GE and target_curve_name = hosp.
+    params split: float. Determines which percentage of the data will be used to train the model
+    params parameters_model: dict with the params that will be used in the ngboost
+                             regressor model.
     """
 
     # compute the clusters
-    clusters, all_regions, fig = compute_clusters(
+    # print('cluster')
+    # start = time.time()
+    clusters = compute_clusters(
         "switzerland",
         "cases",
         ["datum", '"geoRegion"', "entries"],
         t=0.3,
         drop_georegions=["CH", "FL", "CHFL"],
         plot=False,
-    )
+    )[1]
+    # end = time.time()
+    # print(end - start)
 
     for cluster in clusters:
 
@@ -210,9 +256,14 @@ def train_eval_single_canton(
     maxlag = 14
 
     # getting the data
+    # print(cluster_canton)
+    # print('get_data')
+    # start = time.time()
     df = get_cluster_data(
         predictors, list(cluster_canton), vaccine=vaccine, smooth=smooth
     )
+    # end = time.time()
+    # print(end - start)
     # filling the nan values with 0
     df = df.fillna(0)
 
@@ -228,29 +279,28 @@ def train_eval_single_canton(
             # utilizando como último data a data dos dados atualizados:
             df = df.loc[: df_new.index[-1]]
 
-    # apply the model
-
-    # get predictions
+    # apply the model and get the predictions
     df = rolling_predictions(
         target_name,
         df,
         ini_date=ini_date,
-        split=0.75,
+        split=split,
         horizon_forecast=horizon,
         maxlag=maxlag,
+        kwargs=parameters_model,
     )
 
-    # fig = plot_predictions(target_curve_name, canton, target, train_size, x, y5,y50, y95, forecast_dates, forecasts5, forecasts50,forecasts95, title, path)
     return df
 
 
-def train_and_evaluate_all_cantons(
+def train_eval_all_cantons(
     target_curve_name,
     predictors,
     vaccine=True,
     smooth=True,
     ini_date="2020-03-01",
-    title=None,
+    split=0.75,
+    parameters_model=params_model,
 ):
 
     """
@@ -265,6 +315,9 @@ def train_and_evaluate_all_cantons(
     params vaccine: It determines if the vaccine data from owid will be used or not
     params smooth: It determines if data will be smoothed or not
     params ini_date: Determines the beggining of the train dataset
+    params split: float. Determines which percentage of the data will be used to train the model
+    params parameters_model: dict with the params that will be used in the ngboost
+                             regressor model.
 
     returns: Dataframe with the predictions for all the cantons
     """
@@ -272,14 +325,14 @@ def train_and_evaluate_all_cantons(
     df_all = pd.DataFrame()
 
     # compute the clusters
-    clusters, all_regions, fig = compute_clusters(
+    clusters = compute_clusters(
         "switzerland",
         "cases",
         ["datum", '"geoRegion"', "entries"],
         t=0.3,
         drop_georegions=["CH", "FL", "CHFL"],
         plot=False,
-    )
+    )[1]
 
     for cluster in clusters:
         # getting the data
@@ -301,9 +354,10 @@ def train_and_evaluate_all_cantons(
                 target_name,
                 df,
                 ini_date=ini_date,
-                split=0.75,
+                split=split,
                 horizon_forecast=horizon,
                 maxlag=maxlag,
+                kwargs=parameters_model,
             )
 
             df_all = pd.concat([df_all, df_pred])
@@ -311,7 +365,37 @@ def train_and_evaluate_all_cantons(
     return df_all
 
 
-def training_model(target_name, data, ini_date, horizon_forecast=14, maxlag=14):
+def training_model(
+    target_name,
+    data,
+    ini_date="2020-03-01",
+    horizon_forecast=14,
+    maxlag=14,
+    path="../opt/models/saved_models/ml",
+    save=True,
+    kwargs=params_model,
+):
+
+    """
+    Function to train multiple ngboost regressor models given a dataset and a target column.
+    This function will train multiple models, each one specilist in predict the X + n
+    days, of the target column, where n is in the range (1, number of days that you
+                                                         want predict).
+    This function will train the model with all the data available and will save the model
+    that will be used to make forecasts.
+
+
+
+    params target_name:string. Name of the target column.
+    params ini_date: string. Determines the beggining of the train dataset
+    params horizon_forecast: int. Number of days that will be predicted
+    params max_lag: int. Number of the last days that will be used to forecast the next days
+    params path: string. Indicates where the models will be saved
+    params kwargs: dict with the params that will be used in the ngboost
+                             regressor model.
+
+    returns: list with the {horizon_forecast} models saved
+    """
 
     # print(data.index[-1])
     data = data.iloc[:-3]
@@ -330,6 +414,8 @@ def training_model(target_name, data, ini_date, horizon_forecast=14, maxlag=14):
     target = target.dropna()
     df_lag = df_lag.dropna()
 
+    models = []
+
     # condition to only apply the model for datas with values different of 0
     if np.sum(target) > 0.0:
 
@@ -346,8 +432,6 @@ def training_model(target_name, data, ini_date, horizon_forecast=14, maxlag=14):
                 targets[T] = target.shift(-(T - 1))[: -(T - 1)]
                 # print(T, len(df_lag), len(fit_target))
                 # print(df_lag.index,fit_target.index)
-
-        models = []
 
         X_train = df_lag.iloc[:-1]
 
@@ -368,32 +452,45 @@ def training_model(target_name, data, ini_date, horizon_forecast=14, maxlag=14):
 
             # if not os.path.exists(f'../opt/models/saved_models/ml/ngboost_{target_name}_{T}D.joblib'):
 
-            model = NGBRegressor(
-                Base=default_tree_learner,
-                Dist=LogNormal,
-                Score=LogScore,
-                natural_gradient=True,
-                verbose=False,
-                col_sample=0.9,
-                n_estimators=300,
-                learning_rate=0.1,
-                validation_fraction=0.25,
-                early_stopping_rounds=50,
-            )
+            model = NGBRegressor(**kwargs)
 
             model.fit(X_train.iloc[: len(tgt)], tgt)
 
-            dump(
-                model,
-                f"../opt/models/saved_models/ml/ngboost_{target_name}_{T}D.joblib",
-            )
+            if save:
+                dump(model, f"{path}/ngboost_{target_name}_{T}D.joblib")
 
             models.append(model)
 
     return models
 
 
-def rolling_forecast(target_name, data, ini_date, horizon_forecast=14, maxlag=14):
+def rolling_forecast(
+    target_name,
+    data,
+    ini_date="2020-03-01",
+    horizon_forecast=14,
+    maxlag=14,
+    path="../opt/models/saved_models/ml",
+):
+
+    """
+    Function to load multiple ngboost regressor model trained with the function
+    `training_model` and make the forecast.
+
+    Important:
+    horizon_forecast and max_lag need have the same value used in training_model
+    Only the last that of the dataset will be used to forecast the next
+    horizon_forecast days.
+
+    params target_name:string. Name of the target column.
+    params data: dataframe. Dataframe with features and target column.
+    params ini_date: string. Determines the beggining of the train dataset
+    params horizon_forecast: int. Number of days that will be predicted
+    params max_lag: int. Number of the last days that will be used to forecast the next days
+    params path: string. Indicates where the model is save to the function load the model
+
+    returns: DataFrame.
+    """
 
     # print(data.index[-1])
     data = data.iloc[:-3]
@@ -451,9 +548,7 @@ def rolling_forecast(target_name, data, ini_date, horizon_forecast=14, maxlag=14
                     tgt[i] = 0.01
                 i = i + 1
 
-            model = load(
-                f"../opt/models/saved_models/ml/ngboost_{target_name}_{T}D.joblib"
-            )
+            model = load(f"{path}/ngboost_{target_name}_{T}D.joblib")
 
             forecast = model.pred_dist(df_lag.iloc[-1:])
 
@@ -502,19 +597,43 @@ def forecast_single_canton(
     vaccine=True,
     smooth=True,
     ini_date="2020-03-01",
-    title=None,
     updated_data=True,
+    path="../opt/models/saved_models/ml",
 ):
+    """
+    Function to make the forecast for one canton
+
+    Important:
+    * By default the function is using the clustering cantons and the data since 2020
+    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
+
+    params target_curve_name: string to indicate the target column of the predictions
+    params canton: string to indicate the interest canton
+    params predictors: variables that  will be used in model
+    params vaccine: It determines if the vaccine data from owid will be used or not
+    params smooth: It determines if data will be smoothed or not
+    params ini_date: Determines the beggining of the train dataset
+    params update_data: Determines if the data from the Geneva hospital will be used.
+                        this params only is used when canton = GE and target_curve_name = hosp.
+
+    params path: string. Indicates where the models trained are saved.
+
+    returns: Dataframe with the forecast for all the cantons
+    """
 
     # compute the clusters
-    clusters, all_regions, fig = compute_clusters(
+    # print('cluster')
+    # start = time.time()
+    clusters = compute_clusters(
         "switzerland",
         "cases",
         ["datum", '"geoRegion"', "entries"],
         t=0.3,
         drop_georegions=["CH", "FL", "CHFL"],
         plot=False,
-    )
+    )[1]
+    # end = time.time()
+    # print(end-start)
 
     for cluster in clusters:
 
@@ -525,6 +644,7 @@ def forecast_single_canton(
     df = get_cluster_data(
         predictors, list(cluster_canton), vaccine=vaccine, smooth=smooth
     )
+
     # filling the nan values with 0
     df = df.fillna(0)
 
@@ -546,10 +666,20 @@ def forecast_single_canton(
     maxlag = 14
 
     # get predictions and forecast
+
     # date_predsknn, predsknn, targetknn, train_size, date_forecastknn, forecastknn = rolling_predictions(model_knn, 'knn', target_name, df , ini_date = '2021-01-01',split = 0.75,   horizon_forecast = horizon, maxlag=maxlag,)
+    # start = time.time()
     df_for = rolling_forecast(
-        target_name, df, ini_date=ini_date, horizon_forecast=horizon, maxlag=maxlag
+        target_name,
+        df,
+        ini_date=ini_date,
+        horizon_forecast=horizon,
+        maxlag=maxlag,
+        path=path,
     )
+    # end = time.time()
+
+    # print(end - start)
 
     return df_for
 
@@ -560,7 +690,7 @@ def forecast_all_cantons(
     vaccine=True,
     smooth=True,
     ini_date="2020-03-01",
-    title=None,
+    path="../opt/models/saved_models/ml",
 ):
     """
     Function to make the forecast for all the cantons
@@ -574,20 +704,21 @@ def forecast_all_cantons(
     params vaccine: It determines if the vaccine data from owid will be used or not
     params smooth: It determines if data will be smoothed or not
     params ini_date: Determines the beggining of the train dataset
+    params path: string. Indicates where the models trained are saved.
 
     returns: Dataframe with the forecast for all the cantons
     """
     df_all = pd.DataFrame()
 
     # compute the clusters
-    clusters, all_regions, fig = compute_clusters(
+    clusters = compute_clusters(
         "switzerland",
         "cases",
         ["datum", '"geoRegion"', "entries"],
         t=0.3,
         drop_georegions=["CH", "FL", "CHFL"],
         plot=False,
-    )
+    )[1]
 
     for cluster in clusters:
 
@@ -611,6 +742,7 @@ def forecast_all_cantons(
                 ini_date=ini_date,
                 horizon_forecast=horizon,
                 maxlag=maxlag,
+                path=path,
             )
 
             df_all = pd.concat([df_all, df_for])
@@ -626,6 +758,7 @@ def train_single_canton(
     smooth=True,
     ini_date="2020-03-01",
     updated_data=True,
+    parameters_model=params_model,
 ):
 
     """
@@ -640,19 +773,22 @@ def train_single_canton(
     params vaccine: It determines if the vaccine data from owid will be used or not
     params smooth: It determines if data will be smoothed or not
     params ini_date: Determines the beggining of the train dataset
-    params title: If none the title will be: Hospitalizations - canton
-    params path: If none the plot will be save in the directory: images/hosp_{canton}
+    params path: Determines  where the model trained will be saved
+    params update_data: Determines if the data from the Geneva hospital will be used.
+                        this params only is used when canton = GE and target_curve_name = hosp.
+    params parameters_model: dict with the params that will be used in the ngboost
+                             regressor model.
     """
 
     # compute the clusters
-    clusters, all_regions, fig = compute_clusters(
+    clusters = compute_clusters(
         "switzerland",
         "cases",
         ["datum", '"geoRegion"', "entries"],
         t=0.3,
         drop_georegions=["CH", "FL", "CHFL"],
         plot=False,
-    )
+    )[1]
 
     for cluster in clusters:
 
@@ -684,15 +820,29 @@ def train_single_canton(
             # utilizando como último data a data dos dados atualizados:
             df = df.loc[: df_new.index[-1]]
 
-    training_model(target_name, df, ini_date, horizon_forecast=horizon, maxlag=maxlag)
+    training_model(
+        target_name,
+        df,
+        ini_date,
+        horizon_forecast=horizon,
+        maxlag=maxlag,
+        kwargs=parameters_model,
+    )
 
     return
 
 
 def train_all_cantons(
-    target_curve_name, predictors, vaccine=True, smooth=True, ini_date="2020-03-01"
+    target_curve_name,
+    predictors,
+    vaccine=True,
+    smooth=True,
+    ini_date="2020-03-01",
+    parameters_model=params_model,
 ):
+
     """
+    Function to train and evaluate the model for alk the cantons in switzerland
 
     Important:
     * By default the function is using the clustering cantons and the data since 2020
@@ -703,19 +853,21 @@ def train_all_cantons(
     params vaccine: It determines if the vaccine data from owid will be used or not
     params smooth: It determines if data will be smoothed or not
     params ini_date: Determines the beggining of the train dataset
+    params parameters_model: dict with the params that will be used in the ngboost
+                             regressor model.
 
     returns: Dataframe with the forecast for all the cantons
     """
 
     # compute the clusters
-    clusters, all_regions, fig = compute_clusters(
+    clusters = compute_clusters(
         "switzerland",
         "cases",
         ["datum", '"geoRegion"', "entries"],
         t=0.3,
         drop_georegions=["CH", "FL", "CHFL"],
         plot=False,
-    )
+    )[1]
 
     for cluster in clusters:
 
@@ -734,7 +886,12 @@ def train_all_cantons(
 
             # train the models and save in the server
             training_model(
-                target_name, df, ini_date, horizon_forecast=horizon, maxlag=maxlag
+                target_name,
+                df,
+                ini_date,
+                horizon_forecast=horizon,
+                maxlag=maxlag,
+                kwargs=parameters_model,
             )
 
     return

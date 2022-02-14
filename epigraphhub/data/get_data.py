@@ -1,3 +1,19 @@
+"""
+The functions in this file allow the user to get each of the datasets made available
+by FOPH - Federal Office of Public Health for each canton of Switzerland.
+
+In the future will be datasets for other countries available.   
+
+The function get_georegion_data filter the datasets for a list of 
+selected geo regions (in the Switzerland case: cantons).
+
+The function get_cluster_data returns a table where each column is related
+with a curve and a canton (e.g. the daily number of cases and the daily number of hospitalizations). This function is handy to apply forecast models in 
+these data. 
+
+"""
+
+
 import pandas as pd
 from sqlalchemy import create_engine
 
@@ -109,7 +125,44 @@ def get_georegion_data(country, georegion, curve, columns):
     return df
 
 
-def get_cluster_data(curve, georegion, vaccine=True, smooth=True):
+dict_cols = {
+    "cases": ['"geoRegion"', "datum", "entries"],
+    "test": ['"geoRegion"', "datum", "entries", "entries_pos"],
+    "hosp": ['"geoRegion"', "datum", "entries"],
+    "hospcapacity": [
+        '"geoRegion"',
+        "date",
+        '"ICU_Covid19Patients"',
+        '"Total_Covid19Patients"',
+    ],
+    "re": ["geoRegion", "date", "median_R_mean"],
+}
+
+date_columns = {
+    "cases": "datum",
+    "test": "datum",
+    "hosp": "datum",
+    "hospcapacity": "date",
+}
+
+count_columns = {
+    "cases": ["entries"],
+    "test": ["entries"],
+    "hosp": ["entries"],
+    "hospcapacity": ["ICU_Covid19Patients", "Total_Covid19Patients"],
+}
+
+
+def get_cluster_data(
+    curve,
+    georegion,
+    country="Switzerland",
+    dict_cols=dict_cols,
+    date_columns=date_columns,
+    count_columns=count_columns,
+    vaccine=True,
+    smooth=True,
+):
     """
     This function provide a dataframe where each columns is associated with the curve
     and georegion selected.
@@ -160,6 +213,8 @@ def get_cluster_data(curve, georegion, vaccine=True, smooth=True):
         df.index = pd.to_datetime(df.index)
 
         for j in df.geoRegion.unique():
+
+            # print(j)
 
             for k in count_columns[i]:
 
@@ -222,7 +277,7 @@ def get_cluster_data(curve, georegion, vaccine=True, smooth=True):
     return df_end
 
 
-def get_updated_data(smooth):
+def get_updated_data(smooth=True):
 
     """
     Function to get the updated data for Geneva
