@@ -15,7 +15,8 @@ def test_lagged_features(get_df_test):
     df_test = get_df_test
     df_lag = preprocessing.build_lagged_features(df_test, lag, True)
 
-    assert (df_lag.shape[0] >= 0) and (df_lag.shape[1] == df_test.shape[1] * (lag + 1))
+    assert df_lag.shape[0] >= 0
+    assert df_lag.shape[1] == df_test.shape[1] * (lag + 1)
 
 
 def test_lstm_split_data(get_df_test):
@@ -33,17 +34,13 @@ def test_lstm_split_data(get_df_test):
 
     X_shape = X_train.shape
     Y_shape = Y_train.shape
+
+    assert X_shape[1] == look_back
+    assert X_shape[2] == df.shape[1]
+    assert Y_shape[1] == predict_n
     assert (
-        (X_shape[1] == look_back)
-        and (X_shape[2] == df.shape[1])
-        and (Y_shape[1] == predict_n)
-        and (
-            (
-                Y_train[0]
-                == np.array(df.iloc[look_back : look_back + predict_n, Y_column])
-            ).all()
-        )
-    )
+        Y_train[0] == np.array(df.iloc[look_back : look_back + predict_n, Y_column])
+    ).all()
 
 
 def test_norm_data(get_df_test):
@@ -51,4 +48,5 @@ def test_norm_data(get_df_test):
 
     df_norm, df_max = preprocessing.normalize_data(df)
 
-    assert (max(df_norm.max()) <= 1.0) and (min(df_norm.min()) >= -1)
+    assert max(df_norm.max()) <= 1.0
+    assert min(df_norm.min()) >= -1

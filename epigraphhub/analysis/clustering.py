@@ -1,5 +1,5 @@
 """
-The functions in this file allow the user to compute the hierarchical 
+The functions in this module allow the user to compute the hierarchical 
 clusterization between time series curves of all the regions of the 
 specified country.
 """
@@ -17,7 +17,7 @@ from epigraphhub.data.get_data import get_georegion_data
 
 def get_lag(x, y, maxlags=5, smooth=True):
     """
-    Compute the lag and correlation between the curves
+    Compute the lag and correlation between two series x and y
     """
     if smooth:
         x = pd.Series(x).rolling(7).mean().dropna().values
@@ -52,7 +52,6 @@ def lag_ccf(a, maxlags=30, smooth=True):
     return cmat, lags
 
 
-# @st.cache
 def compute_clusters(
     country,
     curve,

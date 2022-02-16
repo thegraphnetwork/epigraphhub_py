@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-The functions in this file transform the data in a format that is accepted by
+The functions in this module transform the data in a format that is accepted by
 ML models (tabular data) and neural network models (3D array data and multiple output). 
 """
 

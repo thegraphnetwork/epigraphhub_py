@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 
-The functions in this file allow the application of the 
+The functions in this module allow the application of the 
 ngboost regressor model. There are separate functions to train and evaluate (separate 
 the data in train and test datasets), train with all the data available, and make
 forecasts. Also, there are functions to apply these methods in just one canton or all the cantons. 

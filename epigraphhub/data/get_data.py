@@ -1,5 +1,5 @@
 """
-The functions in this file allow the user to get each of the datasets made available
+The functions in this module allow the user to get each of the datasets made available
 by FOPH - Federal Office of Public Health for each canton of Switzerland.
 
 In the future will be datasets for other countries available.   

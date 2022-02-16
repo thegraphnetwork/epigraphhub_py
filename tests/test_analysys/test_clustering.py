@@ -19,7 +19,8 @@ def test_get_lag():
 
     lag_comp, corr_comp = clustering.get_lag(x, y)
 
-    assert (lag_comp == lag) and (type(corr_comp) == np.float64)
+    assert lag_comp == lag
+    assert isinstance(corr_comp, np.float64)
 
 
 def test_lag_ccf(get_df_cases):
@@ -33,12 +34,8 @@ def test_lag_ccf(get_df_cases):
 
     cm, lm = clustering.lag_ccf(inc_canton.values)
 
-    assert (
-        (cm.shape[0] == len(inc_canton.columns))
-        and (cm.shape[1] == len(inc_canton.columns))
-        and (lm.shape[0] == len(inc_canton.columns))
-        and (lm.shape[1] == len(inc_canton.columns))
-    )
+    assert lm.shape == (len(inc_canton.columns), len(inc_canton.columns))
+    assert cm.shape == (len(inc_canton.columns), len(inc_canton.columns))
 
 
 def test_plot_curves(get_df_cases):
@@ -52,4 +49,4 @@ def test_plot_curves(get_df_cases):
 
     fig = clustering.plot_clusters("cases", inc_canton, [["GE", "FR", "JU"]])
 
-    assert type(fig) == plotly.graph_objs._figure.Figure
+    assert isinstance(fig, plotly.graph_objs._figure.Figure)
