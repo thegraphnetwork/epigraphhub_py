@@ -11,7 +11,7 @@ updates:
     allow:
       - dependency-type: "all"
     commit-message:
-      prefix: ":arrow_up:"
+      prefix: "chore(depbot):"
     open-pull-requests-limit: 50
 
   - package-ecosystem: "github-actions"
@@ -21,7 +21,7 @@ updates:
     allow:
       - dependency-type: "all"
     commit-message:
-      prefix: ":arrow_up:"
+      prefix: "chore(depbot):"
     open-pull-requests-limit: 50
 
   - package-ecosystem: "docker"
@@ -31,5 +31,5 @@ updates:
     allow:
       - dependency-type: "all"
     commit-message:
-      prefix: ":arrow_up:"
+      prefix: "chore(depbot):"
     open-pull-requests-limit: 50

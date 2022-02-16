@@ -45,3 +45,17 @@ jobs:
       run: |
         # https://github.com/numpy/numpy/issues/19038
         make check-safety || true
+
+    - name: Release
+      if: ${{ github.event_name == 'push' }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        npx --yes \
+          -p semantic-release \
+          -p "@semantic-release/commit-analyzer" \
+          -p "@semantic-release/release-notes-generator" \
+          -p "@semantic-release/changelog" \
+          -p "@semantic-release/github" \
+          -p "@semantic-release/git" \
+          semantic-release --ci
