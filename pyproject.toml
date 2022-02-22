@@ -52,7 +52,7 @@ pytrends = "^4.7.3"
 Theano-PyMC = "^1.1.2"
 jupyter = "^1.0.0"
 joblib = "^1.1.0"
-tensorflow = "^2.8.0"
+tensorflow = "^2.5.0"
 scikit-learn = "^1.0.2"
 ngboost = {git = "https://github.com/stanfordmlgroup/ngboost", rev = "v0.3.12"}
 
