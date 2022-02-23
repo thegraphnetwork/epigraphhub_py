@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 The functions in this module transform the data in a format that is accepted by
-ML models (tabular data) and neural network models (3D array data and multiple output). 
+ML models (tabular data) and neural network models (3D array data and multiple-output). 
 """
 
 import numpy as np
@@ -42,13 +42,14 @@ def build_lagged_features(dt, maxlag=2, dropna=True):
 def lstm_split_data(df, look_back=12, ratio=0.8, predict_n=5, Y_column=0):
     """
     Split the data into training and test sets
-    Keras expects the input tensor to have a shape of (nb_samples, timesteps, features).
+    Keras expects the input tensor to have a shape of (nb_samples, look_back, features),
+    and a output shape of (,predict_n)
     :param df: Pandas dataframe with the data.
     :param look_back: Number of weeks to look back before predicting
     :param ratio: fraction of total samples to use for training
     :param predict_n: number of weeks to predict
     :param Y_column: Column to predict
-    :return:
+    :return: arrays
     """
     df = np.nan_to_num(df.values).astype("float64")
     # n_ts is the number of training samples also number of training sets
@@ -76,7 +77,7 @@ def normalize_data(df, log_transform=False):
     """
     Normalize features in the example table
     :param df:
-    :return:
+    :return: Dataframe, float
     """
     df.fillna(0, inplace=True)
     norm = normalize(df, norm="max", axis=0)

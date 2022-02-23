@@ -38,6 +38,27 @@ def test_lag_ccf(get_df_cases):
     assert cm.shape == (len(inc_canton.columns), len(inc_canton.columns))
 
 
+def test_compute_clusters(get_df_cases):
+    df = get_df_cases
+    df.index = pd.to_datetime(df["datum"])
+
+    inc_canton, clusters, all_regions, fig = clustering.compute_clusters(
+        df,
+        ["geoRegion", "entries"],
+        t=0.5,
+        drop_georegions=None,
+        smooth=True,
+        ini_date="2020-03-01",
+        plot=True,
+    )
+
+    assert len(inc_canton.columns) == len(df["geoRegion"].unique())
+    assert inc_canton.empty == False
+    assert len(clusters) >= 1
+    assert len(all_regions) == len(df["geoRegion"].unique())
+    assert isinstance(fig, plotly.graph_objs._figure.Figure)
+
+
 def test_plot_curves(get_df_cases):
     df = get_df_cases
     df.index = pd.to_datetime(df["datum"])
@@ -47,6 +68,7 @@ def test_plot_curves(get_df_cases):
     for i in ["CH", "CHFL", "FL"]:
         del inc_canton[i]
 
-    fig = clustering.plot_clusters("cases", inc_canton, [["GE", "FR", "JU"]])
+    figs = clustering.plot_clusters("cases", inc_canton, [["GE", "FR", "JU"]])
 
-    assert isinstance(fig, plotly.graph_objs._figure.Figure)
+    for i in figs:
+        assert isinstance(i, plotly.graph_objs._figure.Figure)

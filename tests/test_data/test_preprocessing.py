@@ -49,4 +49,4 @@ def test_norm_data(get_df_test):
     df_norm, df_max = preprocessing.normalize_data(df)
 
     assert max(df_norm.max()) <= 1.0
-    assert min(df_norm.min()) >= -1
+    assert min(df_norm.min()) >= 0

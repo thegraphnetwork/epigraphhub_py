@@ -1,16 +1,19 @@
 """
-The functions in this module allow the user to get each of the datasets made available
-by FOPH - Federal Office of Public Health for each canton of Switzerland.
+The functions in this module allow the user to get the datasets stored in the 
+epigraphhub database. 
 
-In the future will be datasets for other countries available.   
+The function get_agg_data aggregate the data according to the values of one column, 
+and the method of aggregation applied. 
 
 The function get_georegion_data filter the datasets for a list of 
-selected geo regions (in the Switzerland case: cantons).
+selected regions (in the Switzerland case: cantons).
 
-The function get_cluster_data returns a table where each column is related
-with a curve and a canton (e.g. the daily number of cases and the daily number of hospitalizations). This function is handy to apply forecast models in 
-these data. 
-
+The function get_cluster_data is focused on being used to apply the forecast models.
+This function returns a table where each column is related to a  different table and 
+region (e.g. the daily number of cases and the daily number of hospitalizations in 
+Geneva and Fribourg). 
+Some parts of the code of this function are focused on the swiss case.
+So the function isn't fully general. 
 """
 
 
@@ -25,81 +28,115 @@ engine_private = create_engine(
 )
 
 
-def get_georegion_data(country, georegion, curve, columns):
+def get_agg_data(schema, table_name, columns, method, ini_date):
     """
-    This function provide a dataframe for the curve selected in the param curve and
-    the canton selected in the param canton
+    This function provides an aggregate data frame for the table selected in the param
+    table_name. The columns should be a list with three values. The first should be
+    a date column, the second a column that will be used for the aggregation
+    (e.g. regions name), and the third the column that will be used to compute the
+    result of the aggregation.
 
-    params country: string. Country that you want get the data, for now, the unique option is
-    'Switzerland'.
+    :params schema: string. The country that you want to get the data, for now, the
+                    only options are: ['switzerland', 'colombia'].
 
-    param georegion: array with all the subregions of the country of interest or string 'All'
-    to return all the georegions.
+    :params table_name: string. Name of the table that you want to get the data.
 
-    param curve: string. One of the following options are accepted: ['cases', 'casesVaccPersons', 'covidCertificates', 'death',
-                                                             'deathVaccPersons', 'hosp', 'hospCapacity', 'hospVaccPersons',
-                                                             'intCases', 're', 'test', 'testPcrAntigen', 'virusVariantsWgs']
+    :params columns: list of strings. Columns from the table that will be used in the
+                    aggregation. The first column should be a date column,
+                    the second should be a column with the regions name that we want
+                    to aggregate (e.g. regions name), and the third will be used
+                    to compute the result of aggregation.
 
-    param columns: columns of interest
-    return dataframe
+    :params method: string. The method name to be applied in the aggregation the
+                            possible options are: 'COUNT', 'SUM',  and 'AVG'.
+
+    :params ini_date: string. Initial data to start the aggregation.
+
+    :return: Dataframe
     """
-    # put the country name in lower to avoid errors
-    country = country.lower()
 
-    # list with the accepted countrys
-    accepted_countrys = ["switzerland"]
+    table_name = table_name.lower()
+    method = method.upper()
 
-    accepted_curves = {
-        "switzerland": [
-            "cases",
-            "casesVaccPersons",
-            "covidCertificates",
-            "death",
-            "deathVaccPersons",
-            "hosp",
-            "hospcapacity",
-            "hospVaccPersons",
-            "intCases",
-            "re",
-            "test",
-            "testPcrAntigen",
-            "virusVariantsWgs",
-        ]
-    }
+    accepted_countrys = ["switzerland", "colombia"]
 
-    # return a error if a param is not in the correct format.
-
-    if country not in accepted_countrys:
-
+    if schema not in accepted_countrys:
         raise Exception(f"Error. The only countries accepted are: {accepted_countrys}.")
 
-    if curve not in accepted_curves[country]:
+    query = f"SELECT {columns[0]}, {columns[1]}, {method}({columns[2]}) FROM {schema}.{table_name} WHERE {columns[0]} > '{ini_date}' GROUP BY ({columns[0]}, {columns[1]})"
 
+    df = pd.read_sql(query, engine_public)
+    df.set_index(columns[0], inplace=True)
+    df.index = pd.to_datetime(df.index)
+
+    return df
+
+
+def get_georegion_data(schema, table_name, georegion, columns):
+    """
+    This function provides a data frame for the table selected in the param table_name and
+    the chosen regions in the param georegion.
+
+    ":params schema: string. The country that you want to get the data, for now, the only options are:
+                            ['switzerland', 'colombia'].
+
+    :params table_name: string. Name of the table that you want to get the data.
+
+    :param sgeoregion: list of strings| string. This list contains all the regions of the country of interest or the string 'All'
+                            to return all the regions.
+
+    :params columns: list of strings| None. Columns that you want to select from the table table_name. If None all the columns will be returned.
+
+    :return: Dataframe
+    """
+
+    schema = schema.lower()
+    table_name = table_name.lower()
+
+    accepted_countrys = ["switzerland"]
+
+    accepted_tables = {
+        "switzerland": [
+            "foph_cases",
+            "foph_casesVaccPersons",
+            "foph_covidCertificates",
+            "foph_death",
+            "foph_deathVaccPersons",
+            "foph_hosp",
+            "foph_hospcapacity",
+            "foph_hospVaccPersons",
+            "foph_intCases",
+            "foph_re",
+            "foph_test",
+            "foph_testPcrAntigen",
+            "foph_virusVariantsWgs",
+        ],
+        "colombia": ["casos_positivos_covid"],
+    }
+
+    if schema not in accepted_countrys:
+        raise Exception(f"Error. The only countries accepted are: {accepted_countrys}.")
+
+    if table_name not in accepted_tables[schema]:
         raise Exception(
-            f"Error. The only curves accepted are: {accepted_curves[country]}."
+            f"Error. The only curves accepted are: {accepted_tables[schema]}."
         )
 
     if type(georegion) != list and georegion != "All":
-
         raise Exception(
             """Error. The georegion param should be a list or the string All to 
         return all the georegions."""
         )
 
     if type(columns) != list and columns != None:
-
         raise Exception(
             "Error. The columns param should be a list or None. If None all the columns will be returned."
         )
 
-    # name of the table according to the country
-    table_names = {"switzerland": "foph_"}
-
-    # if the columns are not specified get all the columns
     if columns == None:
         columns = "*"
 
-    # separe the columns by comma
+    # separe the columns by comma to apply in the sql query
     s_columns = ""
     for i in columns:
 
@@ -107,18 +144,15 @@ def get_georegion_data(country, georegion, curve, columns):
 
     s_columns = s_columns[:-1]
 
-    # getting the data from the database
-
-    # defining the SQL query to get the data
     if georegion == "All":
-        query = f"select {s_columns} from {country}.{table_names[country] + curve}"
+        query = f"select {s_columns} from {schema}.{table_name}"
 
     if len(georegion) == 1:
-        query = f"select {s_columns}  from {country}.{table_names[country] + curve} where \"geoRegion\" = '{georegion[0]}' ;"
+        query = f"select {s_columns}  from {schema}.{table_name} where \"{columns[1][1:-1]}\" = '{georegion[0]}' ;"
 
     if len(georegion) > 1 and type(georegion) == list:
         georegion_tuple = tuple(i for i in georegion)
-        query = f'select {s_columns} from {country}.{table_names[country] + curve} where "geoRegion" in {georegion_tuple} ;'
+        query = f'select {s_columns} from {schema}.{table_name} where "{columns[1][1:-1]}" in {georegion_tuple} ;'
 
     df = pd.read_sql(query, engine_public)
 
@@ -126,147 +160,151 @@ def get_georegion_data(country, georegion, curve, columns):
 
 
 dict_cols = {
-    "cases": ['"geoRegion"', "datum", "entries"],
-    "test": ['"geoRegion"', "datum", "entries", "entries_pos"],
-    "hosp": ['"geoRegion"', "datum", "entries"],
-    "hospcapacity": [
-        '"geoRegion"',
+    "foph_cases": ["datum", '"geoRegion"', "entries"],
+    "foph_test": ["datum", '"geoRegion"', "entries", "entries_pos"],
+    "foph_hosp": ["datum", '"geoRegion"', "entries"],
+    "foph_hospcapacity": [
         "date",
+        '"geoRegion"',
         '"ICU_Covid19Patients"',
         '"Total_Covid19Patients"',
     ],
-    "re": ["geoRegion", "date", "median_R_mean"],
+    "foph_re": ["date", "geoRegion", "median_R_mean"],
 }
 
 date_columns = {
-    "cases": "datum",
-    "test": "datum",
-    "hosp": "datum",
-    "hospcapacity": "date",
+    "foph_cases": "datum",
+    "foph_test": "datum",
+    "foph_hosp": "datum",
+    "foph_hospcapacity": "date",
 }
 
 count_columns = {
-    "cases": ["entries"],
-    "test": ["entries"],
-    "hosp": ["entries"],
-    "hospcapacity": ["ICU_Covid19Patients", "Total_Covid19Patients"],
+    "foph_cases": ["entries"],
+    "foph_test": ["entries"],
+    "foph_hosp": ["entries"],
+    "foph_hospcapacity": ["ICU_Covid19Patients", "Total_Covid19Patients"],
 }
+
+columns_name = {"foph_cases": "cases", "foph_test": "test", "foph_hosp": "hosp"}
 
 
 def get_cluster_data(
-    curve,
+    schema,
+    table_name,
     georegion,
-    country="Switzerland",
     dict_cols=dict_cols,
     date_columns=date_columns,
     count_columns=count_columns,
+    columns_name=columns_name,
     vaccine=True,
     smooth=True,
 ):
+
     """
-    This function provide a dataframe where each columns is associated with the curve
-    and georegion selected.
+    This function provides a data frame where each column is associated with a table
+    and region selected.
 
-    return dataframe
+    :params schema: string. The country that you want to get the data, for now, the only \
+                    options are: ['switzerland', 'colombia']
+
+    :params table_name: list of strings. In this list should be all the tables that you 
+                        want get the data. 
+
+    :params georegion: list of strings. This list contains all the regions of the country 
+                        of interest or the string 'All' to return all the regions.
+
+    :params dict_cols: dictionary. In the keys are the table_names and in the values 
+                      the columns that you want to use from each table
+    
+    :params date_columns:dictionary. In the keys are the table_names and in the values
+                          the name of the date column of the table to be used as the 
+                          index. 
+
+    :params count_columns: dictionary. In the keys are the table_names and in the values
+                        the name of the column which values will be used. 
+    
+    :params columns_name: dictionary. In the keys ate the table_names and in the values
+                        the name that will appear in the column associated with each 
+                    table in the final data frame that will be returned. 
+        
+    :params vaccine: boolean. If True the data of total vaccinations per hundred for the
+                            country in the schema will be added in the final data frame. 
+                            This data is from our world in data. 
+                            
+    :params smooth: boolean. If True in the end data frame will be applied a moving 
+                            average of seven days. 
+
+    :return: Dataframe
     """
-
-    country = "Switzerland"
-
-    dict_cols = {
-        "cases": ['"geoRegion"', "datum", "entries"],
-        "test": ['"geoRegion"', "datum", "entries", "entries_pos"],
-        "hosp": ['"geoRegion"', "datum", "entries"],
-        "hospcapacity": [
-            '"geoRegion"',
-            "date",
-            '"ICU_Covid19Patients"',
-            '"Total_Covid19Patients"',
-        ],
-        "re": ["geoRegion", "date", "median_R_mean"],
-    }
-
-    date_columns = {
-        "cases": "datum",
-        "test": "datum",
-        "hosp": "datum",
-        "hospcapacity": "date",
-    }
-
-    count_columns = {
-        "cases": ["entries"],
-        "test": ["entries"],
-        "hosp": ["entries"],
-        "hospcapacity": ["ICU_Covid19Patients", "Total_Covid19Patients"],
-    }
-
-    # The dicts above could be passed as params to possibilite adapte this function for another country/subregion.
-
-    # print(df)
-    # dataframe where will the curve for each region
 
     df_end = pd.DataFrame()
 
-    for i in curve:
-        # print(i)
-        df = get_georegion_data(country, georegion, i, dict_cols[i])
-        df.set_index(date_columns[i], inplace=True)
+    for table in table_name:
+
+        df = get_georegion_data(schema, table, georegion, dict_cols[table])
+        df.set_index(date_columns[table], inplace=True)
         df.index = pd.to_datetime(df.index)
 
-        for j in df.geoRegion.unique():
+        for region in df.geoRegion.unique():
 
-            # print(j)
+            for count in count_columns[table]:
 
-            for k in count_columns[i]:
-
-                if i == "hospcapacity":
+                if table == "foph_hospcapacity":
 
                     names = {
                         "ICU_Covid19Patients": "ICU_patients",
                         "Total_Covid19Patients": "total_hosp",
                     }
-                    df_aux = df.loc[df.geoRegion == j].resample("D").mean()
+                    df_aux1 = df.loc[df.geoRegion == region].resample("D").mean()
 
-                    df_end[names[k] + "_" + j] = df_aux[k]
-                    df_end[f"diff_{names[k]}_{j}"] = df_aux[k].diff(1)
-                    df_end[f"diff_2_{names[k]}_{j}"] = df_aux[k].diff(2)
+                    df_aux2 = pd.DataFrame()
+
+                    df_aux2[names[count] + "_" + region] = df_aux1[count]
+                    df_aux2[f"diff_{names[count]}_{region}"] = df_aux1[count].diff(1)
+                    df_aux2[f"diff_2_{names[count]}_{region}"] = df_aux1[count].diff(2)
+
+                    df_end = pd.concat([df_end, df_aux2], axis=1)
 
                 else:
-                    df_aux = df.loc[df.geoRegion == j].resample("D").mean()
+                    df_aux1 = df.loc[df.geoRegion == region].resample("D").mean()
 
-                    # print(df_end.index)
-                    # print(df_aux.index)
+                    df_aux2 = pd.DataFrame()
 
-                    df_end[i + "_" + j] = df_aux[k]
-                    # print(len(df_aux[k]))
-                    # print(len(np.concatenate( ([np.nan], np.diff(df_aux[k],1)))))
-                    df_end[f"diff_{i}_{j}"] = df_aux[k].diff(1)
-                    df_end[f"diff_2_{i}_{j}"] = df_aux[k].diff(2)
+                    df_aux2[columns_name[table] + "_" + region] = df_aux1[count]
+                    df_aux2[f"diff_{columns_name[table]}_{region}"] = df_aux1[
+                        count
+                    ].diff(1)
+                    df_aux2[f"diff_2_{columns_name[table]}_{region}"] = df_aux1[
+                        count
+                    ].diff(2)
+
+                    df_end = pd.concat([df_end, df_aux2], axis=1)
 
     df_end = df_end.resample("D").mean()
 
     if vaccine == True:
-        ## add the vaccine data for Switzerland made available by Our world in Data
-        vac = pd.read_csv(
-            "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv"
+        vac = pd.read_sql_table(
+            "owid_covid",
+            engine_public,
+            schema="public",
+            columns=["date", "iso_code", "total_vaccinations_per_hundred"],
         )
 
-        # selecting the switzerland data
-        vac = vac.loc[vac.iso_code == "CHE"]
+        dict_iso_code = {"switzerland": "CHE", "colombia": "COL"}
+
+        vac = vac.loc[vac.iso_code == dict_iso_code[schema]]
         vac.index = pd.to_datetime(vac.date)
 
         # selecting only the column with vaccinations per hundred
         vac = vac[["total_vaccinations_per_hundred"]]
 
-        vac = vac.fillna(0)
-
-        if vac.total_vaccinations_per_hundred[-1] == 0:
-            vac.total_vaccinations_per_hundred[-1] = vac.total_vaccinations_per_hundred[
-                -2
-            ]
+        vac = vac.fillna(method="ffill")
 
         df_end["vac_all"] = vac.total_vaccinations_per_hundred
 
-    # filling the NaN values by zero
+        df_end["vac_all"] = df_end["vac_all"].fillna(method="ffill")
+
     df_end = df_end.fillna(0)
 
     if smooth == True:
@@ -277,14 +315,14 @@ def get_cluster_data(
     return df_end
 
 
-def get_updated_data(smooth=True):
+def get_updated_data_swiss(smooth=True):
 
     """
     Function to get the updated data for Geneva
 
-    param smooth: Boolean. If True, a rolling average is applied
+    :params smooth: Boolean. If True, a rolling average is applied
 
-    return: dataframe.
+    :return: Dataframe.
     """
 
     df = pd.read_sql_table(

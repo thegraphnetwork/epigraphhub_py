@@ -21,7 +21,11 @@ from ngboost.scores import LogScore
 from sklearn.model_selection import train_test_split
 
 from epigraphhub.analysis.clustering import compute_clusters
-from epigraphhub.data.get_data import get_cluster_data, get_updated_data
+from epigraphhub.data.get_data import (
+    get_cluster_data,
+    get_georegion_data,
+    get_updated_data_swiss,
+)
 from epigraphhub.data.preprocessing import build_lagged_features
 
 params_model = {
@@ -69,6 +73,8 @@ def rolling_predictions(
     returns: DataFrame.
     """
 
+    # remove the last 3 days to avoid delay in data
+    data = data.iloc[:-3]
     target = data[target_name]
 
     df_lag = build_lagged_features(copy.deepcopy(data), maxlag=maxlag)
@@ -85,7 +91,6 @@ def rolling_predictions(
     # remove the target column and columns related with the day that we want to predict
     df_lag = df_lag.drop(data.columns, axis=1)
 
-    # targets
     targets = {}
 
     for T in np.arange(1, horizon_forecast + 1, 1):
@@ -106,7 +111,6 @@ def rolling_predictions(
 
         idx = idx.to_timestamp()
 
-        # predictions
         preds5 = np.empty((len(idx), horizon_forecast))
         preds50 = np.empty((len(idx), horizon_forecast))
         preds95 = np.empty((len(idx), horizon_forecast))
@@ -125,11 +129,7 @@ def rolling_predictions(
 
             model = NGBRegressor(**kwargs)
 
-            # start = time.time()
             model.fit(X_train, tgt)
-
-            # end = time.time()
-            # print('Time elapsed', end - start)
 
             pred = model.pred_dist(df_lag.loc[idx])
 
@@ -141,7 +141,6 @@ def rolling_predictions(
             preds50[:, (T - 1)] = pred50
             preds95[:, (T - 1)] = pred95
 
-        # transformando preds em um array
         train_size = len(X_train)
 
         y5 = preds5.flatten()
@@ -212,37 +211,39 @@ def train_eval_single_canton(
 ):
 
     """
-    Function to train and evaluate the model for one georegion
+    Function to train and evaluate the model for one georegion.
 
     Important:
     * By default the function is using the clustering cantons and the data since 2020
     * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
 
-    params canton: canton of interest
-    params predictors: variables that  will be used in model
-    params vaccine: It determines if the vaccine data from owid will be used or not
-    params smooth: It determines if data will be smoothed (7 day moving average) or not
-    params ini_date: Determines the beggining of the train dataset
-    params update_data: Determines if the data from the Geneva hospital will be used.
+    :params canton: canton of interest
+    :params predictors: variables that  will be used in model
+    :params vaccine: It determines if the vaccine data from owid will be used or not
+    :params smooth: It determines if data will be smoothed (7 day moving average) or not
+    :params ini_date: Determines the beggining of the train dataset
+    :params update_data: Determines if the data from the Geneva hospital will be used.
                         this params only is used when canton = GE and target_curve_name = hosp.
-    params split: float. Determines which percentage of the data will be used to train the model
-    params parameters_model: dict with the params that will be used in the ngboost
+    :params split: float. Determines which percentage of the data will be used to train the model
+    :params parameters_model: dict with the params that will be used in the ngboost
                              regressor model.
+
+    returns: Dataframe.
     """
 
-    # compute the clusters
-    # print('cluster')
-    # start = time.time()
+    df = get_georegion_data(
+        "switzerland", "foph_cases", "All", ["datum", '"geoRegion"', "entries"]
+    )
+    df.set_index("datum", inplace=True)
+    df.index = pd.to_datetime(df.index)
+
     clusters = compute_clusters(
-        "switzerland",
-        "cases",
-        ["datum", '"geoRegion"', "entries"],
+        df,
+        ["geoRegion", "entries"],
         t=0.3,
         drop_georegions=["CH", "FL", "CHFL"],
         plot=False,
     )[1]
-    # end = time.time()
-    # print(end - start)
 
     for cluster in clusters:
 
@@ -255,31 +256,21 @@ def train_eval_single_canton(
     horizon = 14
     maxlag = 14
 
-    # getting the data
-    # print(cluster_canton)
-    # print('get_data')
-    # start = time.time()
     df = get_cluster_data(
-        predictors, list(cluster_canton), vaccine=vaccine, smooth=smooth
+        "switzerland", predictors, list(cluster_canton), vaccine=vaccine, smooth=smooth
     )
-    # end = time.time()
-    # print(end - start)
-    # filling the nan values with 0
-    df = df.fillna(0)
 
-    # removing the last three days of data to avoid delay in the reporting.
+    df = df.fillna(0)
 
     if target_name == "hosp_GE":
         if updated_data:
-            # atualizando a coluna das Hospitalizações com os dados mais atualizados
-            df_new = get_updated_data(smooth)
+            # get updated data
+            df_new = get_updated_data_swiss(smooth)
 
             df.loc[df_new.index[0] : df_new.index[-1], "hosp_GE"] = df_new.hosp_GE
 
-            # utilizando como último data a data dos dados atualizados:
             df = df.loc[: df_new.index[-1]]
 
-    # apply the model and get the predictions
     df = rolling_predictions(
         target_name,
         df,
@@ -310,45 +301,47 @@ def train_eval_all_cantons(
     * By default the function is using the clustering cantons and the data since 2020
     * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
 
-    params target_curve_name: string to indicate the target column of the predictions
-    params predictors: variables that  will be used in model
-    params vaccine: It determines if the vaccine data from owid will be used or not
-    params smooth: It determines if data will be smoothed or not
-    params ini_date: Determines the beggining of the train dataset
-    params split: float. Determines which percentage of the data will be used to train the model
-    params parameters_model: dict with the params that will be used in the ngboost
+    :params target_curve_name: string to indicate the target column of the predictions
+    :params predictors: variables that  will be used in model
+    :params vaccine: It determines if the vaccine data from owid will be used or not
+    :params smooth: It determines if data will be smoothed or not
+    :params ini_date: Determines the beggining of the train dataset
+    :params split: float. Determines which percentage of the data will be used to train the model
+    :params parameters_model: dict with the params that will be used in the ngboost
                              regressor model.
 
-    returns: Dataframe with the predictions for all the cantons
+    returns: Dataframe.
     """
 
     df_all = pd.DataFrame()
 
-    # compute the clusters
+    df = get_georegion_data(
+        "switzerland", "foph_cases", "All", ["datum", '"geoRegion"', "entries"]
+    )
+    df.set_index("datum", inplace=True)
+    df.index = pd.to_datetime(df.index)
+
     clusters = compute_clusters(
-        "switzerland",
-        "cases",
-        ["datum", '"geoRegion"', "entries"],
+        df,
+        ["geoRegion", "entries"],
         t=0.3,
         drop_georegions=["CH", "FL", "CHFL"],
         plot=False,
     )[1]
 
     for cluster in clusters:
-        # getting the data
-        df = get_cluster_data(predictors, list(cluster), vaccine=vaccine, smooth=smooth)
-        # filling the nan values with 0
+
+        df = get_cluster_data(
+            "switzerland", predictors, list(cluster), vaccine=vaccine, smooth=smooth
+        )
+
         df = df.fillna(0)
 
         for canton in cluster:
-            # apply the model
 
             target_name = f"{target_curve_name}_{canton}"
-
             horizon = 14
             maxlag = 14
-
-            # get predictions and forecast
 
             df_pred = rolling_predictions(
                 target_name,
@@ -384,8 +377,6 @@ def training_model(
     This function will train the model with all the data available and will save the model
     that will be used to make forecasts.
 
-
-
     params target_name:string. Name of the target column.
     params ini_date: string. Determines the beggining of the train dataset
     params horizon_forecast: int. Number of days that will be predicted
@@ -397,10 +388,9 @@ def training_model(
     returns: list with the {horizon_forecast} models saved
     """
 
-    # print(data.index[-1])
+    # removing the last three days of data to avoid delay in the reporting.
     data = data.iloc[:-3]
 
-    # print(data.index[-1])
     target = data[target_name]
 
     df_lag = build_lagged_features(copy.deepcopy(data), maxlag=maxlag)
@@ -430,15 +420,10 @@ def training_model(
                 targets[T] = target.shift(-(T - 1))
             else:
                 targets[T] = target.shift(-(T - 1))[: -(T - 1)]
-                # print(T, len(df_lag), len(fit_target))
-                # print(df_lag.index,fit_target.index)
 
         X_train = df_lag.iloc[:-1]
 
         for T in range(1, horizon_forecast + 1):
-            # training of the model with all the data available
-
-            # print(T)
 
             tgt = targets[T][: len(X_train)]
 
@@ -449,8 +434,6 @@ def training_model(
 
                     tgt[i] = 0.01
                 i = i + 1
-
-            # if not os.path.exists(f'../opt/models/saved_models/ml/ngboost_{target_name}_{T}D.joblib'):
 
             model = NGBRegressor(**kwargs)
 
@@ -492,10 +475,9 @@ def rolling_forecast(
     returns: DataFrame.
     """
 
-    # print(data.index[-1])
+    # removing the last three days of data to avoid delay in the reporting.
     data = data.iloc[:-3]
 
-    # print(data.index[-1])
     target = data[target_name]
 
     df_lag = build_lagged_features(copy.deepcopy(data), maxlag=maxlag)
@@ -515,7 +497,6 @@ def rolling_forecast(
         # remove the target column and columns related with the day that we want to predict
         df_lag = df_lag.drop(data.columns, axis=1)
 
-        # targets
         targets = {}
 
         for T in np.arange(1, horizon_forecast + 1, 1):
@@ -523,10 +504,7 @@ def rolling_forecast(
                 targets[T] = target.shift(-(T - 1))
             else:
                 targets[T] = target.shift(-(T - 1))[: -(T - 1)]
-        #         print(T, len(df_lag), len(fit_target))
-        #         print(df_lag.index,fit_target.index)
 
-        # forecast
         forecasts5 = []
         forecasts50 = []
         forecasts95 = []
@@ -534,10 +512,6 @@ def rolling_forecast(
         X_train = df_lag.iloc[:-1]
 
         for T in range(1, horizon_forecast + 1):
-            # training of the model with all the data available
-
-            # print(T)
-
             tgt = targets[T][: len(X_train)]
 
             i = 0
@@ -552,7 +526,6 @@ def rolling_forecast(
 
             forecast = model.pred_dist(df_lag.iloc[-1:])
 
-            # make the forecast
             forecast50 = forecast.median()
 
             forecast5, forecast95 = forecast.interval(alpha=0.95)
@@ -567,7 +540,6 @@ def rolling_forecast(
         forecasts95 = [0] * 14
 
     # transformando preds em um array
-
     forecast_dates = []
 
     last_day = datetime.strftime((df_lag.index)[-1], "%Y-%m-%d")
@@ -621,19 +593,19 @@ def forecast_single_canton(
     returns: Dataframe with the forecast for all the cantons
     """
 
-    # compute the clusters
-    # print('cluster')
-    # start = time.time()
+    df = get_georegion_data(
+        "switzerland", "foph_cases", "All", ["datum", '"geoRegion"', "entries"]
+    )
+    df.set_index("datum", inplace=True)
+    df.index = pd.to_datetime(df.index)
+
     clusters = compute_clusters(
-        "switzerland",
-        "cases",
-        ["datum", '"geoRegion"', "entries"],
+        df,
+        ["geoRegion", "entries"],
         t=0.3,
         drop_georegions=["CH", "FL", "CHFL"],
         plot=False,
     )[1]
-    # end = time.time()
-    # print(end-start)
 
     for cluster in clusters:
 
@@ -642,33 +614,25 @@ def forecast_single_canton(
             cluster_canton = cluster
 
     df = get_cluster_data(
-        predictors, list(cluster_canton), vaccine=vaccine, smooth=smooth
+        "switzerland", predictors, list(cluster_canton), vaccine=vaccine, smooth=smooth
     )
 
-    # filling the nan values with 0
     df = df.fillna(0)
 
     target_name = f"{target_curve_name}_{canton}"
 
     if target_name == "hosp_GE":
         if updated_data:
-            # atualizando a coluna das Hospitalizações com os dados mais atualizados
-            df_new = get_updated_data(smooth)
+
+            df_new = get_updated_data_swiss(smooth)
 
             df.loc[df_new.index[0] : df_new.index[-1], "hosp_GE"] = df_new.hosp_GE
 
-            # utilizando como último data a data dos dados atualizados:
             df = df.loc[: df_new.index[-1]]
-
-    # apply the model
 
     horizon = 14
     maxlag = 14
 
-    # get predictions and forecast
-
-    # date_predsknn, predsknn, targetknn, train_size, date_forecastknn, forecastknn = rolling_predictions(model_knn, 'knn', target_name, df , ini_date = '2021-01-01',split = 0.75,   horizon_forecast = horizon, maxlag=maxlag,)
-    # start = time.time()
     df_for = rolling_forecast(
         target_name,
         df,
@@ -677,9 +641,6 @@ def forecast_single_canton(
         maxlag=maxlag,
         path=path,
     )
-    # end = time.time()
-
-    # print(end - start)
 
     return df_for
 
@@ -710,11 +671,15 @@ def forecast_all_cantons(
     """
     df_all = pd.DataFrame()
 
-    # compute the clusters
+    df = get_georegion_data(
+        "switzerland", "foph_cases", "All", ["datum", '"geoRegion"', "entries"]
+    )
+    df.set_index("datum", inplace=True)
+    df.index = pd.to_datetime(df.index)
+
     clusters = compute_clusters(
-        "switzerland",
-        "cases",
-        ["datum", '"geoRegion"', "entries"],
+        df,
+        ["geoRegion", "entries"],
         t=0.3,
         drop_georegions=["CH", "FL", "CHFL"],
         plot=False,
@@ -722,20 +687,19 @@ def forecast_all_cantons(
 
     for cluster in clusters:
 
-        df = get_cluster_data(predictors, list(cluster), vaccine=vaccine, smooth=smooth)
-        # filling the nan values with 0
+        df = get_cluster_data(
+            "switzerland", predictors, list(cluster), vaccine=vaccine, smooth=smooth
+        )
+
         df = df.fillna(0)
 
         for canton in cluster:
-
-            # apply the model
 
             target_name = f"{target_curve_name}_{canton}"
 
             horizon = 14
             maxlag = 14
 
-            # get predictions and forecast
             df_for = rolling_forecast(
                 target_name,
                 df,
@@ -754,10 +718,11 @@ def train_single_canton(
     target_curve_name,
     canton,
     predictors,
+    path="../opt/models/saved_models/ml",
     vaccine=True,
     smooth=True,
     ini_date="2020-03-01",
-    updated_data=True,
+    updated_data=False,
     parameters_model=params_model,
 ):
 
@@ -768,23 +733,29 @@ def train_single_canton(
     * By default the function is using the clustering cantons and the data since 2020
     * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
 
-    params canton: canton of interest
-    params predictors: variables that  will be used in model
-    params vaccine: It determines if the vaccine data from owid will be used or not
-    params smooth: It determines if data will be smoothed or not
-    params ini_date: Determines the beggining of the train dataset
-    params path: Determines  where the model trained will be saved
-    params update_data: Determines if the data from the Geneva hospital will be used.
+    :params canton: canton of interest
+    :params predictors: variables that  will be used in model
+    :params vaccine: It determines if the vaccine data from owid will be used or not
+    :params smooth: It determines if data will be smoothed or not
+    :params ini_date: Determines the beggining of the train dataset
+    :params path: Determines  where the model trained will be saved
+    :params update_data: Determines if the data from the Geneva hospital will be used.
                         this params only is used when canton = GE and target_curve_name = hosp.
-    params parameters_model: dict with the params that will be used in the ngboost
+    :params parameters_model: dict with the params that will be used in the ngboost
                              regressor model.
+    :returns: None
     """
 
     # compute the clusters
+    df = get_georegion_data(
+        "switzerland", "foph_cases", "All", ["datum", '"geoRegion"', "entries"]
+    )
+    df.set_index("datum", inplace=True)
+    df.index = pd.to_datetime(df.index)
+
     clusters = compute_clusters(
-        "switzerland",
-        "cases",
-        ["datum", '"geoRegion"', "entries"],
+        df,
+        ["geoRegion", "entries"],
         t=0.3,
         drop_georegions=["CH", "FL", "CHFL"],
         plot=False,
@@ -803,17 +774,15 @@ def train_single_canton(
 
     # getting the data
     df = get_cluster_data(
-        predictors, list(cluster_canton), vaccine=vaccine, smooth=smooth
+        "switzerland", predictors, list(cluster_canton), vaccine=vaccine, smooth=smooth
     )
     # filling the nan values with 0
     df = df.fillna(0)
 
-    # removing the last three days of data to avoid delay in the reporting.
-
     if target_name == "hosp_GE":
         if updated_data:
             # atualizando a coluna das Hospitalizações com os dados mais atualizados
-            df_new = get_updated_data(smooth)
+            df_new = get_updated_data_swiss(smooth)
 
             df.loc[df_new.index[0] : df_new.index[-1], "hosp_GE"] = df_new.hosp_GE
 
@@ -824,6 +793,7 @@ def train_single_canton(
         target_name,
         df,
         ini_date,
+        path=path,
         horizon_forecast=horizon,
         maxlag=maxlag,
         kwargs=parameters_model,
@@ -848,22 +818,26 @@ def train_all_cantons(
     * By default the function is using the clustering cantons and the data since 2020
     * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
 
-    params target_curve_name: string to indicate the target column of the predictions
-    params predictors: variables that  will be used in model
-    params vaccine: It determines if the vaccine data from owid will be used or not
-    params smooth: It determines if data will be smoothed or not
-    params ini_date: Determines the beggining of the train dataset
-    params parameters_model: dict with the params that will be used in the ngboost
+    :params target_curve_name: string to indicate the target column of the predictions
+    :params predictors: variables that  will be used in model
+    :params vaccine: It determines if the vaccine data from owid will be used or not
+    :params smooth: It determines if data will be smoothed or not
+    :params ini_date: Determines the beggining of the train dataset
+    :params parameters_model: dict with the params that will be used in the ngboost
                              regressor model.
 
     returns: Dataframe with the forecast for all the cantons
     """
 
-    # compute the clusters
+    df = get_georegion_data(
+        "switzerland", "foph_cases", "All", ["datum", '"geoRegion"', "entries"]
+    )
+    df.set_index("datum", inplace=True)
+    df.index = pd.to_datetime(df.index)
+
     clusters = compute_clusters(
-        "switzerland",
-        "cases",
-        ["datum", '"geoRegion"', "entries"],
+        df,
+        ["geoRegion", "entries"],
         t=0.3,
         drop_georegions=["CH", "FL", "CHFL"],
         plot=False,
@@ -871,20 +845,18 @@ def train_all_cantons(
 
     for cluster in clusters:
 
-        df = get_cluster_data(predictors, list(cluster), vaccine=vaccine, smooth=smooth)
-        # filling the nan values with 0
+        df = get_cluster_data(
+            "switzerland", predictors, list(cluster), vaccine=vaccine, smooth=smooth
+        )
+
         df = df.fillna(0)
 
         for canton in cluster:
-
-            # apply the model
-
             target_name = f"{target_curve_name}_{canton}"
 
             horizon = 14
             maxlag = 14
 
-            # train the models and save in the server
             training_model(
                 target_name,
                 df,
