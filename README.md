@@ -4,7 +4,6 @@
 
 [![Build status](https://github.com/thegraphnetwork/epigraphhub_py/workflows/build/badge.svg?branch=master&event=push)](https://github.com/thegraphnetwork/epigraphhub_py/actions?query=workflow%3Abuild)
 [![Python Version](https://img.shields.io/pypi/pyversions/epigraphhub_py.svg)](https://pypi.org/project/epigraphhub_py/)
-[![Dependencies Status](https://img.shields.io/badge/dependencies-up%20to%20date-brightgreen.svg)](https://github.com/thegraphnetwork/epigraphhub_py/pulls?utf8=%E2%9C%93&q=is%3Apr%20author%3Aapp%2Fdependabot)
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Security: bandit](https://img.shields.io/badge/security-bandit-green.svg)](https://github.com/PyCQA/bandit)
@@ -58,7 +57,6 @@ git push -u origin main
 
 ### Set up bots
 
-- Set up [Dependabot](https://docs.github.com/en/github/administering-a-repository/enabling-and-disabling-version-updates#enabling-github-dependabot-version-updates) to ensure you have the latest dependencies.
 - Set up [Stale bot](https://github.com/apps/stale) for automatic issue closing.
 
 ### Poetry
@@ -128,7 +126,6 @@ Articles:
 - `Github Actions` with predefined [build workflow](https://github.com/thegraphnetwork/epigraphhub_py/blob/master/.github/workflows/build.yml) as the default CI/CD.
 - Everything is already set up for security checks, codestyle checks, code formatting, testing, linting, docker builds, etc with [`Makefile`](https://github.com/thegraphnetwork/epigraphhub_py/blob/master/Makefile#L89). More details in [makefile-usage](#makefile-usage).
 - [Dockerfile](https://github.com/thegraphnetwork/epigraphhub_py/blob/master/docker/Dockerfile) for your package.
-- Always up-to-date dependencies with [`@dependabot`](https://dependabot.com/). You will only [enable it](https://docs.github.com/en/github/administering-a-repository/enabling-and-disabling-version-updates#enabling-github-dependabot-version-updates).
 - Automatic drafts of new releases with [`Release Drafter`](https://github.com/marketplace/actions/release-drafter). You may see the list of labels in [`release-drafter.yml`](https://github.com/thegraphnetwork/epigraphhub_py/blob/master/.github/release-drafter.yml). Works perfectly with [Semantic Versions](https://semver.org/) specification.
 
 ### Open source community features
@@ -378,7 +375,7 @@ We use [`Release Drafter`](https://github.com/marketplace/actions/release-drafte
 
 You can update it in [`release-drafter.yml`](https://github.com/thegraphnetwork/epigraphhub_py/blob/master/.github/release-drafter.yml).
 
-GitHub creates the `bug`, `enhancement`, and `documentation` labels for you. Dependabot creates the `dependencies` label. Create the remaining labels on the Issues tab of your GitHub repository, when you need them.
+GitHub creates the `bug`, `enhancement`, and `documentation` labels for you. Create the remaining labels on the Issues tab of your GitHub repository, when you need them.
 
 ## 🛡 License
 
