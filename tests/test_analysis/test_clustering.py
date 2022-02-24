@@ -4,11 +4,12 @@ Created on Mon Feb  7 09:32:55 2022
 
 @author: eduardoaraujo
 """
+import matplotlib
 import numpy as np
 import pandas as pd
 import plotly
 import pytest
-import matplotlib 
+
 from epigraphhub.analysis import clustering
 
 
