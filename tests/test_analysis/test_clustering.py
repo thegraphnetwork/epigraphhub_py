@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import plotly
 import pytest
-
+import matplotlib 
 from epigraphhub.analysis import clustering
 
 
@@ -56,7 +56,7 @@ def test_compute_clusters(get_df_cases):
     assert inc_canton.empty == False
     assert len(clusters) >= 1
     assert len(all_regions) == len(df["geoRegion"].unique())
-    assert isinstance(fig, plotly.graph_objs._figure.Figure)
+    assert isinstance(fig, matplotlib.figure.Figure)
 
 
 def test_plot_curves(get_df_cases):
