@@ -4,6 +4,6 @@ channels:
   - nodefaults
 dependencies:
   - python 3.9.*
-  - theano-pymc
+  - libblas
   - poetry
   - nodejs
