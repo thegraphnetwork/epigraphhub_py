@@ -11,14 +11,14 @@ jobs:
     concurrency:
       group: ci-${{ github.ref }}
       cancel-in-progress: true
-    
+
     defaults:
       run:
         shell: bash -l {0}
 
     steps:
     - uses: actions/checkout@v2
-    
+
     - uses: conda-incubator/setup-miniconda@v2
       with:
         miniconda-version: "latest"
@@ -43,8 +43,7 @@ jobs:
 
     - name: Run safety checks
       run: |
-        # https://github.com/numpy/numpy/issues/19038
-        make check-safety || true
+        make check-safety
 
     - name: Release
       if: ${{ github.event_name == 'push' }}
