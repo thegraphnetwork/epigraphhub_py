@@ -74,7 +74,7 @@ def rolling_predictions(
     """
 
     # remove the last 3 days to avoid delay in data
-    data = data.iloc[:-3]
+    # data = data.iloc[:-3]
     target = data[target_name]
 
     df_lag = build_lagged_features(copy.deepcopy(data), maxlag=maxlag)
@@ -94,10 +94,7 @@ def rolling_predictions(
     targets = {}
 
     for T in np.arange(1, horizon_forecast + 1, 1):
-        if T == 1:
-            targets[T] = target.shift(-(T - 1))
-        else:
-            targets[T] = target.shift(-(T - 1))[: -(T - 1)]
+        targets[T] = target.shift(-(T))[:-(T)]
 
     X_train, X_test, y_train, y_test = train_test_split(
         df_lag, target, train_size=split, test_size=1 - split, shuffle=False
