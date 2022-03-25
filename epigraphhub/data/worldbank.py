@@ -59,9 +59,9 @@ def get_pop_data(country, time="all", fx_et="5Y"):
 
     df.index = df.index.str.strip(to_strip="YR")
 
-    df["frequency"] = ["yearly"] * len(df)
+    df["frequency"] = "yearly"
 
-    df["country"] = [country] * len(df)
+    df["country"] = country
 
     df.index = pd.to_datetime(df.index, format="%Y")
     return df
@@ -232,7 +232,7 @@ def get_worldbank_data(ind, country, db=2, time="all", columns=None):
 
             df_aux[ind[0].lower().replace(".", "_")] = df[i]
 
-            df_aux["country"] = [i] * len(df_aux)
+            df_aux["country"] = i
 
             df_aux["frequency"] = df["frequency"]
 
