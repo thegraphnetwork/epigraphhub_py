@@ -29,41 +29,70 @@ def get_pop_data(country, time="all", fx_et="5Y"):
 
     fx_et = fx_et.upper()
 
-    if fx_et == "TOTL":
-
-        ind = [
+    ind = {
+        "5Y": [
+            "SP.POP.0004.FE.5Y",
+            "SP.POP.0004.MA.5Y",
+            "SP.POP.0509.FE.5Y",
+            "SP.POP.0509.MA.5Y",
+            "SP.POP.1014.FE.5Y",
+            "SP.POP.1014.MA.5Y",
+            "SP.POP.1519.FE.5Y",
+            "SP.POP.1519.MA.5Y",
+            "SP.POP.2024.FE.5Y",
+            "SP.POP.2024.MA.5Y",
+            "SP.POP.2529.FE.5Y",
+            "SP.POP.2529.MA.5Y",
+            "SP.POP.3034.FE.5Y",
+            "SP.POP.3034.MA.5Y",
+            "SP.POP.3539.FE.5Y",
+            "SP.POP.3539.MA.5Y",
+            "SP.POP.4044.FE.5Y",
+            "SP.POP.4044.MA.5Y",
+            "SP.POP.4549.FE.5Y",
+            "SP.POP.4549.MA.5Y",
+            "SP.POP.5054.FE.5Y",
+            "SP.POP.5054.MA.5Y",
+            "SP.POP.5559.FE.5Y",
+            "SP.POP.5559.MA.5Y",
+            "SP.POP.6064.FE.5Y",
+            "SP.POP.6064.MA.5Y",
+            "SP.POP.6569.FE.5Y",
+            "SP.POP.6569.MA.5Y",
+            "SP.POP.7074.FE.5Y",
+            "SP.POP.7074.MA.5Y",
+            "SP.POP.7579.FE.5Y",
+            "SP.POP.7579.MA.5Y",
+            "SP.POP.80UP.FE.5Y",
+            "SP.POP.80UP.MA.5Y",
+        ],
+        "TOTL": ["SP.POP.TOTL.FE.IN", "SP.POP.TOTL.MA.IN"],
+        "IN": [
+            "SP.POP.0014.FE.IN",
+            "SP.POP.0014.MA.IN",
+            "SP.POP.1564.FE.IN",
+            "SP.POP.1564.MA.IN",
+            "SP.POP.65UP.FE.IN",
+            "SP.POP.65UP.MA.IN",
             "SP.POP.TOTL.FE.IN",
             "SP.POP.TOTL.MA.IN",
-        ]
+        ],
+    }
 
-    else:
-        ind = []
-
-        for i in wb.series.list():
-
-            if (i["id"].startswith("SP.POP")) and (i["id"].endswith(fx_et)):
-
-                ind.append(i["id"])
-
-    df = wb.data.DataFrame(series=ind, economy=country, time=time)
+    df = wb.data.DataFrame(series=ind[fx_et], economy=country, db=2, time=time)
 
     df = df.T
 
-    new_cols = []
+    df.index = pd.to_datetime(df.index, format="YR%Y")
 
-    for i in df.columns:
+    df.columns.name = ""
 
-        new_cols.append(((i[3:-3]).lower()).replace(".", "_"))
-
-    df.columns = new_cols
-
-    df.index = df.index.str.strip(to_strip="YR")
+    df.columns = ((df.columns.str.lower()).str.replace(".", "_")).str[3:-3]
 
     df["frequency"] = "yearly"
 
     df["country"] = country
 
-    df.index = pd.to_datetime(df.index, format="%Y")
     return df
 
 
@@ -147,23 +176,15 @@ def get_worldbank_data(ind, country, db=2, time="all", columns=None):
 
     """
 
-    if columns != None:
-
-        if len(columns) == len(ind):
-
-            rename_columns = {}
-
-            for i in np.arange(0, len(ind)):
-                rename_columns[ind[i]] = columns[i]
-
-    else:
-
-        rename_columns = {}
-
     if len(ind) == 1:
 
         df = wb.data.DataFrame(
-            series=ind, economy=country, db=db, index=["time"], labels=True, time=time
+            series=ind[0],
+            economy=country,
+            db=db,
+            index=["time"],
+            labels=True,
+            time=time,
         )
 
         df = df.reset_index()
@@ -171,6 +192,14 @@ def get_worldbank_data(ind, country, db=2, time="all", columns=None):
         del df["time"]
 
         df["Time"] = df["Time"].astype("str")
+
+        df = pd.melt(
+            df,
+            id_vars=["Time"],
+            value_vars=country,
+            var_name="country",
+            value_name=ind[0],
+        )
 
     else:
         df = wb.data.DataFrame(
@@ -182,76 +211,49 @@ def get_worldbank_data(ind, country, db=2, time="all", columns=None):
             time=time,
         )
 
-    if len(rename_columns) != 0:
+    if columns != None:
 
-        df = df.rename(columns=rename_columns)
+        if len(columns) == len(ind):
 
-    new_dates = []
-    periodicity = []
+            rename_columns = dict(zip(ind, columns))
 
-    for i in df["Time"]:
+            df = df.rename(columns=rename_columns)
 
-        if len(i) == 4:
-
-            new_dates.append(f"{i}-01-01")
-            periodicity.append("yearly")
+            df.columns = df.columns.str.lower().str.replace(".", "_")
 
         else:
-
-            if i[4] == "M":
-
-                new_dates.append(f"{i[:4]}-{i[-2:]}-01")
-                periodicity.append("monthly")
-
-            if i[4] == "Q":
-
-                dict_month = {
-                    "Q1": "01-01",
-                    "Q2": "04-01",
-                    "Q3": "07-01",
-                    "Q4": "10-01",
-                }
-
-                new_dates.append(f"{i[:4]}-{dict_month[i[-2:]]}")
-                periodicity.append("quarterly")
-
-    df["dates"] = new_dates
-    df["frequency"] = periodicity
-
-    df.set_index("dates", inplace=True)
-
-    df.index = pd.to_datetime(df.index)
-
-    if len(ind) == 1:
-
-        df_new = pd.DataFrame()
-
-        for i in country:
-
-            df_aux = pd.DataFrame()
-
-            df_aux[ind[0].lower().replace(".", "_")] = df[i]
-
-            df_aux["country"] = i
-
-            df_aux["frequency"] = df["frequency"]
-
-            df_new = pd.concat([df_new, df_aux])
-
-        df_new = df_new.sort_index()
-
-        df_new = df_new.dropna()
+            raise Exception(
+                f"Error. The ind and columns list must have the same length."
+            )
 
     else:
 
-        del df["Time"]
+        df.columns = df.columns.str.lower().str.replace(".", "_")
 
-        df_new = df
+    df["format"] = 1
+    df.loc[df.time.str.contains("Q"), "format"] = 2
+    df.loc[df.time.str.contains("M"), "format"] = 3
+    df.loc[df.time.str.contains("YR"), "format"] = 4
+    df["dates"] = pd.to_datetime(df.time)
 
-        df_new.columns = df_new.columns.str.lower().str.replace(".", "_")
+    # Convert to datetime with two different format settings
+    df.loc[df.format == 2, "dates"] = pd.to_datetime(
+        df.loc[df.format == 3, "time"], format="%YM%m"
+    )
+    df.loc[df.format == 3, "dates"] = pd.to_datetime(
+        df.loc[df.format == 4, "time"], format="YR%Y"
+    )
 
-        df_new.sort_index(inplace=True)
+    df["frequency"] = np.nan
 
-        df_new = df_new.dropna()
+    df.loc[(df.format == 1) | (df.format == 4), "frequency"] = "yearly"
 
-    return df_new
+    df.loc[df.format == 2, "frequency"] = "quarterly"
+
+    df.loc[df.format == 3, "frequency"] = "monthly"
+
+    df.set_index("dates", inplace=True)
+
+    del df["format"]
+
+    return df
