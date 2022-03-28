@@ -29,8 +29,7 @@ from tensorflow.keras.callbacks import EarlyStopping, TensorBoard
 from tensorflow.keras.layers import LSTM, Bidirectional, Dense, Dropout
 from tensorflow.keras.utils import plot_model
 
-from epigraphhub.analysis.clustering import compute_clusters
-from epigraphhub.data.get_data import get_cluster_data, get_updated_data_swiss
+from epigraphhub.data.get_data import get_cluster_data
 from epigraphhub.data.preprocessing import lstm_split_data as split_data
 from epigraphhub.data.preprocessing import normalize_data
 
@@ -297,25 +296,15 @@ def get_data_model(
     split=0.75,
     vaccine=True,
     smooth=True,
-    updated_data=False,
+    ini_date="2020-08-01",
 ):
-    df = get_cluster_data(predictors, list(cluster), vaccine=vaccine, smooth=smooth)
-    # end = time.time()
-    # print(end - start)
-    # filling the nan values with 0
+    df = get_cluster_data(
+        "switzerland", predictors, list(cluster), vaccine=vaccine, smooth=smooth
+    )
+
+    df = df.loc[ini_date:]
+
     df = df.fillna(0)
-
-    # removing the last three days of data to avoid delay in the reporting.
-
-    if f"{target_curve_name}_{canton}" == "hosp_GE":
-        if updated_data:
-            # atualizando a coluna das Hospitalizações com os dados mais atualizados
-            df_new = get_updated_data_swiss(smooth)
-
-            df.loc[df_new.index[0] : df_new.index[-1], "hosp_GE"] = df_new.hosp_GE
-
-            # utilizando como último data a data dos dados atualizados:
-            df = df.loc[: df_new.index[-1]]
 
     X_train, Y_train, X_test, Y_test, factor, indice, X_forecast = transform_data(
         target_curve_name,
@@ -408,9 +397,9 @@ def train_eval_canton(
 
         df_pred["upper"] = df_predicted975[df_predicted975.columns[-1]] * factor
 
-        df_pred["train_size"] = [
-            len(X_train) - (X_train.shape[1] + Y_train.shape[1])
-        ] * len(df_pred)
+        df_pred["train_size"] = len(X_train) - (X_train.shape[1] + Y_train.shape[1])
+
+        df_pred["canton"] = label
 
     else:
         if len(predicted.shape) == 2:
@@ -422,9 +411,9 @@ def train_eval_canton(
 
         df_pred["predict"] = df_predicted[df_predicted.columns[-1]] * factor
 
-        df_pred["train_size"] = [
-            len(X_train) - (Y_train.shape[1] + X_train.shape[1])
-        ] * len(df_pred)
+        df_pred["train_size"] = len(X_train) - (Y_train.shape[1] + X_train.shape[1])
+
+        df_pred["canton"] = label
 
     return df_pred
 
@@ -517,8 +506,7 @@ def train_eval_single_canton(
     vaccine=True,
     smooth=True,
     ini_date="2020-03-01",
-    updated_data=True,
-    uncertainity=True,
+    uncertainty=True,
     save=False,
     hidden=12,
     epochs=100,
@@ -542,26 +530,6 @@ def train_eval_single_canton(
     params path: If none the plot will be save in the directory: images/hosp_{canton}
     """
 
-    # compute the clusters
-    # print('cluster')
-    # start = time.time()
-    clusters = compute_clusters(
-        "switzerland",
-        "cases",
-        ["datum", '"geoRegion"', "entries"],
-        t=0.3,
-        drop_georegions=["CH", "FL", "CHFL"],
-        plot=False,
-    )[1]
-    # end = time.time()
-    # print(end - start)
-
-    for cluster in clusters:
-
-        if canton in cluster:
-
-            cluster_canton = cluster
-
     # getting the data
     # print(cluster_canton)
     # print('get_data')
@@ -570,14 +538,13 @@ def train_eval_single_canton(
     X_train, Y_train, X_test, Y_test, factor, indice, X_forecast = get_data_model(
         target_curve_name,
         canton,
-        cluster_canton,
+        [canton],
         predictors,
         look_back=look_back,
         predict_n=predict_n,
         split=split,
         vaccine=vaccine,
         smooth=smooth,
-        updated_data=updated_data,
     )
 
     model = build_model(
@@ -596,7 +563,7 @@ def train_eval_single_canton(
         batch=1,
         epochs=epochs,
         label=f"{target_curve_name}_{canton}",
-        uncertainty=uncertainity,
+        uncertainty=uncertainty,
         save=save,
     )
 
@@ -610,7 +577,6 @@ def train_eval_all_cantons(
     vaccine=True,
     smooth=True,
     ini_date="2020-03-01",
-    updated_data=True,
     uncertainity=True,
     save=False,
     hidden=12,
@@ -637,62 +603,78 @@ def train_eval_all_cantons(
 
     df_all = pd.DataFrame()
 
-    # compute the clusters
-    clusters = compute_clusters(
-        "switzerland",
-        "cases",
-        ["datum", '"geoRegion"', "entries"],
-        t=0.3,
-        drop_georegions=["CH", "FL", "CHFL"],
-        plot=False,
-    )[1]
+    all_cantons = [
+        "LU",
+        "JU",
+        "AR",
+        "VD",
+        "NE",
+        "FR",
+        "GL",
+        "GR",
+        "SG",
+        "AI",
+        "NW",
+        "ZG",
+        "SH",
+        "GE",
+        "BL",
+        "BE",
+        "BS",
+        "TI",
+        "UR",
+        "AG",
+        "TG",
+        "SZ",
+        "SO",
+        "ZH",
+        "VS",
+        "OW",
+    ]
 
-    for cluster in clusters:
-        # getting the data
-        df = get_cluster_data(predictors, list(cluster), vaccine=vaccine, smooth=smooth)
-        # filling the nan values with 0
+    for canton in all_cantons:
+
+        df = get_cluster_data(predictors, list(canton), vaccine=vaccine, smooth=smooth)
         df = df.fillna(0)
 
-        for canton in cluster:
-            # apply the model
+        (
+            X_train,
+            Y_train,
+            X_test,
+            Y_test,
+            factor,
+            indice,
+            X_forecast,
+        ) = transform_data(
+            target_curve_name,
+            canton,
+            df,
+            look_back=look_back,
+            predict_n=predict_n,
+            split=split,
+        )
 
-            (
-                X_train,
-                Y_train,
-                X_test,
-                Y_test,
-                factor,
-                indice,
-                X_forecast,
-            ) = transform_data(
-                target_curve_name,
-                canton,
-                df,
-                look_back=look_back,
-                predict_n=predict_n,
-                split=split,
-            )
-            model = build_model(
-                hidden, X_train.shape[2], predict_n=predict_n, look_back=look_back
-            )
+        model = build_model(
+            hidden, X_train.shape[2], predict_n=predict_n, look_back=look_back
+        )
 
-            # get predictions
-            df_pred = train_eval_canton(
-                model,
-                X_train,
-                Y_train,
-                X_test,
-                Y_test,
-                factor,
-                indice,
-                batch=1,
-                epochs=epochs,
-                label=f"{target_curve_name}_{canton}",
-                uncertainty=uncertainity,
-                save=save,
-            )
+        # get predictions
+        df_pred = train_eval_canton(
+            model,
+            X_train,
+            Y_train,
+            X_test,
+            Y_test,
+            factor,
+            indice,
+            batch=1,
+            epochs=epochs,
+            label=f"{target_curve_name}_{canton}",
+            uncertainty=uncertainity,
+            save=save,
+        )
 
-            df_all = pd.concat([df_all, df_pred])
+        df_all = pd.concat([df_all, df_pred])
 
     return df_all
 
@@ -704,7 +686,6 @@ def train_single_canton(
     vaccine=True,
     smooth=True,
     ini_date="2020-03-01",
-    updated_data=True,
     uncertainity=True,
     save=False,
     path=None,
@@ -730,33 +711,16 @@ def train_single_canton(
     params path: If none the plot will be save in the directory: images/hosp_{canton}
     """
 
-    # compute the clusters
-    clusters = compute_clusters(
-        "switzerland",
-        "cases",
-        ["datum", '"geoRegion"', "entries"],
-        t=0.3,
-        drop_georegions=["CH", "FL", "CHFL"],
-        plot=False,
-    )[1]
-
-    for cluster in clusters:
-
-        if canton in cluster:
-
-            cluster_canton = cluster
-
     X_train, Y_train, X_test, Y_test, factor, indice, X_forecast = get_data_model(
         target_curve_name,
         canton,
-        cluster_canton,
+        [canton],
         predictors,
         look_back=look_back,
         predict_n=predict_n,
         split=1,
         vaccine=vaccine,
         smooth=smooth,
-        updated_data=updated_data,
     )
 
     model = build_model(
@@ -784,7 +748,6 @@ def train_all_cantons(
     vaccine=True,
     smooth=True,
     ini_date="2020-03-01",
-    updated_data=True,
     uncertainity=True,
     save=False,
     path=None,
@@ -808,56 +771,73 @@ def train_all_cantons(
     returns: Dataframe with the forecast for all the cantons
     """
 
-    # compute the clusters
-    clusters = compute_clusters(
-        "switzerland",
-        "cases",
-        ["datum", '"geoRegion"', "entries"],
-        t=0.3,
-        drop_georegions=["CH", "FL", "CHFL"],
-        plot=False,
-    )[1]
+    all_cantons = [
+        "LU",
+        "JU",
+        "AR",
+        "VD",
+        "NE",
+        "FR",
+        "GL",
+        "GR",
+        "SG",
+        "AI",
+        "NW",
+        "ZG",
+        "SH",
+        "GE",
+        "BL",
+        "BE",
+        "BS",
+        "TI",
+        "UR",
+        "AG",
+        "TG",
+        "SZ",
+        "SO",
+        "ZH",
+        "VS",
+        "OW",
+    ]
 
-    for cluster in clusters:
+    for canton in all_cantons:
 
-        df = get_cluster_data(predictors, list(cluster), vaccine=vaccine, smooth=smooth)
+        df = get_cluster_data(predictors, list(canton), vaccine=vaccine, smooth=smooth)
         # filling the nan values with 0
         df = df.fillna(0)
 
-        for canton in cluster:
+        (
+            X_train,
+            Y_train,
+            X_test,
+            Y_test,
+            factor,
+            indice,
+            X_forecast,
+        ) = transform_data(
+            target_curve_name,
+            canton,
+            df,
+            look_back=look_back,
+            predict_n=predict_n,
+            split=1,
+        )
 
-            (
-                X_train,
-                Y_train,
-                X_test,
-                Y_test,
-                factor,
-                indice,
-                X_forecast,
-            ) = transform_data(
-                target_curve_name,
-                canton,
-                df,
-                look_back=look_back,
-                predict_n=predict_n,
-                split=1,
-            )
+        # train the models and save in the server
+        model = build_model(
+            hidden, X_train.shape[2], predict_n=predict_n, look_back=look_back
+        )
 
-            # train the models and save in the server
-            model = build_model(
-                hidden, X_train.shape[2], predict_n=predict_n, look_back=look_back
-            )
-
-            training_canton(
-                model,
-                X_train,
-                Y_train,
-                batch=1,
-                epochs=epochs,
-                path=path,
-                label=canton,
-                save=True,
-            )
+        training_canton(
+            model,
+            X_train,
+            Y_train,
+            batch=1,
+            epochs=epochs,
+            path=path,
+            label=canton,
+            save=True,
+        )
 
     return
 
@@ -871,7 +851,6 @@ def forecast_single_canton(
     vaccine=True,
     smooth=True,
     ini_date="2020-03-01",
-    updated_data=True,
     uncertainity=True,
     save=False,
     path=None,
@@ -879,33 +858,16 @@ def forecast_single_canton(
     predict_n=14,
 ):
 
-    # compute the clusters
-    clusters = compute_clusters(
-        "switzerland",
-        "cases",
-        ["datum", '"geoRegion"', "entries"],
-        t=0.3,
-        drop_georegions=["CH", "FL", "CHFL"],
-        plot=False,
-    )[1]
-
-    for cluster in clusters:
-
-        if canton in cluster:
-
-            cluster_canton = cluster
-
     X_train, Y_train, X_test, Y_test, factor, indice, X_forecast = get_data_model(
         target_curve_name,
         canton,
-        cluster_canton,
+        [canton],
         predictors,
         look_back=look_back,
         predict_n=predict_n,
         split=1,
         vaccine=vaccine,
         smooth=smooth,
-        updated_data=updated_data,
     )
 
     df_for = forecasting_canton(
@@ -923,7 +885,6 @@ def forecast_all_cantons(
     vaccine=True,
     smooth=True,
     ini_date="2020-03-01",
-    updated_data=True,
     uncertainity=True,
     save=False,
     path=None,
@@ -947,48 +908,63 @@ def forecast_all_cantons(
     """
     df_all = pd.DataFrame()
 
-    # compute the clusters
-    clusters = compute_clusters(
-        "switzerland",
-        "cases",
-        ["datum", '"geoRegion"', "entries"],
-        t=0.3,
-        drop_georegions=["CH", "FL", "CHFL"],
-        plot=False,
-    )[1]
+    all_cantons = [
+        "LU",
+        "JU",
+        "AR",
+        "VD",
+        "NE",
+        "FR",
+        "GL",
+        "GR",
+        "SG",
+        "AI",
+        "NW",
+        "ZG",
+        "SH",
+        "GE",
+        "BL",
+        "BE",
+        "BS",
+        "TI",
+        "UR",
+        "AG",
+        "TG",
+        "SZ",
+        "SO",
+        "ZH",
+        "VS",
+        "OW",
+    ]
 
-    for cluster in clusters:
+    for canton in all_cantons:
 
-        df = get_cluster_data(predictors, list(cluster), vaccine=vaccine, smooth=smooth)
+        df = get_cluster_data(predictors, list(canton), vaccine=vaccine, smooth=smooth)
         # filling the nan values with 0
         df = df.fillna(0)
 
-        for canton in cluster:
+        (
+            X_train,
+            Y_train,
+            X_test,
+            Y_test,
+            factor,
+            indice,
+            X_forecast,
+        ) = transform_data(
+            target_curve_name,
+            canton,
+            df,
+            look_back=look_back,
+            predict_n=predict_n,
+            split=1,
+        )
 
-            # apply the model
+        # get predictions and forecast
+        df_for = forecasting_canton(
+            canton, epochs, X_forecast, factor, indice, path=None, uncertainty=True
+        )
 
-            (
-                X_train,
-                Y_train,
-                X_test,
-                Y_test,
-                factor,
-                indice,
-                X_forecast,
-            ) = transform_data(
-                target_curve_name,
-                canton,
-                df,
-                look_back=look_back,
-                predict_n=predict_n,
-                split=1,
-            )
-
-            # get predictions and forecast
-            df_for = forecasting_canton(
-                canton, epochs, X_forecast, factor, indice, path=None, uncertainty=True
-            )
-
-            df_all = pd.concat([df_all, df_for])
+        df_all = pd.concat([df_all, df_for])
 
     return df_all

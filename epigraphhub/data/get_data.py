@@ -72,7 +72,7 @@ def get_agg_data(schema, table_name, columns, method, ini_date):
     return df
 
 
-def get_georegion_data(schema, table_name, georegion, columns):
+def get_georegion_data(schema, table_name, georegion, columns, georegion_column):
     """
     This function provides a data frame for the table selected in the param table_name and
     the chosen regions in the param georegion.
@@ -87,6 +87,8 @@ def get_georegion_data(schema, table_name, georegion, columns):
 
     :params columns: list of strings| None. Columns that you want to select from the table table_name. If None all the columns will be returned.
 
+    :params georegion_column: string. Name of the column to filter by georegion name.
+
     :return: Dataframe
     """
 
@@ -97,19 +99,19 @@ def get_georegion_data(schema, table_name, georegion, columns):
 
     accepted_tables = {
         "switzerland": [
-            "foph_cases",
-            "foph_casesVaccPersons",
-            "foph_covidCertificates",
-            "foph_death",
-            "foph_deathVaccPersons",
-            "foph_hosp",
-            "foph_hospcapacity",
-            "foph_hospVaccPersons",
-            "foph_intCases",
-            "foph_re",
-            "foph_test",
-            "foph_testPcrAntigen",
-            "foph_virusVariantsWgs",
+            "foph_cases_d",
+            "foph_casesvaccpersons_d",
+            "foph_covidcertificates_d",
+            "foph_death_d",
+            "foph_deathvaccpersons_d",
+            "foph_hosp_d",
+            "foph_hospcapacity_d",
+            "foph_hospvaccpersons_d",
+            "foph_intcases_d",
+            "foph_re_d",
+            "foph_test_d",
+            "foph_testpcrantigen_d",
+            "foph_virusvariantswgs_d",
         ],
         "colombia": ["casos_positivos_covid"],
     }
@@ -134,25 +136,26 @@ def get_georegion_data(schema, table_name, georegion, columns):
         )
 
     if columns == None:
-        columns = "*"
+        s_columns = "*"
 
-    # separe the columns by comma to apply in the sql query
-    s_columns = ""
-    for i in columns:
+    else:
+        # separe the columns by comma to apply in the sql query
+        s_columns = ""
+        for i in columns:
 
-        s_columns = s_columns + i + ","
+            s_columns = s_columns + i + ","
 
-    s_columns = s_columns[:-1]
+        s_columns = s_columns[:-1]
 
     if georegion == "All":
         query = f"select {s_columns} from {schema}.{table_name}"
 
     if len(georegion) == 1:
-        query = f"select {s_columns}  from {schema}.{table_name} where \"{columns[1][1:-1]}\" = '{georegion[0]}' ;"
+        query = f"select {s_columns}  from {schema}.{table_name} where {georegion_column} = '{georegion[0]}' ;"
 
     if len(georegion) > 1 and type(georegion) == list:
         georegion_tuple = tuple(i for i in georegion)
-        query = f'select {s_columns} from {schema}.{table_name} where "{columns[1][1:-1]}" in {georegion_tuple} ;'
+        query = f'select {s_columns} from {schema}.{table_name} where "{georegion_column}" in {georegion_tuple} ;'
 
     df = pd.read_sql(query, engine_public)
 
@@ -160,33 +163,40 @@ def get_georegion_data(schema, table_name, georegion, columns):
 
 
 dict_cols = {
-    "foph_cases": ["datum", '"geoRegion"', "entries"],
-    "foph_test": ["datum", '"geoRegion"', "entries", "entries_pos"],
-    "foph_hosp": ["datum", '"geoRegion"', "entries"],
-    "foph_hospcapacity": [
+    "foph_cases_d": ["datum", '"georegion"', "entries"],
+    "foph_test_d": ["datum", '"georegion"', "entries", "entries_pos"],
+    "foph_hosp_d": ["datum", '"georegion"', "entries"],
+    "foph_hospcapacity_d": [
         "date",
-        '"geoRegion"',
-        '"ICU_Covid19Patients"',
-        '"Total_Covid19Patients"',
+        '"georegion"',
+        '"icu_covid19patients"',
+        '"total_covid19patients"',
     ],
-    "foph_re": ["date", "geoRegion", "median_R_mean"],
+    "foph_re_d": ["date", "georegion", "median_r_mean"],
+}
+
+georegion_columns = {
+    "foph_cases_d": "georegion",
+    "foph_test_d": "georegion",
+    "foph_hosp_d": "georegion",
+    "foph_hospcapacity_d": "georegion",
 }
 
 date_columns = {
-    "foph_cases": "datum",
-    "foph_test": "datum",
-    "foph_hosp": "datum",
-    "foph_hospcapacity": "date",
+    "foph_cases_d": "datum",
+    "foph_test_d": "datum",
+    "foph_hosp_d": "datum",
+    "foph_hospcapacity_d": "date",
 }
 
 count_columns = {
-    "foph_cases": ["entries"],
-    "foph_test": ["entries"],
-    "foph_hosp": ["entries"],
-    "foph_hospcapacity": ["ICU_Covid19Patients", "Total_Covid19Patients"],
+    "foph_cases_d": ["entries"],
+    "foph_test_d": ["entries"],
+    "foph_hosp_d": ["entries"],
+    "foph_hospcapacity_d": ["icu_covid19patients", "total_covid19patients"],
 }
 
-columns_name = {"foph_cases": "cases", "foph_test": "test", "foph_hosp": "hosp"}
+columns_name = {"foph_cases_d": "cases", "foph_test_d": "test", "foph_hosp_d": "hosp"}
 
 
 def get_cluster_data(
@@ -195,6 +205,7 @@ def get_cluster_data(
     georegion,
     dict_cols=dict_cols,
     date_columns=date_columns,
+    georegion_columns=georegion_columns,
     count_columns=count_columns,
     columns_name=columns_name,
     vaccine=True,
@@ -242,21 +253,27 @@ def get_cluster_data(
 
     for table in table_name:
 
-        df = get_georegion_data(schema, table, georegion, dict_cols[table])
+        df = get_georegion_data(
+            schema,
+            table,
+            georegion,
+            dict_cols[table],
+            georegion_column=georegion_columns[table],
+        )
         df.set_index(date_columns[table], inplace=True)
         df.index = pd.to_datetime(df.index)
 
-        for region in df.geoRegion.unique():
+        for region in df.georegion.unique():
 
             for count in count_columns[table]:
 
-                if table == "foph_hospcapacity":
+                if table == "foph_hospcapacity_d":
 
                     names = {
-                        "ICU_Covid19Patients": "ICU_patients",
-                        "Total_Covid19Patients": "total_hosp",
+                        "icu_covid19patients": "icu_patients",
+                        "total_covid19patients": "total_hosp",
                     }
-                    df_aux1 = df.loc[df.geoRegion == region].resample("D").mean()
+                    df_aux1 = df.loc[df.georegion == region].resample("D").mean()
 
                     df_aux2 = pd.DataFrame()
 
@@ -267,7 +284,7 @@ def get_cluster_data(
                     df_end = pd.concat([df_end, df_aux2], axis=1)
 
                 else:
-                    df_aux1 = df.loc[df.geoRegion == region].resample("D").mean()
+                    df_aux1 = df.loc[df.georegion == region].resample("D").mean()
 
                     df_aux2 = pd.DataFrame()
 
@@ -313,34 +330,3 @@ def get_cluster_data(
         df_end = df_end.dropna()
 
     return df_end
-
-
-def get_updated_data_swiss(smooth=True):
-
-    """
-    Function to get the updated data for Geneva
-
-    :params smooth: Boolean. If True, a rolling average is applied
-
-    :return: Dataframe.
-    """
-
-    df = pd.read_sql_table(
-        "hug_hosp_data",
-        engine_private,
-        schema="switzerland",
-        columns=["Date_Entry", "Patient_id"],
-    )
-
-    df.index = pd.to_datetime(df.Date_Entry)
-    df_hosp = df.resample("D").count()
-    df_hosp = df_hosp[["Patient_id"]]
-
-    if smooth == True:
-        df_hosp = df_hosp[["Patient_id"]].rolling(window=7).mean()
-        df_hosp = df_hosp.dropna()
-
-    df_hosp = df_hosp.sort_index()
-    df_hosp.rename(columns={"Patient_id": "hosp_GE"}, inplace=True)
-
-    return df_hosp.loc[df_hosp.index >= "2021-09-01"]
