@@ -24,4 +24,3 @@ def upload_geotiff(geotiff_file_name, table_name, schema, db):
     """
     eng = get_engine(db=db)
     xds = rioxarray.open_rasterio(geotiff_file_name)
-

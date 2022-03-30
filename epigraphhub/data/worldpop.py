@@ -1,6 +1,7 @@
-import requests as rq
 import json
+
 import pandas as pd
+import requests as rq
 
 
 def json_get(url):
@@ -9,11 +10,11 @@ def json_get(url):
 
 
 class WorldPop:
-    api_root = 'https://www.worldpop.org/rest/data'
+    api_root = "https://www.worldpop.org/rest/data"
 
     def __init__(self):
         self._datasets = None
-        self.aliases = [d['alias'] for d in self.datasets['data']]
+        self.aliases = [d["alias"] for d in self.datasets["data"]]
 
     @property
     def datasets(self):
@@ -22,7 +23,7 @@ class WorldPop:
         return self._datasets
 
     def __str__(self):
-        df = pd.DataFrame(self.datasets['data'])
+        df = pd.DataFrame(self.datasets["data"])
         return df.to_markdown()
 
     def get_dataset_tables(self, alias):
@@ -34,9 +35,11 @@ class WorldPop:
         if alias not in self.aliases:
             raise NameError(f"'{alias}' is invalid dataset alias")
 
-        alias_url = self.api_root + f'/{alias}'
+        alias_url = self.api_root + f"/{alias}"
         content = json_get(alias_url)
-        for ds in content['data']:
-            table = json_get(alias_url + f"/{ds['alias']}")['data']
-            df = pd.DataFrame(table, )
-            yield {'alias': ds['alias'], 'name': ds['name'], 'data': df}
+        for ds in content["data"]:
+            table = json_get(alias_url + f"/{ds['alias']}")["data"]
+            df = pd.DataFrame(
+                table,
+            )
+            yield {"alias": ds["alias"], "name": ds["name"], "data": df}
