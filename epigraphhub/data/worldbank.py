@@ -132,7 +132,8 @@ def search_in_indicators(keyword, db=2):
     """
     Returns a dataframe with the indicators matched by partial name.
 
-    :params keyword: string. keyword to search in the indicators name.
+    :params keyword: string|None. keyword to search in the indicators name. If None,
+                    all the indicators available will be returned.
     :params db:int. Number associated with the database whose you want to get the list
                     of indicators. You can discover this number in the function 'search_in
                     _database'. By default the indicators are search over the World Development
@@ -189,17 +190,19 @@ def get_worldbank_data(ind, country, db=2, time="all", columns=None):
 
         df = df.reset_index()
 
-        del df["time"]
-
-        df["Time"] = df["Time"].astype("str")
+        df["time"] = df["time"].astype("str")
 
         df = pd.melt(
             df,
-            id_vars=["Time"],
+            id_vars=["time"],
             value_vars=country,
             var_name="country",
             value_name=ind[0],
         )
+
+        n_columns = ["time", "country"] + list(ind)
+
+        df = df[n_columns]
 
     else:
         df = wb.data.DataFrame(
@@ -210,6 +213,14 @@ def get_worldbank_data(ind, country, db=2, time="all", columns=None):
             labels=True,
             time=time,
         )
+
+        df.reset_index(inplace=True)
+
+        df = df.rename(columns={"economy": "country"})
+
+        n_columns = ["time", "country"] + list(ind)
+
+        df = df[n_columns]
 
     if columns != None:
 
@@ -234,13 +245,17 @@ def get_worldbank_data(ind, country, db=2, time="all", columns=None):
     df.loc[df.time.str.contains("Q"), "format"] = 2
     df.loc[df.time.str.contains("M"), "format"] = 3
     df.loc[df.time.str.contains("YR"), "format"] = 4
-    df["dates"] = pd.to_datetime(df.time)
+    df["date"] = np.nan
 
     # Convert to datetime with two different format settings
-    df.loc[df.format == 2, "dates"] = pd.to_datetime(
+    df.loc[df.format == 1, "date"] = pd.to_datetime(df.loc[df.format == 1, "time"])
+
+    df.loc[df.format == 2, "date"] = pd.to_datetime(df.loc[df.format == 2, "time"])
+
+    df.loc[df.format == 3, "date"] = pd.to_datetime(
         df.loc[df.format == 3, "time"], format="%YM%m"
     )
-    df.loc[df.format == 3, "dates"] = pd.to_datetime(
+    df.loc[df.format == 4, "date"] = pd.to_datetime(
         df.loc[df.format == 4, "time"], format="YR%Y"
     )
 
@@ -252,7 +267,9 @@ def get_worldbank_data(ind, country, db=2, time="all", columns=None):
 
     df.loc[df.format == 3, "frequency"] = "monthly"
 
-    df.set_index("dates", inplace=True)
+    df.set_index("date", inplace=True)
+
+    del df["time"]
 
     del df["format"]
 
