@@ -17,3 +17,6 @@ def upload_geo_file(fname, table_name, schema, db):
     gdf.to_postgis(table_name, con=eng, schema=schema, if_exists="replace", index=False)
 
     return
+
+def upload_geotiff():
+    pass
