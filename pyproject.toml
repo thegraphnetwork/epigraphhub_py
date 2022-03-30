@@ -56,6 +56,7 @@ tensorflow = "^2.5.0"
 scikit-learn = "^1.0.2"
 ngboost = {git = "https://github.com/stanfordmlgroup/ngboost", rev = "v0.3.12"}
 rioxarray = "^0.10.2"
+wget = "^3.2"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.2"
