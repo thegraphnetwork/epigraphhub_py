@@ -57,6 +57,8 @@ scikit-learn = "^1.0.2"
 ngboost = {git = "https://github.com/stanfordmlgroup/ngboost", rev = "v0.3.12"}
 rioxarray = "^0.10.2"
 wget = "^3.2"
+requests = "^2.27.1"
+tabulate = "^0.8.9"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.2"
