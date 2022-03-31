@@ -35,9 +35,9 @@ params_model = {
     "natural_gradient": True,
     "verbose": False,
     "col_sample": 0.9,
-    "n_estimators": 300,
+    "n_estimators": 30,
     "learning_rate": 0.1,
-    "validation_fraction": 0.25,
+    "validation_fraction": 0.15,
     "early_stopping_rounds": 50,
 }
 
@@ -74,7 +74,7 @@ def rolling_predictions(
     """
 
     # remove the last 3 days to avoid delay in data
-    data = data.iloc[:-3]
+    # data = data.iloc[:-3]
     target = data[target_name]
 
     df_lag = build_lagged_features(copy.deepcopy(data), maxlag=maxlag)
@@ -94,10 +94,7 @@ def rolling_predictions(
     targets = {}
 
     for T in np.arange(1, horizon_forecast + 1, 1):
-        if T == 1:
-            targets[T] = target.shift(-(T - 1))
-        else:
-            targets[T] = target.shift(-(T - 1))[: -(T - 1)]
+        targets[T] = target.shift(-(T))[:-(T)]
 
     X_train, X_test, y_train, y_test = train_test_split(
         df_lag, target, train_size=split, test_size=1 - split, shuffle=False
@@ -171,7 +168,7 @@ def rolling_predictions(
             y95 = y95[: len(y95) + dif]
 
         df_pred = pd.DataFrame()
-        df_pred["target"] = target[1:]
+        df_pred["target"] = target
         df_pred["date"] = x
         df_pred["lower"] = y5
         df_pred["median"] = y50
@@ -187,7 +184,7 @@ def rolling_predictions(
         x = np.array(x)
 
         df_pred = pd.DataFrame()
-        df_pred["target"] = target[1:]
+        df_pred["target"] = target
         df_pred["date"] = x
         df_pred["lower"] = [0.0] * len(df_pred)
         df_pred["median"] = [0.0] * len(df_pred)
