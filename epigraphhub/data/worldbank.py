@@ -4,7 +4,6 @@ import wbgapi as wb
 
 
 def get_pop_data(country, time="all", fx_et="5Y"):
-
     """
     Function to get the population data stratified by age and sex from
     the world bank data
