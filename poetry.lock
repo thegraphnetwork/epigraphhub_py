@@ -2875,7 +2875,7 @@ testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", 
 
 [[package]]
 name = "wbgapi"
-version = "1.1.2"
+version = "1.0.7"
 description = "wbgapi provides a comprehensive interface to the World Bank's data and metadata APIs"
 category = "main"
 optional = false
