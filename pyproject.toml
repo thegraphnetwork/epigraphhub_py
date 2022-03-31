@@ -57,6 +57,7 @@ scikit-learn = "^1.0.2"
 ngboost = {git = "https://github.com/stanfordmlgroup/ngboost", rev = "v0.3.12"}
 wbgapi = "1.0.7"
 
+
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.2"
 black = {version = "^22.1", allow-prereleases = true}
