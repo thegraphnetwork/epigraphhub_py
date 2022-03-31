@@ -4,12 +4,19 @@ import pandas as pd
 import requests as rq
 
 
-def json_get(url):
-    response = rq.get(url)
+def json_get(url, pars=None):
+    if pars:
+        response = rq.get(url, params=pars)
+    else:
+        response = rq.get(url)
     return response.json()
 
 
 class WorldPop:
+    """
+    Class to Consume the WorldPop REST API
+    """
+
     api_root = "https://www.worldpop.org/rest/data"
 
     def __init__(self):
@@ -22,13 +29,13 @@ class WorldPop:
             self._datasets = json_get(self.api_root)
         return self._datasets
 
-    def __str__(self):
+    def __repr__(self):
         df = pd.DataFrame(self.datasets["data"])
-        return df.to_markdown()
+        return df.to_markdown(index=False)
 
     def get_dataset_tables(self, alias):
         """
-        Generator function that returns dictionarys containing on dataframe and metadata at a time
+        Generator function that returns dictionaries containing on dataframe and metadata at a time
         Args:
             alias: alias for the dataset of interest
         """
@@ -43,3 +50,7 @@ class WorldPop:
                 table,
             )
             yield {"alias": ds["alias"], "name": ds["name"], "data": df}
+
+    def get_data_by_country(self, alias, level, ISO3_code="BRA"):
+        content = json_get(self.api_root + f"/{alias}/{level}", {"iso3": ISO3_code})
+        return content
