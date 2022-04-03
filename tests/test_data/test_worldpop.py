@@ -1,7 +1,13 @@
 import pandas as pd
 import pytest
 
-from epigraphhub.data.worldpop import WorldPop
+from epigraphhub.data.worldpop import WorldPop, json_get
+
+
+def test_get_root():
+    res = json_get("https://www.worldpop.org/rest/data")
+    assert "data" in res
+    assert isinstance(res, dict)
 
 
 def test_list_datasets():

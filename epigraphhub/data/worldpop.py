@@ -1,10 +1,10 @@
-import json
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import pandas as pd
 import requests as rq
 
 
-def json_get(url, pars=None):
+def json_get(url: str, pars: dict[str, Any] = {}) -> dict[str, Any]:
     if pars:
         response = rq.get(url, params=pars)
     else:
@@ -17,23 +17,23 @@ class WorldPop:
     Class to Consume the WorldPop REST API
     """
 
-    api_root = "https://www.worldpop.org/rest/data"
+    api_root: str = "https://www.worldpop.org/rest/data"
 
     def __init__(self):
-        self._datasets = None
-        self.aliases = [d["alias"] for d in self.datasets["data"]]
+        self._datasets: dict[str, Any] = {}
+        self.aliases: list[str] = [d["alias"] for d in self.datasets["data"]]
 
     @property
     def datasets(self):
-        if self._datasets is None:
+        if not self._datasets:
             self._datasets = json_get(self.api_root)
         return self._datasets
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         df = pd.DataFrame(self.datasets["data"])
         return df.to_markdown(index=False)
 
-    def get_dataset_tables(self, alias):
+    def get_dataset_tables(self, alias: str) -> dict[str, Union[str, pd.DataFrame]]:
         """
         Generator function that returns dictionaries containing on dataframe and metadata at a time
         Args:
@@ -51,6 +51,18 @@ class WorldPop:
             )
             yield {"alias": ds["alias"], "name": ds["name"], "data": df}
 
-    def get_data_by_country(self, alias, level, ISO3_code="BRA"):
+    def get_data_by_country(
+        self, alias: str, level: str, ISO3_code: str = "BRA"
+    ) -> dict[str, Any]:
+        """
+        Returns Country specific dataset metadata from given `alias` and `level`
+        Args:
+            alias: Top level category of data
+            level: 2nd level catagory of data
+            ISO3_code: 3-letter country code.
+
+        Returns: dictionary
+
+        """
         content = json_get(self.api_root + f"/{alias}/{level}", {"iso3": ISO3_code})
         return content
