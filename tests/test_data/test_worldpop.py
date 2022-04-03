@@ -14,7 +14,7 @@ def test_list_datasets():
     WP = WorldPop()
     ds = WP.datasets
     assert isinstance(ds, dict)
-    assert len(WP.aliases) > 0
+    assert len(WP._aliases) > 0
 
 
 def test_print():

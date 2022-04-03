@@ -1,5 +1,5 @@
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
-
+from collections import defaultdict
 import pandas as pd
 import requests as rq
 
@@ -21,7 +21,8 @@ class WorldPop:
 
     def __init__(self):
         self._datasets: dict[str, Any] = {}
-        self.aliases: list[str] = [d["alias"] for d in self.datasets["data"]]
+        self._aliases: list[str] = [d["alias"] for d in self.datasets["data"]]
+        self._levels: Dict[str, str] = defaultdict(lambda: [])
 
     @property
     def datasets(self):
@@ -39,12 +40,13 @@ class WorldPop:
         Args:
             alias: alias for the dataset of interest
         """
-        if alias not in self.aliases:
+        if alias not in self._aliases:
             raise NameError(f"'{alias}' is invalid dataset alias")
 
         alias_url = self.api_root + f"/{alias}"
         content = json_get(alias_url)
         for ds in content["data"]:
+            self._levels[alias].append(ds['alias'])
             table = json_get(alias_url + f"/{ds['alias']}")["data"]
             df = pd.DataFrame(
                 table,
@@ -64,5 +66,7 @@ class WorldPop:
         Returns: dictionary
 
         """
+        if alias not in self._aliases:
+            raise NameError(f"'{alias}' is invalid dataset alias")
         content = json_get(self.api_root + f"/{alias}/{level}", {"iso3": ISO3_code})
         return content
