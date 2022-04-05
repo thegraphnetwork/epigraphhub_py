@@ -1,5 +1,3 @@
-from typing import Dict
-
 try:
     from typing import ParamSpecKwargs
 except ImportError:
