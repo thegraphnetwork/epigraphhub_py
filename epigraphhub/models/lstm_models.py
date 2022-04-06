@@ -304,6 +304,16 @@ def get_data_model(
 
     df = df.loc[ini_date:]
 
+    if target_curve_name != "hosp":
+
+        for i in df.columns:
+
+            if i.startswith("diff") and (
+                i.endswith(f"{target_curve_name}_{canton}") == False
+            ):
+
+                del df[i]
+
     df = df.fillna(0)
 
     X_train, Y_train, X_test, Y_test, factor, indice, X_forecast = transform_data(
