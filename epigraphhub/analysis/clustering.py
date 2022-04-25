@@ -82,7 +82,7 @@ def compute_clusters(
     :param t: float. Represent the value used to compute the distance between the clusters
                     and so decide the number of clusters returned.
 
-    :param drop_georegions: list. Param with the georegions that wiil be ignored in the
+    :param drop_georegions: list. Param with the georegions that will be ignored in the
                                 clusterization.
 
     :param smooth: Boolean. If true a rooling average of seven days will be applied to

@@ -1,8 +1,11 @@
-#!/usr/bin/env python3
 """
-Created on Mon Jan 31 16:20:05 2022
-
-@author: eduardoaraujo
+The functions in this module allow the application of a
+LSTM (Long short-term memory) model for time series. There are separate 
+functions to train and evaluate (separate the data in train and test 
+datasets), train with all the data available, and make
+forecasts. Also, there are functions focused in apply this model 
+in the Switzerland data for just one 
+canton or all the cantons of Switzerland. 
 """
 
 import pickle
@@ -13,10 +16,6 @@ import numpy as np
 import pandas as pd
 import tensorflow.keras as keras
 from matplotlib import pyplot as plt
-
-# import math
-# import os
-# import shap
 from sklearn.metrics import (
     explained_variance_score,
     mean_absolute_error,
@@ -39,6 +38,7 @@ def build_model(hidden, features, predict_n, look_back=10, batch_size=1):
     Builds and returns the LSTM model with the parameters given
     :param hidden: number of hidden nodes
     :param features: number of variables in the example table
+    :param predict_n: number of days that will be predicted
     :param look_back: Number of time-steps to look back before predicting
     :param batch_size: batch size for batch training
     :return:
@@ -48,23 +48,22 @@ def build_model(hidden, features, predict_n, look_back=10, batch_size=1):
         shape=(look_back, features),
         # batch_shape=(batch_size, look_back, features)
     )
-    x = Bidirectional(
-        LSTM(
-            hidden,
-            input_shape=(look_back, features),
-            stateful=False,
-            kernel_initializer="he_uniform",
-            batch_input_shape=(batch_size, look_back, features),
-            return_sequences=True,
-            activation="relu",
-            dropout=0.1,
-            recurrent_dropout=0.1,
-            implementation=2,
-            unit_forget_bias=True,
-        ),
-        merge_mode="ave",
+    x = LSTM(
+        hidden,
+        input_shape=(look_back, features),
+        stateful=False,
+        kernel_initializer="he_uniform",
+        batch_input_shape=(batch_size, look_back, features),
+        return_sequences=True,
+        activation="relu",
+        dropout=0.1,
+        recurrent_dropout=0.1,
+        implementation=2,
+        unit_forget_bias=True,
     )(inp, training=True)
+
     x = Dropout(0.2)(x, training=True)
+
     x = Bidirectional(
         LSTM(
             hidden,
@@ -81,23 +80,22 @@ def build_model(hidden, features, predict_n, look_back=10, batch_size=1):
         ),
         merge_mode="ave",
     )(x, training=True)
+
     x = Dropout(0.2)(x, training=True)
-    x = Bidirectional(
-        LSTM(
-            hidden,
-            input_shape=(look_back, features),
-            kernel_initializer="he_uniform",
-            stateful=False,
-            batch_input_shape=(batch_size, look_back, features),
-            # return_sequences=True,
-            activation="relu",
-            dropout=0.1,
-            recurrent_dropout=0.1,
-            implementation=2,
-            unit_forget_bias=True,
-        ),
-        merge_mode="ave",
+
+    x = LSTM(
+        hidden,
+        input_shape=(look_back, features),
+        kernel_initializer="he_uniform",
+        stateful=False,
+        batch_input_shape=(batch_size, look_back, features),
+        activation="relu",
+        dropout=0.1,
+        recurrent_dropout=0.1,
+        implementation=2,
+        unit_forget_bias=True,
     )(x, training=True)
+
     x = Dropout(0.2)(x, training=True)
     out = Dense(
         predict_n,
@@ -105,10 +103,13 @@ def build_model(hidden, features, predict_n, look_back=10, batch_size=1):
         kernel_initializer="he_uniform",
         bias_initializer="zeros",
     )(x)
+
     model = keras.Model(inp, out)
 
     start = time()
-    model.compile(loss="msle", optimizer="adam", metrics=["accuracy", "mape", "mse"])
+    model.compile(
+        loss="msle", optimizer="adam", metrics=["accuracy", "mape", "mse", "msle"]
+    )
     print("Compilation Time : ", time() - start)
     plot_model(model, to_file="LSTM_model.png")
     print(model.summary())
@@ -116,8 +117,23 @@ def build_model(hidden, features, predict_n, look_back=10, batch_size=1):
 
 
 def train(
-    model, X_train, Y_train, batch_size=1, epochs=10, path=None, label="GE", save=False
+    model, X_train, Y_train, batch_size=1, epochs=10, save=False, path=None, label="GE"
 ):
+    """
+    traia a LSTM model
+    :param model: LSTM model
+    :param X_train: array with the features to train the model
+    :param Y_train: array with the targets to train the model
+    :param batch_size: batch size for batch training
+    :param epochs: int. Number of epochs to train the model
+    :param save: boolean. Indicates if the history of the model will be save or not
+    :param path: string. Indicates the path where the history of the model will be saved
+    :param label: string. String used to name the .pkl file with the
+                        history of the model. The file is named following: `history_{label}.pkl`
+
+
+    :return: model trained
+    """
 
     TB_callback = TensorBoard(
         log_dir="./tensorboard",
@@ -140,10 +156,10 @@ def train(
 
     if save:
         if path is None:
-            with open("f'history_{label}.pkl", "wb") as f:
+            with open(f"history_{label}.pkl", "wb") as f:
                 pickle.dump(hist.history, f)
         else:
-            with open("f'{path}/history_{label}.pkl", "wb") as f:
+            with open(f"{path}/history_{label}.pkl", "wb") as f:
                 pickle.dump(hist.history, f)
 
     return hist
@@ -165,93 +181,17 @@ def plot_training_history(hist):
     # P.savefig("{}/LSTM_training_history.png".format(FIG_PATH))
 
 
-def plot_predicted_vs_data(
-    predicted,
-    Ydata,
-    indice,
-    canton,
-    pred_window,
-    factor,
-    split_point=None,
-    uncertainty=False,
-):
+def predict(model, Xdata, uncertainty=False):
+    """'
+    Funtion used to make the predictions given a trained model and a array with
+    the same size of the array used to train the model.
+    :param model: trained model.
+    :param Xdata: array.
+    :param uncertainty: boolean. If true, it's returned 100 different predictions that
+                        can be used to compute the confidence interval of the predictions.
+
+    :returns: array.
     """
-    Plot the model's predictions against data
-    :param predicted: model predictions
-    :param Ydata: observed data
-    :param indice:
-    :param label: Name of the locality of the predictions
-    :param pred_window:
-    :param factor: Normalizing factor for the target variable
-    """
-
-    plt.clf()
-    if len(predicted.shape) == 2:
-        df_predicted = pd.DataFrame(predicted)
-    else:
-        df_predicted = pd.DataFrame(np.percentile(predicted, 50, axis=2))
-        df_predicted25 = pd.DataFrame(np.percentile(predicted, 2.5, axis=2))
-        df_predicted975 = pd.DataFrame(np.percentile(predicted, 97.5, axis=2))
-        uncertainty = True
-    ymax = max(predicted.max() * factor, Ydata.max() * factor)
-    plt.vlines(indice[split_point], 0, ymax, "g", "dashdot", lw=2)
-    plt.text(indice[split_point + 2], 0.6 * ymax, "Out of sample Predictions")
-    # plot only the last (furthest) prediction point
-    plt.plot(
-        indice[len(indice) - Ydata.shape[0] :],
-        Ydata[:, -1] * factor,
-        "k-",
-        alpha=0.7,
-        label="data",
-    )
-    plt.plot(
-        indice[len(indice) - Ydata.shape[0] :],
-        df_predicted.iloc[:, -1] * factor,
-        "r-",
-        alpha=0.5,
-        label="median",
-    )
-    if uncertainty:
-        plt.fill_between(
-            indice[len(indice) - Ydata.shape[0] :],
-            df_predicted25[df_predicted25.columns[-1]] * factor,
-            df_predicted975[df_predicted975.columns[-1]] * factor,
-            color="b",
-            alpha=0.3,
-        )
-
-    # plot all predicted points
-    # plt.plot(indice[pred_window:], pd.DataFrame(Ydata)[7] * factor, 'k-')
-    # for n in range(df_predicted.shape[1] - pred_window):
-    #     plt.plot(
-    #         indice[n: n + pred_window],
-    #         pd.DataFrame(Ydata.T)[n] * factor,
-    #         "k-",
-    #         alpha=0.7,
-    #     )
-    #     plt.plot(indice[n: n + pred_window], df_predicted[n] * factor, "r-")
-    #     try:
-    #         plt.vlines(
-    #             indice[n + pred_window],
-    #             0,
-    #             df_predicted[n].values[-1] * factor,
-    #             "b",
-    #             alpha=0.2,
-    #         )
-    #     except IndexError as e:
-    #         print(indice.shape, n, df_predicted.shape)
-    tag = "_unc" if uncertainty else ""
-    plt.grid()
-    plt.title(f"Predictions for {canton}")
-    plt.xlabel("time")
-    plt.ylabel("incidence")
-    plt.xticks(rotation=70)
-    plt.legend(["data", "predicted"])
-    # plt.savefig("lstm_{}{}.png".format(canton, tag), bbox_inches="tight", dpi=300,)
-    plt.show()
-
-
-def predict(model, Xdata, Ydata, uncertainty=False):
     if uncertainty:
         predicted = np.stack([model.predict(Xdata, batch_size=1, verbose=1) for i in range(100)], axis=2)  # type: ignore
     else:
@@ -261,6 +201,14 @@ def predict(model, Xdata, Ydata, uncertainty=False):
 
 
 def calculate_metrics(pred, ytrue, factor):
+    """
+    Function to return a dataframe with some error metrics computed.
+
+    :params pred: array.
+    :params ytrue: array.
+    :params factor: array.
+    :returns: dataframe.
+    """
     metrics = pd.DataFrame(
         index=(
             "mean_absolute_error",
@@ -298,8 +246,24 @@ def get_data_model(
     smooth=True,
     ini_date="2020-08-01",
 ):
+    """
+    Function specific to transform the swiss data in the right format.
+
+    :params target_curve_name: String. string to indicate the target column of the predictions
+    :params canton: string. canton of interest
+    :params cluster: list of strings.  list of other cantons whose data will be used as predictors
+    :params predictors: list of strings. variables that  will be used in model
+    :params lookback: int. Number of the last days that will be used to forecast the next days
+    :params predict_n: int. Number of days that will be predicted
+    :params split: float (0,1). Determines which percentage of the data will be used to train the model
+    :params vaccine: It determines if the vaccine data from owid will be used or not
+    :params smooth: It determines if data will be smoothed (7 day moving average) or not
+    :params ini_date: string. Determines the beggining of the train dataset
+
+    :return: arrays
+    """
     df = get_cluster_data(
-        "switzerland", predictors, list(cluster), vaccine=vaccine, smooth=smooth
+        "switzerland", predictors, cluster, vaccine=vaccine, smooth=smooth
     )
 
     df = df.loc[ini_date:]
@@ -317,8 +281,7 @@ def get_data_model(
     df = df.fillna(0)
 
     X_train, Y_train, X_test, Y_test, factor, indice, X_forecast = transform_data(
-        target_curve_name,
-        canton,
+        f"{target_curve_name}_{canton}",
         df,
         look_back=look_back,
         predict_n=predict_n,
@@ -329,17 +292,29 @@ def get_data_model(
 
 
 def transform_data(
-    target_curve_name,
-    canton,
+    target_name,
     df,
     look_back=21,
     predict_n=14,
     split=0.75,
 ):
+    """
+    Function to transform a data frame with datetime index and features and target
+    values in the columns in the format accepted by a neural network model.
+
+    :params target_name: string. String with the name of the target column
+    :params df: dataframe. Dataframe with features and target column.
+    :params lookback: int. Number of the last days that will be used to forecast the next days
+    :params predict_n: int. Number of days that will be predicted
+    :params split: float (0,1). Determines which percentage of the data will be used to train the model
+
+    :returns: arrays.
+    """
+
     indice = list(df.index)
     indice = [i.date() for i in indice]
 
-    target_col = list(df.columns).index(f"{target_curve_name}_{canton}")
+    target_col = list(df.columns).index(target_name)
 
     norm_data, max_features = normalize_data(df)
     factor = max_features[target_col]
@@ -370,6 +345,26 @@ def train_eval_canton(
     uncertainty=True,
     save=False,
 ):
+    """
+    Function to train an evaluate the model for a single canton
+
+    :params model:
+    :params X_train: array.
+    :params Y_train: array.
+    :params X_test: array.
+    :params Y_test: array.
+    :params factor: array.
+    :params indice: array.
+    :params batch: int.
+    :params epoch: int.
+    :params uncertainty: boolean.
+    :params save: boolean.
+    :params path: string.
+    :params label: string.
+
+    :returns: dataframe
+
+    """
 
     history = train(
         model, X_train, Y_train, batch_size=batch, epochs=epochs, label=label, save=save
@@ -494,6 +489,7 @@ def forecasting_canton(
 
         df_for["upper"] = df_predicted975[df_predicted975.columns[-1]] * factor
 
+        df_for["canton"] = label[-2:]
     else:
         if len(predicted.shape) == 2:
             df_predicted = pd.DataFrame(predicted).T
@@ -501,6 +497,8 @@ def forecasting_canton(
         df_for["date"] = forecast_dates
 
         df_for["predict"] = df_predicted[df_predicted.columns[-1]] * factor
+
+        df_for["canton"] = label[-2:]
 
     return df_for
 
@@ -881,7 +879,7 @@ def forecast_single_canton(
     )
 
     df_for = forecasting_canton(
-        label, epochs, X_forecast, factor, indice, path=None, uncertainty=True
+        label, epochs, X_forecast, factor, indice, path=path, uncertainty=True
     )
 
     return df_for
@@ -978,3 +976,88 @@ def forecast_all_cantons(
         df_all = pd.concat([df_all, df_for])
 
     return df_all
+
+
+def plot_predicted_vs_data(
+    predicted,
+    Ydata,
+    indice,
+    canton,
+    factor,
+    split_point=None,
+    uncertainty=False,
+):
+    """
+    Plot the model's predictions against data
+    :param predicted: model predictions
+    :param Ydata: observed data
+    :param indice:
+    :param label: Name of the locality of the predictions
+    :param pred_window:
+    :param factor: Normalizing factor for the target variable
+    """
+
+    plt.clf()
+    if len(predicted.shape) == 2:
+        df_predicted = pd.DataFrame(predicted)
+    else:
+        df_predicted = pd.DataFrame(np.percentile(predicted, 50, axis=2))
+        df_predicted25 = pd.DataFrame(np.percentile(predicted, 2.5, axis=2))
+        df_predicted975 = pd.DataFrame(np.percentile(predicted, 97.5, axis=2))
+        uncertainty = True
+    ymax = max(predicted.max() * factor, Ydata.max() * factor)
+    plt.vlines(indice[split_point], 0, ymax, "g", "dashdot", lw=2)
+    plt.text(indice[split_point + 2], 0.6 * ymax, "Out of sample Predictions")
+    # plot only the last (furthest) prediction point
+    plt.plot(
+        indice[len(indice) - Ydata.shape[0] :],
+        Ydata[:, -1] * factor,
+        "k-",
+        alpha=0.7,
+        label="data",
+    )
+    plt.plot(
+        indice[len(indice) - Ydata.shape[0] :],
+        df_predicted.iloc[:, -1] * factor,
+        "r-",
+        alpha=0.5,
+        label="median",
+    )
+    if uncertainty:
+        plt.fill_between(
+            indice[len(indice) - Ydata.shape[0] :],
+            df_predicted25[df_predicted25.columns[-1]] * factor,
+            df_predicted975[df_predicted975.columns[-1]] * factor,
+            color="b",
+            alpha=0.3,
+        )
+
+    # plot all predicted points
+    # plt.plot(indice[pred_window:], pd.DataFrame(Ydata)[7] * factor, 'k-')
+    # for n in range(df_predicted.shape[1] - pred_window):
+    #     plt.plot(
+    #         indice[n: n + pred_window],
+    #         pd.DataFrame(Ydata.T)[n] * factor,
+    #         "k-",
+    #         alpha=0.7,
+    #     )
+    #     plt.plot(indice[n: n + pred_window], df_predicted[n] * factor, "r-")
+    #     try:
+    #         plt.vlines(
+    #             indice[n + pred_window],
+    #             0,
+    #             df_predicted[n].values[-1] * factor,
+    #             "b",
+    #             alpha=0.2,
+    #         )
+    #     except IndexError as e:
+    #         print(indice.shape, n, df_predicted.shape)
+    tag = "_unc" if uncertainty else ""
+    plt.grid()
+    plt.title(f"Predictions for {canton}")
+    plt.xlabel("time")
+    plt.ylabel("incidence")
+    plt.xticks(rotation=70)
+    plt.legend(["data", "predicted"])
+    # plt.savefig("lstm_{}{}.png".format(canton, tag), bbox_inches="tight", dpi=300,)
+    plt.show()

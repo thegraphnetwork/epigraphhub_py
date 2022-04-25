@@ -23,9 +23,6 @@ from sqlalchemy import create_engine
 engine_public = create_engine(
     "postgresql://epigraph:epigraph@localhost:5432/epigraphhub"
 )
-engine_private = create_engine(
-    "postgresql://epigraph:epigraph@localhost:5432/privatehub"
-)
 
 
 def get_agg_data(schema, table_name, columns, method, ini_date):
@@ -36,8 +33,7 @@ def get_agg_data(schema, table_name, columns, method, ini_date):
     (e.g. regions name), and the third the column that will be used to compute the
     result of the aggregation.
 
-    :params schema: string. The country that you want to get the data, for now, the
-                    only options are: ['switzerland', 'colombia'].
+    :params schema: string. The schema where the data that you want to get is saved.
 
     :params table_name: string. Name of the table that you want to get the data.
 
@@ -58,11 +54,6 @@ def get_agg_data(schema, table_name, columns, method, ini_date):
     table_name = table_name.lower()
     method = method.upper()
 
-    accepted_countrys = ["switzerland", "colombia"]
-
-    if schema not in accepted_countrys:
-        raise Exception(f"Error. The only countries accepted are: {accepted_countrys}.")
-
     query = f"SELECT {columns[0]}, {columns[1]}, {method}({columns[2]}) FROM {schema}.{table_name} WHERE {columns[0]} > '{ini_date}' GROUP BY ({columns[0]}, {columns[1]})"
 
     df = pd.read_sql(query, engine_public)
@@ -77,8 +68,7 @@ def get_georegion_data(schema, table_name, georegion, columns, georegion_column)
     This function provides a data frame for the table selected in the param table_name and
     the chosen regions in the param georegion.
 
-    ":params schema: string. The country that you want to get the data, for now, the only options are:
-                            ['switzerland', 'colombia'].
+    :params schema: string. The schema where the data that you want to get is saved.
 
     :params table_name: string. Name of the table that you want to get the data.
 
@@ -94,35 +84,6 @@ def get_georegion_data(schema, table_name, georegion, columns, georegion_column)
 
     schema = schema.lower()
     table_name = table_name.lower()
-
-    accepted_countrys = ["switzerland"]
-
-    accepted_tables = {
-        "switzerland": [
-            "foph_cases_d",
-            "foph_casesvaccpersons_d",
-            "foph_covidcertificates_d",
-            "foph_death_d",
-            "foph_deathvaccpersons_d",
-            "foph_hosp_d",
-            "foph_hospcapacity_d",
-            "foph_hospvaccpersons_d",
-            "foph_intcases_d",
-            "foph_re_d",
-            "foph_test_d",
-            "foph_testpcrantigen_d",
-            "foph_virusvariantswgs_d",
-        ],
-        "colombia": ["casos_positivos_covid"],
-    }
-
-    if schema not in accepted_countrys:
-        raise Exception(f"Error. The only countries accepted are: {accepted_countrys}.")
-
-    if table_name not in accepted_tables[schema]:
-        raise Exception(
-            f"Error. The only curves accepted are: {accepted_tables[schema]}."
-        )
 
     if type(georegion) != list and georegion != "All":
         raise Exception(
@@ -216,35 +177,34 @@ def get_cluster_data(
     This function provides a data frame where each column is associated with a table
     and region selected.
 
-    :params schema: string. The country that you want to get the data, for now, the only \
-                    options are: ['switzerland', 'colombia']
+    :params schema: string. The schema where the data that you want to get is saved.
 
-    :params table_name: list of strings. In this list should be all the tables that you 
-                        want get the data. 
+    :params table_name: list of strings. In this list should be all the tables that you
+                        want get the data.
 
-    :params georegion: list of strings. This list contains all the regions of the country 
+    :params georegion: list of strings. This list contains all the regions of the country
                         of interest or the string 'All' to return all the regions.
 
-    :params dict_cols: dictionary. In the keys are the table_names and in the values 
+    :params dict_cols: dictionary. In the keys are the table_names and in the values
                       the columns that you want to use from each table
-    
+
     :params date_columns:dictionary. In the keys are the table_names and in the values
-                          the name of the date column of the table to be used as the 
-                          index. 
+                          the name of the date column of the table to be used as the
+                          index.
 
     :params count_columns: dictionary. In the keys are the table_names and in the values
-                        the name of the column which values will be used. 
-    
+                        the name of the column which values will be used.
+
     :params columns_name: dictionary. In the keys ate the table_names and in the values
-                        the name that will appear in the column associated with each 
-                    table in the final data frame that will be returned. 
-        
+                        the name that will appear in the column associated with each
+                    table in the final data frame that will be returned.
+
     :params vaccine: boolean. If True the data of total vaccinations per hundred for the
-                            country in the schema will be added in the final data frame. 
-                            This data is from our world in data. 
-                            
-    :params smooth: boolean. If True in the end data frame will be applied a moving 
-                            average of seven days. 
+                            country in the schema will be added in the final data frame.
+                            This data is from our world in data.
+
+    :params smooth: boolean. If True in the end data frame will be applied a moving
+                            average of seven days.
 
     :return: Dataframe
     """
