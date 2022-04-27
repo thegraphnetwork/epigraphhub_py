@@ -267,7 +267,7 @@ def train_eval_all_cantons(
     Function to make prediction for all the cantons
 
     Important:
-    * By default in the function for each canton is used your own data as predictors
+    * By default in the function, for each canton is used your own data as predictors
     * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
 
     :params target_curve_name: string to indicate the target column of the predictions

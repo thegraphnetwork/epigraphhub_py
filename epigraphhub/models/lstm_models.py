@@ -129,7 +129,8 @@ def train(
     :param save: boolean. Indicates if the history of the model will be save or not
     :param path: string. Indicates the path where the history of the model will be saved
     :param label: string. String used to name the .pkl file with the
-                        history of the model. The file is named following: `history_{label}.pkl`
+                        history of the model. The file is named following: `history_{label}.pkl`. The 
+                        file with the model are saved as `{label}_{epochs}.h5`. 
 
 
     :return: model trained
@@ -156,13 +157,15 @@ def train(
 
     if save:
         if path is None:
+            model.save(f"{label}_{epochs}.h5")
             with open(f"history_{label}.pkl", "wb") as f:
                 pickle.dump(hist.history, f)
         else:
+            model.save(f"{path}/{label}_{epochs}.h5")
             with open(f"{path}/history_{label}.pkl", "wb") as f:
                 pickle.dump(hist.history, f)
 
-    return hist
+    return hist, model 
 
 
 def plot_training_history(hist):
@@ -329,8 +332,7 @@ def transform_data(
 
     return X_train, Y_train, X_test, Y_test, factor, indice, X_forecast
 
-
-def train_eval_canton(
+def train_eval(
     model,
     X_train,
     Y_train,
@@ -341,41 +343,33 @@ def train_eval_canton(
     batch=1,
     epochs=100,
     path=None,
-    label="region_name",
+    label="train_eval_region_name",
     uncertainty=True,
     save=False,
 ):
     """
     Function to train an evaluate the model for a single canton
 
-    :params model:
-    :params X_train: array.
-    :params Y_train: array.
-    :params X_test: array.
-    :params Y_test: array.
-    :params factor: array.
-    :params indice: array.
-    :params batch: int.
-    :params epoch: int.
-    :params uncertainty: boolean.
-    :params save: boolean.
-    :params path: string.
-    :params label: string.
+    :params model: compiled LSTM model. 
+    :params X_train: array. Array with the features to train the model.
+    :params Y_train: array. Array with the targets to train the model.
+    :params X_test: array. Array with the features to test the model.
+    :params Y_test: array. Array with the targets to test the model.
+    :params factor: array. Array with the weights used to normalize the data.
+    :params indice: array. Array with the dates associated with the arrays in 
+                            X_train and X_test 
+    :params batch: int. batch size for batch training
+    :params epoch: int. Number of epochs to train the model
+    :params uncertainty: boolean. Indicates if the confidence intervals will be computed or not 
+    :params save: boolean. Indicates if the trained model will be saved or not
+    :params path: string. Path where the model will be saved 
+    :params label: string. Name used to save the model 
 
     :returns: dataframe
-
     """
 
-    history = train(
-        model, X_train, Y_train, batch_size=batch, epochs=epochs, label=label, save=save
-    )
-
-    if save:
-        if path is None:
-            model.save(f"train_eval_lstm_{label}_epochs_{epochs}.h5")
-
-        else:
-            model.save(f"{path}/train_eval_lstm_{label}_epochs_{epochs}.h5")
+    history, model = train(
+        model, X_train, Y_train, batch_size=batch, epochs=epochs, label=label, save=save, path = path)
 
     Y_data = np.concatenate((Y_train, Y_test), axis=0)  # type: ignore
 
@@ -404,8 +398,6 @@ def train_eval_canton(
 
         df_pred["train_size"] = len(X_train) - (X_train.shape[1] + Y_train.shape[1])
 
-        df_pred["canton"] = label
-
     else:
         if len(predicted.shape) == 2:
             df_predicted = pd.DataFrame(predicted).T
@@ -418,43 +410,363 @@ def train_eval_canton(
 
         df_pred["train_size"] = len(X_train) - (Y_train.shape[1] + X_train.shape[1])
 
-        df_pred["canton"] = label
+    return df_pred
+
+def train_eval_single_canton(
+    target_curve_name,
+    canton,
+    predictors,
+    cantons, 
+    vaccine,
+    smooth,
+    ini_date, 
+    split,
+    look_back, 
+    predict_n,
+    batch=1,
+    hidden = 8, 
+    epochs=100,
+    uncertainty = True,  
+    save = True, 
+    path=None):
+
+    """
+    Function to train and evaluate the model for one georegion.
+
+    Important:
+    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
+    :params target_curve_name: string to indicate the target column of the predictions
+    :params canton: canton of interest
+    :params predictors: variables that  will be used in model
+    :params cantons: list of other cantons whose data will be used as predictors
+    :params vaccine: It determines if the vaccine data from owid will be used or not
+    :params smooth: It determines if data will be smoothed (7 day moving average) or not
+    :params ini_date: Determines the beggining of the train dataset
+    :params split: float. Determines which percentage of the data will be used to train the model
+    :params look_back: int. Number of the last days that will be used to forecast the next days
+    :params predict_n: int. Number of days that will be predicted
+    :param batch_size: batch size for batch training
+    :param hidden: number of hidden nodes
+    :params epochs: int. Number of epochs to train the model
+    :params uncertainty: boolean. Indicates if the confidence intervals will be computed or not 
+    :params save: boolean. Indicates if the trained model will be saved or not
+    :params path: string. Path where the model will be saved 
+
+    returns: Dataframe.
+    """
+    X_train, Y_train, X_test, Y_test, factor, indice, X_forecast = get_data_model(
+        target_curve_name,
+        canton,
+        cantons,
+        predictors,
+        look_back=look_back,
+        predict_n=predict_n,
+        split=split,
+        vaccine=vaccine,
+        smooth=smooth,
+        ini_date = ini_date)
+
+    model = build_model(
+        hidden, X_train.shape[2], predict_n=predict_n, look_back=look_back
+    )
+
+    df_pred = train_eval(
+        model,
+        X_train,
+        Y_train,
+        X_test,
+        Y_test,
+        factor,
+        indice,
+        batch=batch,
+        epochs=epochs,
+        path=path,
+        label=f'train_eval_lstm_{target_curve_name}_{canton}_{epochs}',
+        uncertainty=uncertainty,
+        save=save)
+
+    df_pred['canton'] = canton
 
     return df_pred
 
 
-def training_canton(
-    model,
-    X_train,
-    Y_train,
+def train_eval_all_cantons(
+    target_curve_name,
+    canton,
+    predictors, 
+    vaccine,
+    smooth,
+    ini_date, 
+    split,
+    look_back, 
+    predict_n,
     batch=1,
+    hidden = 8, 
     epochs=100,
-    path=None,
-    label="region_name",
-    save=True,
-):
+    uncertainty = True,  
+    save = True, 
+    path=None):
 
-    history = train(
-        model, X_train, Y_train, batch_size=batch, epochs=epochs, label=label, save=save
+    """
+    Function to train and evaluate the model for one georegion.
+
+    Important:
+    * By default in the function, for each canton is used your own data as predictors
+    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
+
+    :params target_curve_name: string to indicate the target column of the predictions
+    :params canton: canton of interest
+    :params predictors: variables that  will be used in model
+    :params vaccine: It determines if the vaccine data from owid will be used or not
+    :params smooth: It determines if data will be smoothed (7 day moving average) or not
+    :params ini_date: Determines the beggining of the train dataset
+    :params split: float. Determines which percentage of the data will be used to train the model
+    :params look_back: int. Number of the last days that will be used to forecast the next days
+    :params predict_n: int. Number of days that will be predicted
+    :param batch_size: batch size for batch training
+    :param hidden: number of hidden nodes
+    :params epochs: int. Number of epochs to train the model
+    :params uncertainty: boolean. Indicates if the confidence intervals will be computed or not 
+    :params save: boolean. Indicates if the trained model will be saved or not
+    :params path: string. Path where the model will be saved 
+
+    returns: Dataframe.
+    """
+
+    df_all = pd.DataFrame()
+
+    all_cantons = [
+        "LU",
+        "JU",
+        "AR",
+        "VD",
+        "NE",
+        "FR",
+        "GL",
+        "GR",
+        "SG",
+        "AI",
+        "NW",
+        "ZG",
+        "SH",
+        "GE",
+        "BL",
+        "BE",
+        "BS",
+        "TI",
+        "UR",
+        "AG",
+        "TG",
+        "SZ",
+        "SO",
+        "ZH",
+        "VS",
+        "OW",
+    ]
+
+    for canton in all_cantons:
+
+        df_pred = train_eval_single_canton(
+                        target_curve_name,
+                        canton,
+                        predictors,
+                        [canton],
+                        vaccine = vaccine,
+                        smooth = smooth,
+                        ini_date = ini_date, 
+                        split = split,
+                        look_back = look_back, 
+                        predict_n = predict_n,
+                        batch = batch,
+                        hidden = hidden, 
+                        epochs = epochs,
+                        uncertainty = uncertainty,  
+                        save = save, 
+                        path = path)
+
+        df_all = pd.concat([df_all, df_pred])
+
+    return df_all
+
+
+def train_single_canton(
+    target_curve_name,
+    canton,
+    predictors,
+    cantons, 
+    vaccine,
+    smooth,
+    ini_date, 
+    look_back, 
+    predict_n,
+    batch=1,
+    hidden = 8, 
+    epochs=100, 
+    save = True, 
+    path=None):
+
+    """
+    Function to train the model for one georegion.
+
+    Important:
+    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
+    :params target_curve_name: string to indicate the target column of the predictions
+    :params canton: canton of interest
+    :params predictors: variables that  will be used in model
+    :params cantons: list of other cantons whose data will be used as predictors
+    :params vaccine: It determines if the vaccine data from owid will be used or not
+    :params smooth: It determines if data will be smoothed (7 day moving average) or not
+    :params ini_date: Determines the beggining of the train dataset
+    :params look_back: int. Number of the last days that will be used to forecast the next days
+    :params predict_n: int. Number of days that will be predicted
+    :param batch: batch size for batch training
+    :param hidden: number of hidden nodes
+    :params epochs: int. Number of epochs to train the model
+    :params save: boolean. Indicates if the trained model will be saved or not
+    :params path: string. Path where the model will be saved 
+    
+    returns: model, history 
+    """
+
+    X_train, Y_train, X_test, Y_test, factor, indice, X_forecast = get_data_model(
+        target_curve_name,
+        canton,
+        cantons,
+        predictors,
+        look_back=look_back,
+        predict_n=predict_n,
+        split=1,
+        vaccine=vaccine,
+        smooth=smooth,
+        ini_date = ini_date 
+    )
+    
+    model = build_model(
+        hidden, X_train.shape[2], predict_n=predict_n, look_back=look_back
     )
 
-    if path is None:
-        model.save(f"trained_model_{label}_epochs_{epochs}.h5")
-    else:
-        model.save(f"{path}/trained_model_{label}_epochs_{epochs}.h5")
+    history, model = train(
+        model, X_train, Y_train, batch_size=batch, epochs=epochs, label=f'train_lstm_{target_curve_name}_{canton}_{epochs}', save=save, path = path)
 
-    return
+    return model, history 
+
+def train_all_cantons(
+    target_curve_name,
+    canton,
+    predictors,
+    vaccine,
+    smooth,
+    ini_date, 
+    look_back, 
+    predict_n,
+    batch=1,
+    hidden = 8, 
+    epochs=100, 
+    save = True, 
+    path=None):
+
+    """
+    Function to train the model for one georegion.
+
+    Important:
+    * By default in the function, for each canton is used your own data as predictors
+
+    :params target_curve_name: string to indicate the target column of the predictions
+    :params canton: canton of interest
+    :params predictors: variables that  will be used in model
+    :params cantons: list of other cantons whose data will be used as predictors
+    :params vaccine: It determines if the vaccine data from owid will be used or not
+    :params smooth: It determines if data will be smoothed (7 day moving average) or not
+    :params ini_date: Determines the beggining of the train dataset
+    :params look_back: int. Number of the last days that will be used to forecast the next days
+    :params predict_n: int. Number of days that will be predicted
+    :param batch: batch size for batch training
+    :param hidden: number of hidden nodes
+    :params epochs: int. Number of epochs to train the model
+    :params save: boolean. Indicates if the trained model will be saved or not
+    :params path: string. Path where the model will be saved 
+    
+    
+    """
+
+    all_cantons = [
+        "LU",
+        "JU",
+        "AR",
+        "VD",
+        "NE",
+        "FR",
+        "GL",
+        "GR",
+        "SG",
+        "AI",
+        "NW",
+        "ZG",
+        "SH",
+        "GE",
+        "BL",
+        "BE",
+        "BS",
+        "TI",
+        "UR",
+        "AG",
+        "TG",
+        "SZ",
+        "SO",
+        "ZH",
+        "VS",
+        "OW",
+    ]
+
+    for canton in all_cantons:
+
+        train_single_canton(
+                        target_curve_name,
+                        canton,
+                        predictors,
+                        [canton], 
+                        vaccine=vaccine,
+                        smooth =smooth,
+                        ini_date = ini_date, 
+                        look_back = look_back, 
+                        predict_n = predict_n,
+                        batch = batch,
+                        hidden = hidden, 
+                        epochs = epochs, 
+                        save = save, 
+                        path = path)
 
 
-def forecasting_canton(
-    label, epochs, X_for, factor, indice, path=None, uncertainty=True
+    
+
+    return 
+
+
+
+def forecast(
+    label,path,  X_for, factor, indice, uncertainty=True
 ):
+    """
+    Function to apply the forecast using a pre trained model.
+
+    Important:
+    :params label: string. Name used to save the model 
+    :params path: string. Path where the model is saved
+    :params X_for: array. Array that will be used to forecast the data 
+    :params factor: array. It will be used to transform the predictions to the right scale
+    :params indice: array | list. It's the date associated with X_for.  
+    :params uncertainty: boolean. If true the confidence interval of the predicitions will be computed. 
+
+    :return dataframe. 
+    """
+
+
 
     if path is None:
-        model = keras.models.load_model(f"trained_model_{label}_epochs_{epochs}.h5")
+        model = keras.models.load_model(f"{label}.h5")
     else:
         model = keras.models.load_model(
-            f"{path}/trained_model_{label}_epochs_{epochs}.h5"
+            f"{path}/{label}.h5"
         )
 
     if uncertainty:
@@ -489,7 +801,6 @@ def forecasting_canton(
 
         df_for["upper"] = df_predicted975[df_predicted975.columns[-1]] * factor
 
-        df_for["canton"] = label[-2:]
     else:
         if len(predicted.shape) == 2:
             df_predicted = pd.DataFrame(predicted).T
@@ -498,389 +809,60 @@ def forecasting_canton(
 
         df_for["predict"] = df_predicted[df_predicted.columns[-1]] * factor
 
-        df_for["canton"] = label[-2:]
-
     return df_for
 
 
-# params_model = {'hidden': 12, 'epochs': 100,  'look_back' : 21,'predict_n': 14 }
-
-
-def train_eval_single_canton(
-    target_curve_name,
-    canton,
-    predictors,
-    split=0.75,
-    vaccine=True,
-    smooth=True,
-    ini_date="2020-03-01",
-    uncertainty=True,
-    save=False,
-    hidden=12,
-    epochs=100,
-    look_back=21,
-    predict_n=14,
-):
-
-    """
-    Function to train and evaluate the model for one georegion
-
-    Important:
-    * By default the function is using the clustering cantons and the data since 2020
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
-
-    params canton: canton of interest
-    params predictors: variables that  will be used in model
-    params vaccine: It determines if the vaccine data from owid will be used or not
-    params smooth: It determines if data will be smoothed or not
-    params ini_date: Determines the beggining of the train dataset
-    params title: If none the title will be: Hospitalizations - canton
-    params path: If none the plot will be save in the directory: images/hosp_{canton}
-    """
-
-    # getting the data
-    # print(cluster_canton)
-    # print('get_data')
-    # start = time.time()
-
-    X_train, Y_train, X_test, Y_test, factor, indice, X_forecast = get_data_model(
-        target_curve_name,
-        canton,
-        [canton],
-        predictors,
-        look_back=look_back,
-        predict_n=predict_n,
-        split=split,
-        vaccine=vaccine,
-        smooth=smooth,
-    )
-
-    model = build_model(
-        hidden, X_train.shape[2], predict_n=predict_n, look_back=look_back
-    )
-
-    # get predictions
-    df = train_eval_canton(
-        model,
-        X_train,
-        Y_train,
-        X_test,
-        Y_test,
-        factor,
-        indice,
-        batch=1,
-        epochs=epochs,
-        label=f"{target_curve_name}_{canton}",
-        uncertainty=uncertainty,
-        save=save,
-    )
-
-    return df
-
-
-def train_eval_all_cantons(
-    target_curve_name,
-    predictors,
-    split=0.75,
-    vaccine=True,
-    smooth=True,
-    ini_date="2020-03-01",
-    uncertainity=True,
-    save=False,
-    hidden=12,
-    epochs=100,
-    look_back=21,
-    predict_n=14,
-):
-
-    """
-    Function to make prediction for all the cantons
-
-    Important:
-    * By default the function is using the clustering cantons and the data since 2020
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
-
-    params target_curve_name: string to indicate the target column of the predictions
-    params predictors: variables that  will be used in model
-    params vaccine: It determines if the vaccine data from owid will be used or not
-    params smooth: It determines if data will be smoothed or not
-    params ini_date: Determines the beggining of the train dataset
-
-    returns: Dataframe with the predictions for all the cantons
-    """
-
-    df_all = pd.DataFrame()
-
-    all_cantons = [
-        "LU",
-        "JU",
-        "AR",
-        "VD",
-        "NE",
-        "FR",
-        "GL",
-        "GR",
-        "SG",
-        "AI",
-        "NW",
-        "ZG",
-        "SH",
-        "GE",
-        "BL",
-        "BE",
-        "BS",
-        "TI",
-        "UR",
-        "AG",
-        "TG",
-        "SZ",
-        "SO",
-        "ZH",
-        "VS",
-        "OW",
-    ]
-
-    for canton in all_cantons:
-
-        df = get_cluster_data(predictors, list(canton), vaccine=vaccine, smooth=smooth)
-        df = df.fillna(0)
-
-        (
-            X_train,
-            Y_train,
-            X_test,
-            Y_test,
-            factor,
-            indice,
-            X_forecast,
-        ) = transform_data(
-            target_curve_name,
-            canton,
-            df,
-            look_back=look_back,
-            predict_n=predict_n,
-            split=split,
-        )
-
-        model = build_model(
-            hidden, X_train.shape[2], predict_n=predict_n, look_back=look_back
-        )
-
-        # get predictions
-        df_pred = train_eval_canton(
-            model,
-            X_train,
-            Y_train,
-            X_test,
-            Y_test,
-            factor,
-            indice,
-            batch=1,
-            epochs=epochs,
-            label=f"{target_curve_name}_{canton}",
-            uncertainty=uncertainity,
-            save=save,
-        )
-
-        df_all = pd.concat([df_all, df_pred])
-
-    return df_all
-
-
-def train_single_canton(
-    target_curve_name,
-    canton,
-    predictors,
-    vaccine=True,
-    smooth=True,
-    ini_date="2020-03-01",
-    uncertainity=True,
-    save=False,
-    path=None,
-    hidden=12,
-    epochs=100,
-    look_back=21,
-    predict_n=14,
-):
-
-    """
-    Function to train and evaluate the model for one georegion
-
-    Important:
-    * By default the function is using the clustering cantons and the data since 2020
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
-
-    params canton: canton of interest
-    params predictors: variables that  will be used in model
-    params vaccine: It determines if the vaccine data from owid will be used or not
-    params smooth: It determines if data will be smoothed or not
-    params ini_date: Determines the beggining of the train dataset
-    params title: If none the title will be: Hospitalizations - canton
-    params path: If none the plot will be save in the directory: images/hosp_{canton}
-    """
-
-    X_train, Y_train, X_test, Y_test, factor, indice, X_forecast = get_data_model(
-        target_curve_name,
-        canton,
-        [canton],
-        predictors,
-        look_back=look_back,
-        predict_n=predict_n,
-        split=1,
-        vaccine=vaccine,
-        smooth=smooth,
-    )
-
-    model = build_model(
-        hidden, X_train.shape[2], predict_n=predict_n, look_back=look_back
-    )
-
-    training_canton(
-        model,
-        X_train,
-        Y_train,
-        batch=1,
-        epochs=epochs,
-        path=path,
-        label=canton,
-        save=True,
-    )
-
-    return
-
-
-def train_all_cantons(
-    target_curve_name,
-    canton,
-    predictors,
-    vaccine=True,
-    smooth=True,
-    ini_date="2020-03-01",
-    uncertainity=True,
-    save=False,
-    path=None,
-    hidden=12,
-    epochs=100,
-    look_back=21,
-    predict_n=14,
-):
-    """
-
-    Important:
-    * By default the function is using the clustering cantons and the data since 2020
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
-
-    params target_curve_name: string to indicate the target column of the predictions
-    params predictors: variables that  will be used in model
-    params vaccine: It determines if the vaccine data from owid will be used or not
-    params smooth: It determines if data will be smoothed or not
-    params ini_date: Determines the beggining of the train dataset
-
-    returns: Dataframe with the forecast for all the cantons
-    """
-
-    all_cantons = [
-        "LU",
-        "JU",
-        "AR",
-        "VD",
-        "NE",
-        "FR",
-        "GL",
-        "GR",
-        "SG",
-        "AI",
-        "NW",
-        "ZG",
-        "SH",
-        "GE",
-        "BL",
-        "BE",
-        "BS",
-        "TI",
-        "UR",
-        "AG",
-        "TG",
-        "SZ",
-        "SO",
-        "ZH",
-        "VS",
-        "OW",
-    ]
-
-    for canton in all_cantons:
-
-        df = get_cluster_data(predictors, list(canton), vaccine=vaccine, smooth=smooth)
-        # filling the nan values with 0
-        df = df.fillna(0)
-
-        (
-            X_train,
-            Y_train,
-            X_test,
-            Y_test,
-            factor,
-            indice,
-            X_forecast,
-        ) = transform_data(
-            target_curve_name,
-            canton,
-            df,
-            look_back=look_back,
-            predict_n=predict_n,
-            split=1,
-        )
-
-        # train the models and save in the server
-        model = build_model(
-            hidden, X_train.shape[2], predict_n=predict_n, look_back=look_back
-        )
-
-        training_canton(
-            model,
-            X_train,
-            Y_train,
-            batch=1,
-            epochs=epochs,
-            path=path,
-            label=canton,
-            save=True,
-        )
-
-    return
-
-
 def forecast_single_canton(
-    label,
-    epochs,
     target_curve_name,
     canton,
     predictors,
+    cantons,
     vaccine=True,
     smooth=True,
     ini_date="2020-03-01",
-    uncertainity=True,
-    save=False,
-    path=None,
     look_back=21,
     predict_n=14,
+    path = None,
+    epochs = 300,
+    uncertainty=True,
 ):
+    """
+    Function to load a trained model and use it to forecast one canton.
+
+    Important:
+    :params target_curve_name: string to indicate the target column of the predictions
+    :params canton: canton of interest
+    :params predictors: variables that  will be used in model
+    :params cantons: list of other cantons whose data will be used as predictors
+    :params vaccine: It determines if the vaccine data from owid will be used or not
+    :params smooth: It determines if data will be smoothed (7 day moving average) or not
+    :params ini_date: Determines the beggining of the train dataset
+    :params look_back: int. Number of the last days that will be used to forecast the next days
+    :params predict_n: int. Number of days that will be predicted
+    :params path: string. Path where the trained model was saved
+    :params epochs: int. Number of epochs used to train the model
+    :params uncertainty: boolean. If true the confidence interval of the predicitions will be computed.   
+    
+    :return DataFrame 
+    """
+
 
     X_train, Y_train, X_test, Y_test, factor, indice, X_forecast = get_data_model(
         target_curve_name,
         canton,
-        [canton],
+        cantons,
         predictors,
         look_back=look_back,
         predict_n=predict_n,
         split=1,
         vaccine=vaccine,
         smooth=smooth,
+        ini_date = ini_date
     )
 
-    df_for = forecasting_canton(
-        label, epochs, X_forecast, factor, indice, path=path, uncertainty=True
-    )
+    df_for = forecast(f'train_lstm_{target_curve_name}_{canton}_{epochs}',path, X_forecast, factor, indice, uncertainty = uncertainty)
+
+    df_for['canton'] = canton 
 
     return df_for
 
@@ -889,31 +871,35 @@ def forecast_all_cantons(
     target_curve_name,
     canton,
     predictors,
-    epochs=100,
     vaccine=True,
     smooth=True,
     ini_date="2020-03-01",
-    uncertainity=True,
-    save=False,
-    path=None,
     look_back=21,
     predict_n=14,
+    path = None,
+    epochs = 300,
+    uncertainty=True,
 ):
     """
-    Function to make the forecast for all the cantons
-
+    Function to load a trained model and use it to forecast all canton.
     Important:
-    * By default the function is using the clustering cantons and the data since 2020
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
+    * By default in the function, for each canton is used your own data as predictors
 
-    params target_curve_name: string to indicate the target column of the predictions
-    params predictors: variables that  will be used in model
-    params vaccine: It determines if the vaccine data from owid will be used or not
-    params smooth: It determines if data will be smoothed or not
-    params ini_date: Determines the beggining of the train dataset
-
-    returns: Dataframe with the forecast for all the cantons
+    :params target_curve_name: string to indicate the target column of the predictions
+    :params canton: canton of interest
+    :params predictors: variables that  will be used in model
+    :params vaccine: It determines if the vaccine data from owid will be used or not
+    :params smooth: It determines if data will be smoothed (7 day moving average) or not
+    :params ini_date: Determines the beggining of the train dataset
+    :params look_back: int. Number of the last days that will be used to forecast the next days
+    :params predict_n: int. Number of days that will be predicted
+    :params path: string. Path where the trained model was saved
+    :params epochs: int. Number of epochs used to train the model
+    :params uncertainty: boolean. If true the confidence interval of the predicitions will be computed.   
+    
+    :return DataFrame 
     """
+
     df_all = pd.DataFrame()
 
     all_cantons = [
@@ -947,31 +933,19 @@ def forecast_all_cantons(
 
     for canton in all_cantons:
 
-        df = get_cluster_data(predictors, list(canton), vaccine=vaccine, smooth=smooth)
-        # filling the nan values with 0
-        df = df.fillna(0)
-
-        (
-            X_train,
-            Y_train,
-            X_test,
-            Y_test,
-            factor,
-            indice,
-            X_forecast,
-        ) = transform_data(
-            target_curve_name,
-            canton,
-            df,
-            look_back=look_back,
-            predict_n=predict_n,
-            split=1,
-        )
-
-        # get predictions and forecast
-        df_for = forecasting_canton(
-            canton, epochs, X_forecast, factor, indice, path=None, uncertainty=True
-        )
+        df_for = forecast_single_canton(
+                            target_curve_name,
+                            canton,
+                            predictors,
+                            [canton],
+                            vaccine=True,
+                            smooth=True,
+                            ini_date="2020-03-01",
+                            look_back=21,
+                            predict_n=14,
+                            path = None,
+                            epochs = 300,
+                            uncertainty=True)
 
         df_all = pd.concat([df_all, df_for])
 
@@ -982,19 +956,27 @@ def plot_predicted_vs_data(
     predicted,
     Ydata,
     indice,
-    canton,
+    label, 
     factor,
     split_point=None,
     uncertainty=False,
+    save = True, 
+    path = None, 
+    label_save = 'predict_vs_data'
 ):
     """
-    Plot the model's predictions against data
-    :param predicted: model predictions
-    :param Ydata: observed data
-    :param indice:
-    :param label: Name of the locality of the predictions
-    :param pred_window:
-    :param factor: Normalizing factor for the target variable
+    Plot  only the last (furthest) prediction points against data
+
+    :params predicted: array. model predictions
+    :params Ydata: array. observed data
+    :params indice: array|list. Dates associated with the predicted and Ydata. 
+    :params label: string. Name associated with the predictions. It has this format: `Predictions for {label}`
+    :params factor: array. Normalizing factor for the target variable
+    :params split_point: int. Location of the value that split the Ydata in train and test.
+    :params uncertainty: boolean. If true the confidence interval are predicted 
+    :params save: boolean. If true the figure created is saved
+    :params path: string|None. Path where save the figure 
+    :params label_save: string. Name to save the figure 
     """
 
     plt.clf()
@@ -1008,6 +990,7 @@ def plot_predicted_vs_data(
     ymax = max(predicted.max() * factor, Ydata.max() * factor)
     plt.vlines(indice[split_point], 0, ymax, "g", "dashdot", lw=2)
     plt.text(indice[split_point + 2], 0.6 * ymax, "Out of sample Predictions")
+    
     # plot only the last (furthest) prediction point
     plt.plot(
         indice[len(indice) - Ydata.shape[0] :],
@@ -1023,7 +1006,7 @@ def plot_predicted_vs_data(
         alpha=0.5,
         label="median",
     )
-    if uncertainty:
+    if (uncertainty) and (len(predicted.shape) != 2):
         plt.fill_between(
             indice[len(indice) - Ydata.shape[0] :],
             df_predicted25[df_predicted25.columns[-1]] * factor,
@@ -1032,32 +1015,19 @@ def plot_predicted_vs_data(
             alpha=0.3,
         )
 
-    # plot all predicted points
-    # plt.plot(indice[pred_window:], pd.DataFrame(Ydata)[7] * factor, 'k-')
-    # for n in range(df_predicted.shape[1] - pred_window):
-    #     plt.plot(
-    #         indice[n: n + pred_window],
-    #         pd.DataFrame(Ydata.T)[n] * factor,
-    #         "k-",
-    #         alpha=0.7,
-    #     )
-    #     plt.plot(indice[n: n + pred_window], df_predicted[n] * factor, "r-")
-    #     try:
-    #         plt.vlines(
-    #             indice[n + pred_window],
-    #             0,
-    #             df_predicted[n].values[-1] * factor,
-    #             "b",
-    #             alpha=0.2,
-    #         )
-    #     except IndexError as e:
-    #         print(indice.shape, n, df_predicted.shape)
-    tag = "_unc" if uncertainty else ""
     plt.grid()
-    plt.title(f"Predictions for {canton}")
+    plt.title(f"Predictions for {label}")
     plt.xlabel("time")
     plt.ylabel("incidence")
     plt.xticks(rotation=70)
     plt.legend(["data", "predicted"])
-    # plt.savefig("lstm_{}{}.png".format(canton, tag), bbox_inches="tight", dpi=300,)
+
+    if save:
+        if path == None:
+            plt.savefig(f"{label_save.png}", bbox_inches="tight", dpi=300)
+        else: 
+            plt.savefig(f"{path}/{label_save}.png", bbox_inches="tight", dpi=300)
+
     plt.show()
+    
+    return 
