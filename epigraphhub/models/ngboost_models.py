@@ -8,17 +8,16 @@ the cantons of switzerland.
 """
 
 import copy
-from datetime import datetime, timedelta
-
 import numpy as np
 import pandas as pd
 from joblib import dump, load
+import matplotlib.pyplot as plt 
 from ngboost import NGBRegressor
+from ngboost.scores import LogScore
 from ngboost.distns import LogNormal
 from ngboost.learners import default_tree_learner
-from ngboost.scores import LogScore
+from datetime import datetime, timedelta
 from sklearn.model_selection import train_test_split
-
 from epigraphhub.data.get_data import get_cluster_data
 from epigraphhub.data.preprocessing import build_lagged_features
 
@@ -39,7 +38,7 @@ params_model = {
 def rolling_predictions(
     target_name,
     data,
-    ini_date="2020-03-01",
+    ini_date,
     split=0.75,
     horizon_forecast=14,
     maxlag=14,
@@ -56,16 +55,20 @@ def rolling_predictions(
 
     Important:
 
-    :params target_name:string. Name of the target column.
-    :params data: dataframe. Dataframe with features and target column.
-    :params ini_date: string. Determines the beggining of the train dataset
-    :params split: float. Determines which percentage of the data will be used to train the model
-    :params horizon_forecast: int. Number of days that will be predicted
-    :params max_lag: int. Number of the last days that will be used to forecast the next days
-    :params parameters_model: dict with the params that will be used in the ngboost
+    :param target_name:string. Name of the target column.
+    :param data: dataframe. Dataframe with features and target column.
+    :param ini_date: string. Determines the beggining of the train dataset
+    :param split: float. Determines which percentage of the data will be used to train the model
+    :param horizon_forecast: int. Number of days that will be predicted
+    :param max_lag: int. Number of the last days that will be used to forecast the next days
+    :param parameters_model: dict with the params that will be used in the ngboost
                              regressor model.
 
-    returns: DataFrame, list of the models trained, X_train (features used training the model), targets
+    returns: 
+    :return df_pred: pandas DataFrame with the target values and the predictions
+    :return models: list of the models trained
+    :return X_train: array with features used training the model
+    :return targets: dictionary with the target values 
     """
 
     target = data[target_name]
@@ -166,6 +169,7 @@ def rolling_predictions(
         df_pred["median"] = y50
         df_pred["upper"] = y95
         df_pred["train_size"] = [train_size] * len(df_pred)
+        df_pred.set_index('date', inplace = True)
 
     else:
         x = pd.period_range(
@@ -183,8 +187,64 @@ def rolling_predictions(
         df_pred["median"] = [0.0]
         df_pred["upper"] = [0.0]
         df_pred["train_size"] = [len(X_train)]
+        df_pred.set_index('date', inplace = True)
 
     return df_pred, models, X_train, targets
+
+def plot_predicted_vs_data(df_pred, title = 'Ngboost predictions', save = False, filename = 'ngboost_pred', path = None):
+
+    '''
+    Function to plot the data vs the predictions 
+    
+    :params df_pred: pandas Dataframe with the following columns: target, lower, median, upper and train_size 
+                    (this column is optional since if you train the model with all the data available plot this
+                    column is nonsense)
+    :params title: string. This string is used as title of the plot
+    :params save: boolean. If true the plot is saved
+    :params filename: string. Name of the png file where the plot is saved 
+    :params path: string|None. Path where the figure must be saved. If None the 
+                                figure is saved in the current directory.
+
+    :returns: None  
+    '''
+    fig, ax = plt.subplots()
+
+    ax.plot(df_pred.target, label = 'Data')
+    
+    ax.plot(df_pred['median'], label = 'Predicted', color = 'tab:orange')
+    
+    ax.fill_between(df_pred.index, df_pred.lower, df_pred.upper, 
+                    color = 'tab:orange', alpha = 0.3, label = '95% CI')
+    
+    if ('train_size' in df_pred.columns):
+    
+        ax.axvline(df_pred.index[df_pred.train_size[0]], min( df_pred.target.min(), df_pred.lower.min()), 
+              
+              max( df_pred.target.max(), df_pred.upper.max()), color = 'tab:green', ls = '--', label = 'Train/Test')
+    
+    ax.set_title(f'{title}')
+    
+    ax.set_xlabel('Date')
+    
+    #ax.set_ylabel('Predictions')
+    
+    for label in ax.get_xticklabels():
+        label.set_rotation(30)
+    
+    ax.legend()
+    
+    ax.grid()
+    
+    if save:
+        if path == None:
+            plt.savefig(f'{filename}.png', dpi = 300, bbox_inches = 'tight')
+            
+        else:
+            plt.savefig(f'{path}/{filename}.png', dpi = 300, bbox_inches = 'tight')
+            
+    plt.show()
+    
+    return 
 
 
 def train_eval_single_canton(
@@ -196,7 +256,7 @@ def train_eval_single_canton(
     smooth=True,
     ini_date="2020-03-01",
     split=0.75,
-    horizon=14,
+    horizon_forecast=14,
     maxlag=14,
     parameters_model=params_model,
 ):
@@ -241,7 +301,7 @@ def train_eval_single_canton(
         df,
         ini_date=ini_date,
         split=split,
-        horizon_forecast=horizon,
+        horizon_forecast=horizon_forecast,
         maxlag=maxlag,
         kwargs=parameters_model,
     )[0]
@@ -345,7 +405,7 @@ def train_eval_all_cantons(
 def training_model(
     target_name,
     data,
-    ini_date="2020-03-01",
+    ini_date,
     horizon_forecast=14,
     maxlag=14,
     save=True,
@@ -371,7 +431,7 @@ def training_model(
     :params kwargs: dict with the params that will be used in the ngboost
                              regressor model.
 
-    returns: list with the {horizon_forecast} models saved
+    returns: dictionary with the {horizon_forecast} models saved
     """
 
     target = data[target_name]
@@ -387,7 +447,7 @@ def training_model(
     target = target.dropna()
     df_lag = df_lag.dropna()
 
-    models = []
+    models = {}
 
     # condition to only apply the model for datas with values different of 0
     if np.sum(target) > 0.0:
@@ -422,7 +482,7 @@ def training_model(
                 else:
                     dump(model, f"ngboost_{target_name}_{T}D.joblib")
 
-            models.append(model)
+            models[T] = model
 
     return models
 
@@ -562,7 +622,7 @@ def train_all_cantons(
         training_model(
             target_name,
             df,
-            ini_date,
+            ini_date = ini_date,
             horizon_forecast=horizon_forecast,
             maxlag=maxlag,
             kwargs=parameters_model,
@@ -603,8 +663,7 @@ def rolling_forecast(
     df_lag = build_lagged_features(copy.deepcopy(data), maxlag=maxlag)
 
     ini_date = max(
-        df_lag.index[0], target.index[0], datetime.strptime(ini_date, "%Y-%m-%d")
-    )
+        df_lag.index[0], target.index[0])
 
     df_lag = df_lag[ini_date:]
     target = target[ini_date:]
@@ -652,8 +711,60 @@ def rolling_forecast(
     df_for["lower"] = np.array(forecasts5)
     df_for["median"] = np.array(forecasts50)
     df_for["upper"] = np.array(forecasts95)
+    df_for.set_index('date', inplace = True)
 
     return df_for
+
+def plot_forecast(df, target_name, df_for, last_values = 90, title = 'Ngboost forecast', save = False, filename = 'ngboost_forecast', path = None):
+
+    '''
+    Function to plot the forecast 
+    
+    :params df: pandas Dataframe with the data used to make the forecast
+    :params target_name: string. Name of the target column forecasted
+    :params df_for: pandas Dataframe with the forecast values. This dataframe must have the 
+                    following columns: lower, median, upper and a datetime index 
+                    
+    :params last_values: int. Number of last values of the df show in the plot. 
+          
+    :params title: string. This string is used as title of the plot
+    :params save: booelan. If true the plot is saved
+    :params filename: string. Name of the png file where the plot is saved 
+    :params path: string|None. Path where the figure must be saved. If None the 
+                                figure is saved in the current directory.
+
+    :returns: None  
+    '''
+    fig, ax = plt.subplots()
+
+    ax.plot(df[target_name][-last_values:], label = 'Data')
+    
+    ax.plot(df_for['median'], label = 'Forecast', color = 'tab:orange')
+    
+    ax.fill_between(df_for.index, df_for.lower, df_for.upper, 
+                    color = 'tab:orange', alpha = 0.3, label = '95% CI')
+    
+    ax.set_title(f'{title}')
+    
+    ax.set_xlabel('Date')
+    
+    for label in ax.get_xticklabels():
+        label.set_rotation(30)
+    
+    ax.legend()
+    
+    ax.grid()
+    
+    if save:
+        if path == None:
+            plt.savefig(f'{filename}.png', dpi = 300, bbox_inches = 'tight')
+            
+        else:
+            plt.savefig(f'{path}/{filename}.png', dpi = 300, bbox_inches = 'tight')
+            
+    plt.show()
+    
+    return 
 
 
 def forecast_single_canton(

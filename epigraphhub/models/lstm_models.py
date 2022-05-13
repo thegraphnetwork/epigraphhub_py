@@ -2,7 +2,7 @@
 The functions in this module allow the application of a
 LSTM (Long short-term memory) model for time series. There are separate 
 functions to train and evaluate (separate the data in train and test 
-datasets), train with all the data available, and make
+datasets), train with all the data available and save the trained model, and make
 forecasts. Also, there are functions focused in apply this model 
 in the Switzerland data for just one 
 canton or all the cantons of Switzerland. 
@@ -33,15 +33,16 @@ from epigraphhub.data.preprocessing import lstm_split_data as split_data
 from epigraphhub.data.preprocessing import normalize_data
 
 
-def build_model(hidden, features, predict_n, look_back=10, batch_size=1):
+def build_model(hidden, features, predict_n, look_back, batch_size=1):
     """
     Builds and returns the LSTM model with the parameters given
-    :param hidden: number of hidden nodes
-    :param features: number of variables in the example table
-    :param predict_n: number of days that will be predicted
-    :param look_back: Number of time-steps to look back before predicting
-    :param batch_size: batch size for batch training
-    :return:
+    :param hidden: int. Number of hidden nodes
+    :param features: int. Number of variables in the example table
+    :param predict_n: int. Number of days that will be predicted
+    :param look_back: int. Number of time-steps to look back before predicting
+    :param batch_size: int. Batch size for batch training
+    :returns:
+    * model: compiled LSTM model. 
     """
 
     inp = keras.Input(
@@ -269,8 +270,6 @@ def get_data_model(
         "switzerland", predictors, cluster, vaccine=vaccine, smooth=smooth
     )
 
-    df = df.loc[ini_date:]
-
     if target_curve_name != "hosp":
 
         for i in df.columns:
@@ -297,6 +296,7 @@ def get_data_model(
 def transform_data(
     target_name,
     df,
+    ini_date = None,
     look_back=21,
     predict_n=14,
     split=0.75,
@@ -313,6 +313,9 @@ def transform_data(
 
     :returns: arrays.
     """
+
+    if ini_date != None:
+        df = df.loc[ini_date:]
 
     indice = list(df.index)
     indice = [i.date() for i in indice]
@@ -373,9 +376,9 @@ def train_eval(
 
     Y_data = np.concatenate((Y_train, Y_test), axis=0)  # type: ignore
 
-    predicted_out = predict(model, X_test, Y_test, uncertainty)
+    predicted_in = predict(model, X_train, uncertainty)
 
-    predicted_in = predict(model, X_train, Y_train, uncertainty)
+    predicted_out = predict(model, X_test, uncertainty)
 
     predicted = np.concatenate((predicted_in, predicted_out), axis=0)  # type: ignore
 
@@ -396,7 +399,9 @@ def train_eval(
 
         df_pred["upper"] = df_predicted975[df_predicted975.columns[-1]] * factor
 
-        df_pred["train_size"] = len(X_train) - (X_train.shape[1] + Y_train.shape[1])
+        df_pred["train_size"] = len(X_train)
+
+        df_pred.set_index('date', inplace = True)
 
     else:
         if len(predicted.shape) == 2:
@@ -408,9 +413,124 @@ def train_eval(
 
         df_pred["predict"] = df_predicted[df_predicted.columns[-1]] * factor
 
-        df_pred["train_size"] = len(X_train) - (Y_train.shape[1] + X_train.shape[1])
+        df_pred["train_size"] = len(X_train) 
+
+        df_pred.set_index('date', inplace = True)
 
     return df_pred
+
+def training_eval_model(model, 
+                   target_name,
+                   data,
+                   ini_date,
+                   split=0.75,
+                   predict_n=14,
+                   look_back=14,
+                   batch  =1, 
+                   epochs = 100,
+                   path = None, 
+                   label = "train_eval_region_name",
+                   uncertainty = True,
+                   save = True):
+    """
+    Function to train an evaluate a LSTM model 
+    :params model: compiled LSTM model
+    :params target_name: string. String with the name of the target column
+    :params data: dataframe. Dataframe with features and target column
+    :params ini_date: string. Start date of training data
+    :param split: float. Determines which percentage of the data will be used to train the model
+    :params lookback: int. Number of the last days that will be used to forecast the next days
+    :params predict_n: int. Number of days that will be predicted
+    :params batch: int. batch size for batch training
+    :params epochs: int. Number of epochs to train the model
+    :params path: string. Path where the model will be saved 
+    :params label: string. Name used to save the model
+    :params uncertainty: boolean. Indicates if the confidence intervals will be computed or not 
+    :params save: boolean. Indicates if the trained model will be saved or not 
+ 
+    :returns: 
+    * `df_pred`: DataFrame with the target values and the predictions. 
+    """
+
+
+    X_train, Y_train, X_test, Y_test, factor, indice, X_forecast = transform_data(
+                                                                            target_name, 
+    data,ini_date = ini_date, look_back = look_back, predict_n = predict_n, split = split)
+
+    df_pred = train_eval(
+                    model,
+                    X_train,
+                    Y_train,
+                    X_test,
+                    Y_test,
+                    factor,
+                    indice,
+                    batch = batch,
+                    epochs = epochs,
+                    path = path,
+                    label = label,
+                    uncertainty=uncertainty,
+                    save=save)
+
+
+    return df_pred
+
+def plot_df_predictions(df_pred, title = 'LSTM predictions', save = False, filename = 'lstm_pred', path = None):
+
+    '''
+    Function to plot the data vs the predictions 
+    
+    :params df_pred: pandas Dataframe with the following columns: target, lower, median, upper and train_size 
+                    (this column is optional since if you train the model with all the data available plot this
+                    column is nonsense)
+    :params title: string. This string is used as title of the plot
+    :params save: booelan. If true the plot is saved
+    :params filename: string. Name of the png file where the plot is saved 
+    :params path: string|None. Path where the figure must be saved. If None the 
+                                figure is saved in the current directory.
+
+    :returns: None  
+    '''
+    fig, ax = plt.subplots()
+
+    ax.plot(df_pred.target, label = 'Data')
+    
+    ax.plot(df_pred['median'], label = 'Predicted', color = 'tab:orange')
+    
+    ax.fill_between(df_pred.index, df_pred.lower, df_pred.upper, 
+                    color = 'tab:orange', alpha = 0.3, label = '95% CI')
+    
+    if ('train_size' in df_pred.columns):
+    
+        ax.axvline(df_pred.index[df_pred.train_size[0]], min( df_pred.target.min(), df_pred.lower.min()), 
+              
+              max( df_pred.target.max(), df_pred.upper.max()), color = 'tab:green', ls = '--', label = 'Train/Test')
+    
+    ax.set_title(f'{title}')
+    
+    ax.set_xlabel('Date')
+    
+    #ax.set_ylabel('Predictions')
+    
+    for label in ax.get_xticklabels():
+        label.set_rotation(30)
+    
+    ax.legend()
+    
+    ax.grid()
+    
+    if save:
+        if path == None:
+            plt.savefig(f'{filename}.png', dpi = 300, bbox_inches = 'tight')
+            
+        else:
+            plt.savefig(f'{path}/{filename}.png', dpi = 300, bbox_inches = 'tight')
+            
+    plt.show()
+    
+    return 
+
+
 
 def train_eval_single_canton(
     target_curve_name,
@@ -742,6 +862,46 @@ def train_all_cantons(
     return 
 
 
+def training_model(model, 
+                   target_name,
+                   data,
+                   ini_date,
+                   predict_n=14,
+                   look_back=14,
+                   batch  =1, 
+                   epochs = 100,
+                   path = None, 
+                   label = "train_region_name",
+                   save = True):
+
+    """
+    Function to train a LSTM model with all the data available
+    :params model: compiled LSTM model
+    :params target_name: string. String with the name of the target column
+    :params data: dataframe. Dataframe with features and target column
+    :params ini_date: string. Start date of training data
+    :params predict_n: int. Number of days that will be predicted
+    :params lookback: int. Number of the last days that will be used to forecast the next days
+    :params batch: int. batch size for batch training
+    :params epochs: int. Number of epochs to train the model
+    :params path: string. Path where the model will be saved 
+    :params label: string. Name used to save the model 
+    :params save: boolean. Indicates if the trained model will be saved or not 
+ 
+    :returns: 
+    :return model: trained model 
+    :return hist: history of the model 
+    """
+
+    X_train, Y_train, X_test, Y_test, factor, indice, X_forecast = transform_data(
+                                                                            target_name, 
+    data,ini_date = ini_date, look_back = look_back, predict_n = predict_n, split = 1)
+
+    hist, model = train(model, X_train, Y_train, batch_size=batch, epochs=epochs, save=save, path=path, label=label)
+
+    return model, hist
+
+
 
 def forecast(
     label,path,  X_for, factor, indice, uncertainty=True
@@ -809,6 +969,40 @@ def forecast(
 
         df_for["predict"] = df_predicted[df_predicted.columns[-1]] * factor
 
+    df_for.set_index('date', inplace = True)
+
+    return df_for
+
+
+def forecasting_model(target_name,
+                      data,
+                      predict_n=14,
+                      look_back=14,
+                      path = None, 
+                      label = "train_region_name",
+                      uncertainty = True):
+    """
+    Function to make forecast using a saved model 
+    :params target_name: string. String with the name of the target column
+    :params data: dataframe. Dataframe with features and target column
+    :params predict_n: int. Number of days that will be predicted
+    :params lookback: int. Number of the last days that will be used to forecast the next days
+    :params path: string. Path where the model will be saved 
+    :params label: string. Name used to save the model
+    :params uncertainty: boolean. Indicates if the confidence intervals will be computed or not 
+ 
+    :returns: 
+    * `df_for`: DataFrame with the forecasted values. 
+    """
+
+    
+
+    X_train, Y_train, X_test, Y_test, factor, indice, X_for = transform_data(
+                                                                            target_name, 
+    data, look_back = look_back, predict_n = predict_n, split = 1)
+
+    df_for = forecast(label,path,  X_for, factor, indice, uncertainty=uncertainty)
+    
     return df_for
 
 
@@ -860,8 +1054,11 @@ def forecast_single_canton(
         ini_date = ini_date
     )
 
-    df_for = forecast(f'train_lstm_{target_curve_name}_{canton}_{epochs}',path, X_forecast, factor, indice, uncertainty = uncertainty)
+    #df_for = forecast(f'train_lstm_{target_curve_name}_{canton}_{epochs}',path, X_forecast, factor, indice, uncertainty = uncertainty)
 
+    df_for = forecast(f'trained_model_{target_curve_name}_{canton}_{epochs}',path, X_forecast, factor, indice, uncertainty = uncertainty)
+
+    
     df_for['canton'] = canton 
 
     return df_for
@@ -1030,4 +1227,55 @@ def plot_predicted_vs_data(
 
     plt.show()
     
-    return 
+    return
+
+def plot_forecast(df, target_name, df_for, last_values = 90, title = 'Ngboost forecast', save = False, filename = 'ngboost_forecast', path = None):
+
+    '''
+    Function to plot the forecast 
+    
+    :params df: pandas Dataframe with the data used to make the forecast
+    :params target_name: string. Name of the target column forecasted
+    :params df_for: pandas Dataframe with the forecast values. This dataframe must have the 
+                    following columns: lower, median, upper and a datetime index 
+                    
+    :params last_values: int. Number of last values of the df show in the plot. 
+          
+    :params title: string. This string is used as title of the plot
+    :params save: booelan. If true the plot is saved
+    :params filename: string. Name of the png file where the plot is saved 
+    :params path: string|None. Path where the figure must be saved. If None the 
+                                figure is saved in the current directory.
+
+    :returns: None  
+    '''
+    fig, ax = plt.subplots()
+
+    ax.plot(df[target_name][-last_values:], label = 'Data')
+    
+    ax.plot(df_for['median'], label = 'Forecast', color = 'tab:orange')
+    
+    ax.fill_between(df_for.index, df_for.lower, df_for.upper, 
+                    color = 'tab:orange', alpha = 0.3, label = '95% CI')
+    
+    ax.set_title(f'{title}')
+    
+    ax.set_xlabel('Date')
+    
+    for label in ax.get_xticklabels():
+        label.set_rotation(30)
+    
+    ax.legend()
+    
+    ax.grid()
+    
+    if save:
+        if path == None:
+            plt.savefig(f'{filename}.png', dpi = 300, bbox_inches = 'tight')
+            
+        else:
+            plt.savefig(f'{path}/{filename}.png', dpi = 300, bbox_inches = 'tight')
+            
+    plt.show()
+    
+    return

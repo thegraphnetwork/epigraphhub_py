@@ -17,13 +17,20 @@ def test_rolling_predictions(get_df_test):
     df = get_df_test
     target_name = "hosp_GE"
 
-    df_preds = ngboost_models.rolling_predictions(
+    df_preds, models, X_train, targets = ngboost_models.rolling_predictions(
         target_name, df, ini_date="2020-03-01", split=0.75, horizon_forecast=2, maxlag=3
     )
 
     df_preds = df_preds.dropna()
 
     assert not df_preds.empty
+
+
+#def test_plot_predicted_vs_data():
+
+#    df_preds = pd.read_csv("tests/data_for_test/df_preds")
+
+#    ngboost_models.plot_predicted_vs_data(df_preds)
 
 
 def test_training_model(get_df_test):
@@ -33,9 +40,10 @@ def test_training_model(get_df_test):
     models = ngboost_models.training_model(
         target_name,
         df,
+        ini_date="2020-03-01",
         horizon_forecast=2,
         maxlag=3,
-        path="tests/data_for_test/",
+        path="tests/saved_models_for_test",
         save=True,
     )
 
@@ -49,7 +57,7 @@ def test_rolling_forecast(get_df_test):
     target_name = "hosp_GE"
 
     df_for = ngboost_models.rolling_forecast(
-        target_name, df, horizon_forecast=2, maxlag=3, path="tests/data_for_test/"
+        target_name, df, horizon_forecast=2, maxlag=3, path="tests/saved_models_for_test"
     )
 
     assert not df_for.empty
