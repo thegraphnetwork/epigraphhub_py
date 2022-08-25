@@ -9,23 +9,22 @@ forecasts. Also, there are functions to apply these methods in just one canton o
 """
 
 import copy
+import os
 from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
 from joblib import dump, load
 from ngboost import NGBRegressor
-from ngboost.distns import LogNormal
+from ngboost.distns import LogNormal, Poisson
 from ngboost.learners import default_tree_learner
-from ngboost.scores import LogScore
-from sklearn.model_selection import train_test_split
+from ngboost.scores import CRPScore, LogScore
+from sklearn.metrics import explained_variance_score as evs
+from sklearn.metrics import mean_absolute_error as mae
+from sklearn.metrics import mean_absolute_percentage_error as mape
+from sklearn.metrics import mean_squared_error as mse
+from sklearn.metrics import mean_squared_log_error as msle
 
-from epigraphhub.analysis.clustering import compute_clusters
-from epigraphhub.data.get_data import (
-    get_cluster_data,
-    get_georegion_data,
-    get_updated_data_swiss,
-)
 from epigraphhub.data.preprocessing import build_lagged_features
 
 params_model = {
@@ -35,21 +34,41 @@ params_model = {
     "natural_gradient": True,
     "verbose": False,
     "col_sample": 0.9,
-    "n_estimators": 30,
+    "n_estimators": 100,
     "learning_rate": 0.1,
     "validation_fraction": 0.15,
-    "early_stopping_rounds": 50,
+    "early_stopping_rounds": 10,
 }
 
 
-def rolling_predictions(
+def get_targets(target, predict_n):
+    """
+    Function to create a dictionary that it will be used train the ngboost model
+    :params target: array with the values used as target.
+    :params predict_n: int. Number os days that it will be predicted.
+    """
+
+    targets = {}
+
+    for d in range(1, predict_n + 1):
+        targets[d] = target.shift(-(d))[:-(d)]
+
+    return targets
+
+
+def train_eval_ngb(
     target_name,
     data,
     ini_date="2020-03-01",
-    split=0.75,
-    horizon_forecast=14,
-    maxlag=14,
+    end_train_date=None,
+    end_date=None,
+    ratio=0.75,
+    predict_n=14,
+    look_back=14,
     kwargs=params_model,
+    path=None,
+    name=None,
+    save=False,
 ):
 
     """
@@ -61,306 +80,125 @@ def rolling_predictions(
     made using the test dataset.
     Important:
 
-    params target_name:string. Name of the target column.
-    params data: dataframe. Dataframe with features and target column.
-    params ini_date: string. Determines the beggining of the train dataset
-    params split: float. Determines which percentage of the data will be used to train the model
-    params horizon_forecast: int. Number of days that will be predicted
-    params max_lag: int. Number of the last days that will be used to forecast the next days
-    params parameters_model: dict with the params that will be used in the ngboost
+    :params target_name:string. Name of the target column.
+    :params data: dataframe. Dataframe with features and target column.
+    :params ini_date: string or None. Determines the beggining of the train dataset
+    :params end_train_date: string or None. Determines the beggining of end of train dataset. If end_train_date
+                           is not None, then ratio isn't used.
+    :params end_date: string or None. Determines the end of the dataset used in validation.
+    :params ratio: float. Determines which percentage of the data will be used to train the model
+    :params predict_n: int. Number of days that will be predicted
+    :params look_back: int. Number of the last days that will be used to forecast the next days
+    :params parameters_model: dict with the params that will be used in the ngboost
                              regressor model.
+    :params path: sting. It indicates where save the models trained.
+    :params name: string. It indicates which name use to save the models trained.
+    :params save: boolean. If True the models trained are saved.
 
     returns: DataFrame.
     """
 
-    # remove the last 3 days to avoid delay in data
-    # data = data.iloc[:-3]
-    target = data[target_name]
+    df_lag = build_lagged_features(copy.deepcopy(data), maxlag=look_back)
 
-    df_lag = build_lagged_features(copy.deepcopy(data), maxlag=maxlag)
+    if ini_date != None:
+        df_lag = df_lag[ini_date:]
 
-    ini_date = max(
-        df_lag.index[0], target.index[0], datetime.strptime(ini_date, "%Y-%m-%d")
-    )
+    if end_date != None:
+        df_lag = df_lag[:end_date]
 
-    df_lag = df_lag[ini_date:]
-    target = target[ini_date:]
-    target = target.dropna()
     df_lag = df_lag.dropna()
+
+    target = df_lag[target_name]
+
+    targets = get_targets(target, predict_n)
 
     # remove the target column and columns related with the day that we want to predict
     df_lag = df_lag.drop(data.columns, axis=1)
 
-    targets = {}
-
-    for T in np.arange(1, horizon_forecast + 1, 1):
-        targets[T] = target.shift(-(T))[:-(T)]
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        df_lag, target, train_size=split, test_size=1 - split, shuffle=False
-    )
-
-    if np.sum(target) > 0.0:
-
-        idx = pd.period_range(
-            start=df_lag.index[0], end=df_lag.index[-1], freq=f"{horizon_forecast}D"
-        )
-
-        idx = idx.to_timestamp()
-
-        preds5 = np.empty((len(idx), horizon_forecast))
-        preds50 = np.empty((len(idx), horizon_forecast))
-        preds95 = np.empty((len(idx), horizon_forecast))
-
-        for T in range(1, horizon_forecast + 1):
-
-            tgt = targets[T][: len(X_train)]
-
-            i = 0
-
-            while i < len(tgt):
-                if tgt[i] <= 0:
-
-                    tgt[i] = 0.01
-                i = i + 1
-
-            model = NGBRegressor(**kwargs)
-
-            model.fit(X_train, tgt)
-
-            pred = model.pred_dist(df_lag.loc[idx])
-
-            pred50 = pred.median()
-
-            pred5, pred95 = pred.interval(alpha=0.95)
-
-            preds5[:, (T - 1)] = pred5
-            preds50[:, (T - 1)] = pred50
-            preds95[:, (T - 1)] = pred95
-
-        train_size = len(X_train)
-
-        y5 = preds5.flatten()
-        y50 = preds50.flatten()
-        y95 = preds95.flatten()
-
-        x = pd.period_range(
-            start=df_lag.index[1], end=df_lag.index[-1], freq="D"
-        ).to_timestamp()
-
-        x = np.array(x)
-
-        y5 = np.array(y5)
-
-        y50 = np.array(y50)
-
-        y95 = np.array(y95)
-
-        target = targets[1]
-
-        train_size = len(X_train)
-
-        dif = len(x) - len(y5)
-
-        if dif < 0:
-            y5 = y5[: len(y5) + dif]
-            y50 = y50[: len(y50) + dif]
-            y95 = y95[: len(y95) + dif]
-
-        df_pred = pd.DataFrame()
-        df_pred["target"] = target
-        df_pred["date"] = x
-        df_pred["lower"] = y5
-        df_pred["median"] = y50
-        df_pred["upper"] = y95
-        df_pred["train_size"] = [train_size] * len(df_pred)
-        df_pred["canton"] = [target_name[-2:]] * len(df_pred)
+    if end_train_date == None:
+        X_train = df_lag.iloc[: int(df_lag.shape[0] * ratio)]
 
     else:
-        x = pd.period_range(
-            start=df_lag.index[1], end=df_lag.index[-1], freq="D"
-        ).to_timestamp()
+        X_train = df_lag.loc[:end_train_date]
 
-        x = np.array(x)
+    idx = pd.period_range(
+        start=df_lag.index[0], end=df_lag.index[-1], freq=f"{predict_n}D"
+    )
 
-        df_pred = pd.DataFrame()
-        df_pred["target"] = target
-        df_pred["date"] = x
-        df_pred["lower"] = [0.0] * len(df_pred)
-        df_pred["median"] = [0.0] * len(df_pred)
-        df_pred["upper"] = [0.0] * len(df_pred)
-        df_pred["train_size"] = [len(X_train)] * len(df_pred)
-        df_pred["canton"] = [target_name[-2:]] * len(df_pred)
+    idx = idx.to_timestamp()
+
+    preds5 = np.empty((len(idx), predict_n))
+    preds50 = np.empty((len(idx), predict_n))
+    preds95 = np.empty((len(idx), predict_n))
+
+    for T in range(1, predict_n + 1):
+
+        tgt = targets[T][: len(X_train)]
+
+        model = NGBRegressor(**kwargs)
+
+        model.fit(X_train, tgt)
+
+        pred = model.pred_dist(df_lag.loc[idx], max_iter=model.best_val_loss_itr)
+
+        pred50 = pred.median()
+
+        pred5, pred95 = pred.interval(alpha=0.95)
+
+        preds5[:, (T - 1)] = pred5
+        preds50[:, (T - 1)] = pred50
+        preds95[:, (T - 1)] = pred95
+
+        if save:
+            dump(model, f"{path}/{name}_{T}.joblib")
+
+    train_size = len(X_train)
+
+    y5 = preds5.flatten()
+    y50 = preds50.flatten()
+    y95 = preds95.flatten()
+
+    x = pd.period_range(
+        start=df_lag.index[1], end=df_lag.index[-1], freq="D"
+    ).to_timestamp()
+
+    x = np.array(x)
+
+    y5 = np.array(y5)
+
+    y50 = np.array(y50)
+
+    y95 = np.array(y95)
+
+    train_size = len(X_train)
+
+    dif = len(x) - len(y5)
+
+    if dif < 0:
+        y5 = y5[: len(y5) + dif]
+        y50 = y50[: len(y50) + dif]
+        y95 = y95[: len(y95) + dif]
+
+    df_pred = pd.DataFrame()
+    df_pred["target"] = target[1:]
+    df_pred["date"] = x
+    df_pred["lower"] = y5
+    df_pred["median"] = y50
+    df_pred["upper"] = y95
+    df_pred["train_size"] = [train_size] * len(df_pred)
+    df_pred.set_index("date", inplace=True)
+    df_pred.index = pd.to_datetime(df_pred.index)
 
     return df_pred
 
 
-def train_eval_single_canton(
-    target_curve_name,
-    canton,
-    predictors,
-    vaccine=True,
-    smooth=True,
-    ini_date="2020-03-01",
-    updated_data=True,
-    split=0.75,
-    parameters_model=params_model,
-):
-
-    """
-    Function to train and evaluate the model for one georegion.
-
-    Important:
-    * By default the function is using the clustering cantons and the data since 2020
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
-
-    :params canton: canton of interest
-    :params predictors: variables that  will be used in model
-    :params vaccine: It determines if the vaccine data from owid will be used or not
-    :params smooth: It determines if data will be smoothed (7 day moving average) or not
-    :params ini_date: Determines the beggining of the train dataset
-    :params update_data: Determines if the data from the Geneva hospital will be used.
-                        this params only is used when canton = GE and target_curve_name = hosp.
-    :params split: float. Determines which percentage of the data will be used to train the model
-    :params parameters_model: dict with the params that will be used in the ngboost
-                             regressor model.
-
-    returns: Dataframe.
-    """
-
-    df = get_georegion_data(
-        "switzerland", "foph_cases", "All", ["datum", '"geoRegion"', "entries"]
-    )
-    df.set_index("datum", inplace=True)
-    df.index = pd.to_datetime(df.index)
-
-    clusters = compute_clusters(
-        df,
-        ["geoRegion", "entries"],
-        t=0.3,
-        drop_georegions=["CH", "FL", "CHFL"],
-        plot=False,
-    )[1]
-
-    for cluster in clusters:
-
-        if canton in cluster:
-
-            cluster_canton = cluster
-
-    target_name = f"{target_curve_name}_{canton}"
-
-    horizon = 14
-    maxlag = 14
-
-    df = get_cluster_data(
-        "switzerland", predictors, list(cluster_canton), vaccine=vaccine, smooth=smooth
-    )
-
-    df = df.fillna(0)
-
-    if target_name == "hosp_GE":
-        if updated_data:
-            # get updated data
-            df_new = get_updated_data_swiss(smooth)
-
-            df.loc[df_new.index[0] : df_new.index[-1], "hosp_GE"] = df_new.hosp_GE
-
-            df = df.loc[: df_new.index[-1]]
-
-    df = rolling_predictions(
-        target_name,
-        df,
-        ini_date=ini_date,
-        split=split,
-        horizon_forecast=horizon,
-        maxlag=maxlag,
-        kwargs=parameters_model,
-    )
-
-    return df
-
-
-def train_eval_all_cantons(
-    target_curve_name,
-    predictors,
-    vaccine=True,
-    smooth=True,
-    ini_date="2020-03-01",
-    split=0.75,
-    parameters_model=params_model,
-):
-
-    """
-    Function to make prediction for all the cantons
-
-    Important:
-    * By default the function is using the clustering cantons and the data since 2020
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
-
-    :params target_curve_name: string to indicate the target column of the predictions
-    :params predictors: variables that  will be used in model
-    :params vaccine: It determines if the vaccine data from owid will be used or not
-    :params smooth: It determines if data will be smoothed or not
-    :params ini_date: Determines the beggining of the train dataset
-    :params split: float. Determines which percentage of the data will be used to train the model
-    :params parameters_model: dict with the params that will be used in the ngboost
-                             regressor model.
-
-    returns: Dataframe.
-    """
-
-    df_all = pd.DataFrame()
-
-    df = get_georegion_data(
-        "switzerland", "foph_cases", "All", ["datum", '"geoRegion"', "entries"]
-    )
-    df.set_index("datum", inplace=True)
-    df.index = pd.to_datetime(df.index)
-
-    clusters = compute_clusters(
-        df,
-        ["geoRegion", "entries"],
-        t=0.3,
-        drop_georegions=["CH", "FL", "CHFL"],
-        plot=False,
-    )[1]
-
-    for cluster in clusters:
-
-        df = get_cluster_data(
-            "switzerland", predictors, list(cluster), vaccine=vaccine, smooth=smooth
-        )
-
-        df = df.fillna(0)
-
-        for canton in cluster:
-
-            target_name = f"{target_curve_name}_{canton}"
-            horizon = 14
-            maxlag = 14
-
-            df_pred = rolling_predictions(
-                target_name,
-                df,
-                ini_date=ini_date,
-                split=split,
-                horizon_forecast=horizon,
-                maxlag=maxlag,
-                kwargs=parameters_model,
-            )
-
-            df_all = pd.concat([df_all, df_pred])
-
-    return df_all
-
-
-def training_model(
+def train_ngb(
     target_name,
     data,
     ini_date="2020-03-01",
-    horizon_forecast=14,
-    maxlag=14,
+    end_date=None,
+    predict_n=14,
+    look_back=14,
     path="../opt/models/saved_models/ml",
     save=True,
     kwargs=params_model,
@@ -375,81 +213,60 @@ def training_model(
     that will be used to make forecasts.
 
     params target_name:string. Name of the target column.
-    params ini_date: string. Determines the beggining of the train dataset
-    params horizon_forecast: int. Number of days that will be predicted
-    params max_lag: int. Number of the last days that will be used to forecast the next days
+    params ini_date: string or None. Determines the beggining of the train dataset
+    params end_date: string or None. Determines the end of the train dataset
+    params predict_n: int. Number of days that will be predicted
+    params look_back: int. Number of the last days that will be used to forecast the next days
     params path: string. Indicates where the models will be saved
+    params save: boolean. If True the models is saved
     params kwargs: dict with the params that will be used in the ngboost
                              regressor model.
 
-    returns: list with the {horizon_forecast} models saved
+    returns: list with the {predict_n} models saved
     """
 
-    # removing the last three days of data to avoid delay in the reporting.
-    data = data.iloc[:-3]
+    if ini_date != None:
+        data = data.loc[ini_date:]
 
-    target = data[target_name]
+    if end_date != None:
+        data = data.loc[:end_date]
 
-    df_lag = build_lagged_features(copy.deepcopy(data), maxlag=maxlag)
+    df_lag = build_lagged_features(copy.deepcopy(data), maxlag=look_back)
 
-    ini_date = max(
-        df_lag.index[0], target.index[0], datetime.strptime(ini_date, "%Y-%m-%d")
-    )
-
-    df_lag = df_lag[ini_date:]
-    target = target[ini_date:]
-    target = target.dropna()
     df_lag = df_lag.dropna()
+
+    target = df_lag[target_name]
 
     models = []
 
-    # condition to only apply the model for datas with values different of 0
-    if np.sum(target) > 0.0:
+    # remove the target column and columns related with the day that we want to predict
+    df_lag = df_lag.drop(data.columns, axis=1)
 
-        # remove the target column and columns related with the day that we want to predict
-        df_lag = df_lag.drop(data.columns, axis=1)
+    targets = get_targets(target, predict_n)
 
-        # targets
-        targets = {}
+    X_train = df_lag.iloc[:-1]
 
-        for T in np.arange(1, horizon_forecast + 1, 1):
-            if T == 1:
-                targets[T] = target.shift(-(T - 1))
-            else:
-                targets[T] = target.shift(-(T - 1))[: -(T - 1)]
+    for T in range(1, predict_n + 1):
+        tgt = targets[T]
 
-        X_train = df_lag.iloc[:-1]
+        model = NGBRegressor(**kwargs)
 
-        for T in range(1, horizon_forecast + 1):
+        model.fit(X_train.iloc[: len(tgt)], tgt)
 
-            tgt = targets[T][: len(X_train)]
+        if save:
+            dump(model, f"{path}/ngboost_{target_name}_{T}D.joblib")
 
-            i = 0
-
-            while i < len(tgt):
-                if tgt[i] <= 0:
-
-                    tgt[i] = 0.01
-                i = i + 1
-
-            model = NGBRegressor(**kwargs)
-
-            model.fit(X_train.iloc[: len(tgt)], tgt)
-
-            if save:
-                dump(model, f"{path}/ngboost_{target_name}_{T}D.joblib")
-
-            models.append(model)
+        models.append(model)
 
     return models
 
 
-def rolling_forecast(
+def forecast_ngb(
     target_name,
     data,
-    ini_date="2020-03-01",
-    horizon_forecast=14,
-    maxlag=14,
+    end_date=None,
+    predict_n=14,
+    look_back=14,
     path="../opt/models/saved_models/ml",
 ):
 
@@ -458,66 +275,35 @@ def rolling_forecast(
     `training_model` and make the forecast.
 
     Important:
-    horizon_forecast and max_lag need have the same value used in training_model
+    predict_n and max_lag need have the same value used in training_model
     Only the last that of the dataset will be used to forecast the next
-    horizon_forecast days.
+    predict_n days.
 
     params target_name:string. Name of the target column.
     params data: dataframe. Dataframe with features and target column.
-    params ini_date: string. Determines the beggining of the train dataset
-    params horizon_forecast: int. Number of days that will be predicted
-    params max_lag: int. Number of the last days that will be used to forecast the next days
+    params end_date: string. Determines from what day the forecast will be computed.
+    params predict_n: int. Number of days that will be predicted
+    params look_back: int. Number of the last days that will be used to forecast the next days
     params path: string. Indicates where the model is save to the function load the model
 
     returns: DataFrame.
     """
 
-    # removing the last three days of data to avoid delay in the reporting.
-    data = data.iloc[:-3]
+    df_lag = build_lagged_features(copy.deepcopy(data), maxlag=look_back)
 
-    target = data[target_name]
+    if end_date != None:
+        df_lag = df_lag.loc[:end_date]
 
-    df_lag = build_lagged_features(copy.deepcopy(data), maxlag=maxlag)
+    # remove the target column and columns related with the day that we want to predict
+    df_lag = df_lag.drop(data.columns, axis=1)
 
-    ini_date = max(
-        df_lag.index[0], target.index[0], datetime.strptime(ini_date, "%Y-%m-%d")
-    )
+    forecasts5 = []
+    forecasts50 = []
+    forecasts95 = []
 
-    df_lag = df_lag[ini_date:]
-    target = target[ini_date:]
-    target = target.dropna()
-    df_lag = df_lag.dropna()
+    for T in range(1, predict_n + 1):
 
-    # condition to only apply the model for datas with values different of 0
-    if np.sum(target) > 0.0:
-
-        # remove the target column and columns related with the day that we want to predict
-        df_lag = df_lag.drop(data.columns, axis=1)
-
-        targets = {}
-
-        for T in np.arange(1, horizon_forecast + 1, 1):
-            if T == 1:
-                targets[T] = target.shift(-(T - 1))
-            else:
-                targets[T] = target.shift(-(T - 1))[: -(T - 1)]
-
-        forecasts5 = []
-        forecasts50 = []
-        forecasts95 = []
-
-        X_train = df_lag.iloc[:-1]
-
-        for T in range(1, horizon_forecast + 1):
-            tgt = targets[T][: len(X_train)]
-
-            i = 0
-
-            while i < len(tgt):
-                if tgt[i] <= 0:
-
-                    tgt[i] = 0.01
-                i = i + 1
+        if os.path.exists(f"{path}/ngboost_{target_name}_{T}D.joblib"):
 
             model = load(f"{path}/ngboost_{target_name}_{T}D.joblib")
 
@@ -531,10 +317,10 @@ def rolling_forecast(
             forecasts50.append(forecast50)
             forecasts95.append(forecast95)
 
-    else:  # return a dataframe with values equal 0
-        forecasts5 = [0] * 14
-        forecasts50 = [0] * 14
-        forecasts95 = [0] * 14
+        else:
+            forecasts5.append(0)
+            forecasts50.append(0)
+            forecasts95.append(0)
 
     # transformando preds em um array
     forecast_dates = []
@@ -543,7 +329,7 @@ def rolling_forecast(
 
     a = datetime.strptime(last_day, "%Y-%m-%d")
 
-    for i in np.arange(1, horizon_forecast + 1):
+    for i in np.arange(1, predict_n + 1):
 
         d_i = datetime.strftime(a + timedelta(days=int(i)), "%Y-%m-%d")
 
@@ -554,313 +340,65 @@ def rolling_forecast(
     df_for["lower"] = np.array(forecasts5)
     df_for["median"] = np.array(forecasts50)
     df_for["upper"] = np.array(forecasts95)
-    df_for["canton"] = [target_name[-2:]] * len(df_for)
+    df_for.set_index("date", inplace=True)
 
     return df_for
 
 
-def forecast_single_canton(
-    target_curve_name,
-    canton,
-    predictors,
-    vaccine=True,
-    smooth=True,
-    ini_date="2020-03-01",
-    updated_data=True,
-    path="../opt/models/saved_models/ml",
-):
+def compute_metrics(df_pred):
     """
-    Function to make the forecast for one canton
+    This function evaluates the predictions obtained in the `train_eval_ngb()` function
+    in the train and test sample. The predictions must be saved in a dataset with the following columns:
+    'median', 'target' and 'train_size'.
+    This function uses the following metrics:
+    - explained variance score;
+    - mean absolute error;
+    - mean squared error;
+    - root mean squared error;
+    - mean squared log error;
+    - mean absolute percentage error.
 
-    Important:
-    * By default the function is using the clustering cantons and the data since 2020
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
-
-    params target_curve_name: string to indicate the target column of the predictions
-    params canton: string to indicate the interest canton
-    params predictors: variables that  will be used in model
-    params vaccine: It determines if the vaccine data from owid will be used or not
-    params smooth: It determines if data will be smoothed or not
-    params ini_date: Determines the beggining of the train dataset
-    params update_data: Determines if the data from the Geneva hospital will be used.
-                        this params only is used when canton = GE and target_curve_name = hosp.
-
-    params path: string. Indicates where the models trained are saved.
-
-    returns: Dataframe with the forecast for all the cantons
+    To compute this metrics we use the implementations of the sklearn.metrics package.
     """
 
-    df = get_georegion_data(
-        "switzerland", "foph_cases", "All", ["datum", '"geoRegion"', "entries"]
-    )
-    df.set_index("datum", inplace=True)
-    df.index = pd.to_datetime(df.index)
+    metrics = [
+        "explained_variance_score",
+        "mean_absolute_error",
+        "mean_squared_error",
+        "root_mean_squared_error",
+        "mean_squared_log_error",
+        "mean_absolute_percentage_error",
+    ]
 
-    clusters = compute_clusters(
-        df,
-        ["geoRegion", "entries"],
-        t=0.3,
-        drop_georegions=["CH", "FL", "CHFL"],
-        plot=False,
-    )[1]
+    # computing error in train sample
+    df_metrics = pd.DataFrame(columns=["metrics", "in_sample", "out_sample"])
 
-    for cluster in clusters:
+    df_metrics["metrics"] = metrics
 
-        if canton in cluster:
+    split = df_pred["train_size"][0]
+    y_true_in = df_pred["target"].iloc[:split]
+    y_pred_in = df_pred["median"].iloc[:split]
+    y_true_out = df_pred["target"].iloc[split:]
+    y_pred_out = df_pred["median"].iloc[split:]
 
-            cluster_canton = cluster
+    df_metrics["in_sample"] = [
+        evs(y_true_in, y_pred_in),
+        mae(y_true_in, y_pred_in),
+        mse(y_true_in, y_pred_in),
+        mse(y_true_in, y_pred_in, squared=False),
+        msle(y_true_in, y_pred_in),
+        mape(y_true_in, y_pred_in),
+    ]
 
-    df = get_cluster_data(
-        "switzerland", predictors, list(cluster_canton), vaccine=vaccine, smooth=smooth
-    )
+    df_metrics["out_sample"] = [
+        evs(y_true_out, y_pred_out),
+        mae(y_true_out, y_pred_out),
+        mse(y_true_out, y_pred_out),
+        mse(y_true_out, y_pred_out, squared=False),
+        msle(y_true_out, y_pred_out),
+        mape(y_true_out, y_pred_out),
+    ]
 
-    df = df.fillna(0)
+    df_metrics.set_index("metrics", inplace=True)
 
-    target_name = f"{target_curve_name}_{canton}"
-
-    if target_name == "hosp_GE":
-        if updated_data:
-
-            df_new = get_updated_data_swiss(smooth)
-
-            df.loc[df_new.index[0] : df_new.index[-1], "hosp_GE"] = df_new.hosp_GE
-
-            df = df.loc[: df_new.index[-1]]
-
-    horizon = 14
-    maxlag = 14
-
-    df_for = rolling_forecast(
-        target_name,
-        df,
-        ini_date=ini_date,
-        horizon_forecast=horizon,
-        maxlag=maxlag,
-        path=path,
-    )
-
-    return df_for
-
-
-def forecast_all_cantons(
-    target_curve_name,
-    predictors,
-    vaccine=True,
-    smooth=True,
-    ini_date="2020-03-01",
-    path="../opt/models/saved_models/ml",
-):
-    """
-    Function to make the forecast for all the cantons
-
-    Important:
-    * By default the function is using the clustering cantons and the data since 2020
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
-
-    params target_curve_name: string to indicate the target column of the predictions
-    params predictors: variables that  will be used in model
-    params vaccine: It determines if the vaccine data from owid will be used or not
-    params smooth: It determines if data will be smoothed or not
-    params ini_date: Determines the beggining of the train dataset
-    params path: string. Indicates where the models trained are saved.
-
-    returns: Dataframe with the forecast for all the cantons
-    """
-    df_all = pd.DataFrame()
-
-    df = get_georegion_data(
-        "switzerland", "foph_cases", "All", ["datum", '"geoRegion"', "entries"]
-    )
-    df.set_index("datum", inplace=True)
-    df.index = pd.to_datetime(df.index)
-
-    clusters = compute_clusters(
-        df,
-        ["geoRegion", "entries"],
-        t=0.3,
-        drop_georegions=["CH", "FL", "CHFL"],
-        plot=False,
-    )[1]
-
-    for cluster in clusters:
-
-        df = get_cluster_data(
-            "switzerland", predictors, list(cluster), vaccine=vaccine, smooth=smooth
-        )
-
-        df = df.fillna(0)
-
-        for canton in cluster:
-
-            target_name = f"{target_curve_name}_{canton}"
-
-            horizon = 14
-            maxlag = 14
-
-            df_for = rolling_forecast(
-                target_name,
-                df,
-                ini_date=ini_date,
-                horizon_forecast=horizon,
-                maxlag=maxlag,
-                path=path,
-            )
-
-            df_all = pd.concat([df_all, df_for])
-
-    return df_all
-
-
-def train_single_canton(
-    target_curve_name,
-    canton,
-    predictors,
-    path="../opt/models/saved_models/ml",
-    vaccine=True,
-    smooth=True,
-    ini_date="2020-03-01",
-    updated_data=False,
-    parameters_model=params_model,
-):
-
-    """
-    Function to train and evaluate the model for one georegion
-
-    Important:
-    * By default the function is using the clustering cantons and the data since 2020
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
-
-    :params canton: canton of interest
-    :params predictors: variables that  will be used in model
-    :params vaccine: It determines if the vaccine data from owid will be used or not
-    :params smooth: It determines if data will be smoothed or not
-    :params ini_date: Determines the beggining of the train dataset
-    :params path: Determines  where the model trained will be saved
-    :params update_data: Determines if the data from the Geneva hospital will be used.
-                        this params only is used when canton = GE and target_curve_name = hosp.
-    :params parameters_model: dict with the params that will be used in the ngboost
-                             regressor model.
-    :returns: None
-    """
-
-    # compute the clusters
-    df = get_georegion_data(
-        "switzerland", "foph_cases", "All", ["datum", '"geoRegion"', "entries"]
-    )
-    df.set_index("datum", inplace=True)
-    df.index = pd.to_datetime(df.index)
-
-    clusters = compute_clusters(
-        df,
-        ["geoRegion", "entries"],
-        t=0.3,
-        drop_georegions=["CH", "FL", "CHFL"],
-        plot=False,
-    )[1]
-
-    for cluster in clusters:
-
-        if canton in cluster:
-
-            cluster_canton = cluster
-
-    target_name = f"{target_curve_name}_{canton}"
-
-    horizon = 14
-    maxlag = 14
-
-    # getting the data
-    df = get_cluster_data(
-        "switzerland", predictors, list(cluster_canton), vaccine=vaccine, smooth=smooth
-    )
-    # filling the nan values with 0
-    df = df.fillna(0)
-
-    if target_name == "hosp_GE":
-        if updated_data:
-            # atualizando a coluna das Hospitalizações com os dados mais atualizados
-            df_new = get_updated_data_swiss(smooth)
-
-            df.loc[df_new.index[0] : df_new.index[-1], "hosp_GE"] = df_new.hosp_GE
-
-            # utilizando como último data a data dos dados atualizados:
-            df = df.loc[: df_new.index[-1]]
-
-    training_model(
-        target_name,
-        df,
-        ini_date,
-        path=path,
-        horizon_forecast=horizon,
-        maxlag=maxlag,
-        kwargs=parameters_model,
-    )
-
-    return
-
-
-def train_all_cantons(
-    target_curve_name,
-    predictors,
-    vaccine=True,
-    smooth=True,
-    ini_date="2020-03-01",
-    parameters_model=params_model,
-):
-
-    """
-    Function to train and evaluate the model for alk the cantons in switzerland
-
-    Important:
-    * By default the function is using the clustering cantons and the data since 2020
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
-
-    :params target_curve_name: string to indicate the target column of the predictions
-    :params predictors: variables that  will be used in model
-    :params vaccine: It determines if the vaccine data from owid will be used or not
-    :params smooth: It determines if data will be smoothed or not
-    :params ini_date: Determines the beggining of the train dataset
-    :params parameters_model: dict with the params that will be used in the ngboost
-                             regressor model.
-
-    returns: Dataframe with the forecast for all the cantons
-    """
-
-    df = get_georegion_data(
-        "switzerland", "foph_cases", "All", ["datum", '"geoRegion"', "entries"]
-    )
-    df.set_index("datum", inplace=True)
-    df.index = pd.to_datetime(df.index)
-
-    clusters = compute_clusters(
-        df,
-        ["geoRegion", "entries"],
-        t=0.3,
-        drop_georegions=["CH", "FL", "CHFL"],
-        plot=False,
-    )[1]
-
-    for cluster in clusters:
-
-        df = get_cluster_data(
-            "switzerland", predictors, list(cluster), vaccine=vaccine, smooth=smooth
-        )
-
-        df = df.fillna(0)
-
-        for canton in cluster:
-            target_name = f"{target_curve_name}_{canton}"
-
-            horizon = 14
-            maxlag = 14
-
-            training_model(
-                target_name,
-                df,
-                ini_date,
-                horizon_forecast=horizon,
-                maxlag=maxlag,
-                kwargs=parameters_model,
-            )
-
-    return
+    return df_metrics
