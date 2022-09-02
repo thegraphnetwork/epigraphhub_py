@@ -1,5 +1,7 @@
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
+
 from collections import defaultdict
+
 import pandas as pd
 import requests as rq
 
@@ -22,7 +24,7 @@ class WorldPop:
     def __init__(self):
         self._datasets: dict[str, Any] = {}
         self._aliases: list[str] = [d["alias"] for d in self.datasets["data"]]
-        self._levels: Dict[str, str] = defaultdict(lambda: [])
+        self._levels: dict[str, str] = defaultdict(lambda: [])
 
     @property
     def datasets(self):
@@ -46,7 +48,7 @@ class WorldPop:
         alias_url = self.api_root + f"/{alias}"
         content = json_get(alias_url)
         for ds in content["data"]:
-            self._levels[alias].append(ds['alias'])
+            self._levels[alias].append(ds["alias"])
             table = json_get(alias_url + f"/{ds['alias']}")["data"]
             df = pd.DataFrame(
                 table,
