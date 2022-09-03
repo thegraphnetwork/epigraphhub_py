@@ -1,28 +1,33 @@
 """
-The functions in this module allow the user to get the datasets stored in the 
-epigraphhub database. 
+The functions in this module allow the user to get the datasets stored in the
+epigraphhub database.
 
-The function get_agg_data aggregate the data according to the values of one column, 
-and the method of aggregation applied. 
+The function get_agg_data aggregate the data according to the values of one column,
+and the method of aggregation applied.
 
-The function get_georegion_data filter the datasets for a list of 
+The function get_georegion_data filter the datasets for a list of
 selected regions (in the Switzerland case: cantons).
 
 The function get_cluster_data is focused on being used to apply the forecast models.
-This function returns a table where each column is related to a  different table and 
-region (e.g. the daily number of cases and the daily number of hospitalizations in 
-Geneva and Fribourg). 
+This function returns a table where each column is related to a  different table and
+region (e.g. the daily number of cases and the daily number of hospitalizations in
+Geneva and Fribourg).
 Some parts of the code of this function are focused on the swiss case.
-So the function isn't fully general. 
+So the function isn't fully general.
 """
 
 
 import pandas as pd
 from sqlalchemy import create_engine
 
-engine_public = create_engine(
-    "postgresql://epigraph:epigraph@localhost:5432/epigraphhub"
-)
+from epigraphhub.settings import env
+
+with env.db.credentials['epigraph_public'] as credential:
+    engine_public = create_engine(
+        f"postgresql://{credential.username}:"
+        f"{credential.password}@{env.db.host}:{env.db.port}/"
+        f"{credential.dbname}"
+    )
 
 
 def get_agg_data(schema, table_name, columns, method, ini_date):
@@ -87,7 +92,7 @@ def get_georegion_data(schema, table_name, georegion, columns, georegion_column)
 
     if type(georegion) != list and georegion != "All":
         raise Exception(
-            """Error. The georegion param should be a list or the string All to 
+            """Error. The georegion param should be a list or the string All to
         return all the georegions."""
         )
 

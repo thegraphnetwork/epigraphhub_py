@@ -5,12 +5,12 @@ from sshtunnel import SSHTunnelForwarder
 
 
 class Tunnel:
-    def __init__(self):
-        self.host = "epigraphhub.org"
+    def __init__(self, host: str):
+        self.host: str = host
         self.server = None
         atexit.register(self.close_tunnel)
 
-    def open_tunnel(self, user="epigraph", ssh_key_passphrase=""):
+    def open_tunnel(self, user: str = "epigraph", ssh_key_passphrase=""):
         """
         Opens a tunnel to EpigraphHub database
 
@@ -41,7 +41,7 @@ class Tunnel:
             self.server = None
 
 
-def get_engine(dbuser="epigraph", dbpass="epigraph", db="sandbox"):
+def get_engine(dbuser: str = "epigraph", dbpass: str = "epigraph", db: str = "sandbox"):
     """
     returns an engine connected to the Epigraphhub database
     Args:
