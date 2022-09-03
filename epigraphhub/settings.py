@@ -8,22 +8,30 @@ __all__ = ["config"]
 config_data = read()
 
 
+class ConfigContext:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+
 @dataclass
-class DBCredential:
+class DBCredential(ConfigContext):
     dbname: str = "placeholder"
     username: str = "placeholder"
     password: str = "placeholder"
 
 
 @dataclass
-class DBConfig:
+class DBConfig(ConfigContext):
     host: str = "localhost"
     port: str = "5432"
     credentials: dict[str, DBCredential] = field(default_factory=dict)
 
 
 @dataclass
-class Config:
+class Config(ConfigContext):
     db: DBConfig = DBConfig()
 
 

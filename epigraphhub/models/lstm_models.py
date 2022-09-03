@@ -30,7 +30,7 @@ from tensorflow.keras.layers import LSTM, Bidirectional, Dense, Dropout
 from tensorflow.keras.utils import plot_model
 
 from epigraphhub.analysis.clustering import compute_clusters
-from epigraphhub.data.get_data import get_cluster_data, get_updated_data_swiss
+from epigraphhub.data.foph import get_cluster_data, get_updated_data_swiss
 from epigraphhub.data.preprocessing import lstm_split_data as split_data
 from epigraphhub.data.preprocessing import normalize_data
 

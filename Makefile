@@ -1,5 +1,6 @@
 #* Variables
-SHELL := /usr/bin/env bash
+SHELL:=/usr/bin/env bash
+ARGS:=
 
 #* Docker variables
 DOCKER=docker-compose --file docker/compose.yaml --env-file docker/.env
@@ -17,7 +18,7 @@ linter:
 
 .PHONY: test
 test:
-	poetry run pytest -c pyproject.toml --cov-report=html --cov tests/
+	poetry run pytest --cov-report=html --cov tests/ ${ARGS}
 	poetry run coverage-badge -o assets/images/coverage.svg -f
 
 

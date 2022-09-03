@@ -63,7 +63,7 @@ jobs:
         make docker-compose-start
 
     - name: Run tests
-      run: make test
+      run: make test ARGS="--disable-warnings"
 
     - name: Run style checks
       run: make check-codestyle
