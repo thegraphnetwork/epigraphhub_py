@@ -12,7 +12,7 @@
             "from": "return \".*\"  # changed by semantic-release",
             "to": "return \"${nextRelease.version}\"  # changed by semantic-release",
             "results": [
-              { 
+              {
                 "file": "epigraphhub/__init__.py",
                 "hasChanged": true,
                 "numMatches": 1,
@@ -26,7 +26,7 @@
             "from": "version = \".*\"  # changed by semantic-release",
             "to": "version = \"${nextRelease.version}\"  # changed by semantic-release",
             "results": [
-              { 
+              {
                 "file": "pyproject.toml",
                 "hasChanged": true,
                 "numMatches": 1,
@@ -49,7 +49,8 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "poetry build"
+        "prepareCmd": "poetry build",
+        "publishCmd": "poetry build"
       }
     ],
     [
