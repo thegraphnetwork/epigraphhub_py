@@ -12,7 +12,6 @@ env:
   POSTGRES_EPIGRAPH_DB: dev_epigraphhub
   POSTGRES_EPIGRAPH_DB_PRIVATE: dev_privatehub
   POSTGRES_EPIGRAPH_DB_SANDBOX: dev_sandbox
-  DOCKER: "docker-compose --file docker/compose.yaml --env-file docker/.env"
 
 jobs:
   build:
@@ -52,17 +51,16 @@ jobs:
     - name: Create config file
       run: |
         epigraphhub-config \
-          --db-host localhost \
-          --db-port 25432 \
-          --db-credential "epigraph_public:dev_epigraphhub/dev_epigraph/dev_epigraph" \
-          --db-credential "epigraph_private:dev_privatehub/dev_epigraph/dev_epigraph" \
-          --db-credential "epigraph_sandbox:dev_sandbox/dev_epigraph/dev_epigraph"
+          --db-host ${POSTGRES_HOST} \
+          --db-port ${POSTGRES_ṔORT} \
+          --db-credential "epigraph_public:${POSTGRES_EPIGRAPH_DB}/${POSTGRES_EPIGRAPH_USER}/${POSTGRES_EPIGRAPH_PASSWORD}" \
+          --db-credential "epigraph_private:${POSTGRES_EPIGRAPH_DB_PRIVATE}/${POSTGRES_EPIGRAPH_USER}/${POSTGRES_EPIGRAPH_PASSWORD}" \
+          --db-credential "epigraph_sandbox:${POSTGRES_EPIGRAPH_DB_SANDBOX}/${POSTGRES_EPIGRAPH_USER}/${POSTGRES_EPIGRAPH_PASSWORD}"
 
     - name: start up docker container
       run: |
-        ${DOCKER} pull
-        ${DOCKER} build
-        ${DOCKER} up -d postgres
+        make docker-compose-build
+        make docker-compose-start
 
     - name: Run tests
       run: make test

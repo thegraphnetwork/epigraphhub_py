@@ -50,7 +50,7 @@
       "@semantic-release/exec",
       {
         "prepareCmd": "poetry build",
-        "publishCmd": "poetry build"
+        "publishCmd": "poetry publish"
       }
     ],
     [

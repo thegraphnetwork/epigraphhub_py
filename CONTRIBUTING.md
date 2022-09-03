@@ -2,17 +2,62 @@
 
 ## Dependencies
 
-We use `poetry` to manage the [dependencies](https://github.com/python-poetry/poetry).
-If you dont have `poetry`, you should install with `make poetry-download`.
+The easiest way to have the environment setup is using conda.
+Conda is the most recommended package manager for scientific
+and data python stack.
 
-To install dependencies and prepare [`pre-commit`](https://pre-commit.com/) hooks you would need to run `install` command:
+If you don't have it installed, you can install it via mambaforge:
+https://github.com/conda-forge/miniforge#mambaforge
+
+Mamba is a fastest layer on top of conda that will fast the way
+conda works.
+
+When you have the conda installed, you can proceed and create
+a new conda environment for epigraphhub.
 
 ```bash
-make install
-make pre-commit-install
+mamba env create --file conda/dev.yaml
 ```
 
-To activate your `virtualenv` run `poetry shell`.
+This command will create a new conda environment with some development
+dependencies for epigraphhub. In order to proceed, you will need first
+activate your environment:
+
+```bash
+conda activate epigraphhubpy
+```
+
+Now, you can install the epigraphhub dependencies with:
+
+```bash
+poetry install
+```
+
+## Configuration file
+
+`epigraphhub_py` needs a configuration file in order to access the database.
+
+After you have the library installed, you can run the following command
+(just an example):
+
+```bash
+epigraphhub-config \
+  --db-host localhost \
+  --db-port 25432 \
+  --db-credential "epigraph_public:dev_epigraphhub/dev_epigraph/dev_epigraph" \
+  --db-credential "epigraph_private:dev_privatehub/dev_epigraph/dev_epigraph" \
+  --db-credential "epigraph_sandbox:dev_sandbox/dev_epigraph/dev_epigraph"
+```
+
+We need to have connection for all these 3 databases:
+  - epigraphhub_public,
+  - epigraphhub_private
+  - epigraphhub_sandbox
+
+If you don't have this databases yet, you can create that locally using docker:
+
+```bash
+```
 
 ## Codestyle
 
