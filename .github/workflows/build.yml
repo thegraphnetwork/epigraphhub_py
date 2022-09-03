@@ -3,16 +3,16 @@ name: build
 on: [push, pull_request]
 
 env:
-  POSTGRES_HOST=localhost
-  POSTGRES_PORT=25432
-  POSTGRES_USER=postgres
-  POSTGRES_PASSWORD=postgres
-  POSTGRES_EPIGRAPH_USER=dev_epigraph
-  POSTGRES_EPIGRAPH_PASSWORD=dev_epigraph
-  POSTGRES_EPIGRAPH_DB=dev_epigraphhub
-  POSTGRES_EPIGRAPH_DB_PRIVATE=dev_privatehub
-  POSTGRES_EPIGRAPH_DB_SANDBOX=dev_sandbox
-  DOCKER="docker-compose --file docker/compose.yaml --env-file ./.env"
+  POSTGRES_HOST: localhost
+  POSTGRES_PORT: 25432
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+  POSTGRES_EPIGRAPH_USER: dev_epigraph
+  POSTGRES_EPIGRAPH_PASSWORD: dev_epigraph
+  POSTGRES_EPIGRAPH_DB: dev_epigraphhub
+  POSTGRES_EPIGRAPH_DB_PRIVATE: dev_privatehub
+  POSTGRES_EPIGRAPH_DB_SANDBOX: dev_sandbox
+  DOCKER: "docker-compose --file docker/compose.yaml --env-file ./.env"
 
 jobs:
   build:
