@@ -12,7 +12,7 @@ env:
   POSTGRES_EPIGRAPH_DB: dev_epigraphhub
   POSTGRES_EPIGRAPH_DB_PRIVATE: dev_privatehub
   POSTGRES_EPIGRAPH_DB_SANDBOX: dev_sandbox
-  DOCKER: "docker-compose --file docker/compose.yaml --env-file ./.env"
+  DOCKER: "docker-compose --file docker/compose.yaml --env-file docker/.env"
 
 jobs:
   build:
