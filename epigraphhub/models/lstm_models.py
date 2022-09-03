@@ -30,7 +30,7 @@ from tensorflow.keras.layers import LSTM, Bidirectional, Dense, Dropout
 from tensorflow.keras.utils import plot_model
 
 from epigraphhub.analysis.clustering import compute_clusters
-from epigraphhub.data.foph import get_cluster_data, get_updated_data_swiss
+from epigraphhub.data.foph import get_cluster_data
 from epigraphhub.data.preprocessing import lstm_split_data as split_data
 from epigraphhub.data.preprocessing import normalize_data
 
@@ -310,6 +310,7 @@ def get_data_model(
     if f"{target_curve_name}_{canton}" == "hosp_GE":
         if updated_data:
             # atualizando a coluna das Hospitalizações com os dados mais atualizados
+            # Note: get_updated_data_swiss is missing
             df_new = get_updated_data_swiss(smooth)
 
             df.loc[df_new.index[0] : df_new.index[-1], "hosp_GE"] = df_new.hosp_GE
