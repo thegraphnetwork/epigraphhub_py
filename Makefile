@@ -56,12 +56,30 @@ docker-compose-build:
 docker-compose-start:
 	$(DOCKER) up -d ${DOCKER_SERVICES}
 
+.PHONY: docker-compose-start-no-detatched
+docker-compose-start-no-detatched:  # useful for debugging
+	$(DOCKER) up ${DOCKER_SERVICES}
+
 .PHONY: docker-compose-stop
 docker-compose-stop:
 	$(DOCKER) stop ${DOCKER_SERVICES}
 
+.PHONY: docker-compose-down
+docker-compose-down:
+	$(DOCKER) down --volume ${DOCKER_SERVICES}
+
+.PHONY: docker-compose-logs
+docker-compose-logs:
+	$(DOCKER) logs ${ARGS} ${DOCKER_SERVICES}
+
 .PHONY: docker-compose-restart
 docker-compose-restart: docker-compose-stop docker-compose-stop
+
+
+#* Config
+.PHONY:
+make config-file:  # for development
+	bash scripts/dev/create-config-file.sh
 
 #* Cleaning
 

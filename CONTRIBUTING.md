@@ -44,32 +44,59 @@ After you have the library installed, you can run the following command
 epigraphhub-config \
   --db-host localhost \
   --db-port 25432 \
-  --db-credential "epigraph_public:dev_epigraphhub/dev_epigraph/dev_epigraph" \
-  --db-credential "epigraph_private:dev_privatehub/dev_epigraph/dev_epigraph" \
-  --db-credential "epigraph_sandbox:dev_sandbox/dev_epigraph/dev_epigraph"
+  --db-credential "public:dev_epigraphhub/dev_epigraph/dev_epigraph" \
+  --db-credential "private:dev_privatehub/dev_epigraph/dev_epigraph" \
+  --db-credential "sandbox:dev_sandbox/dev_epigraph/dev_epigraph"
 ```
-
 We need to have connection for all these 3 databases:
-  - epigraphhub_public,
-  - epigraphhub_private
-  - epigraphhub_sandbox
+  - public,
+  - private
+  - sandbox
 
-If you don't have this databases yet, you can create that locally using docker:
+For development, if you are using the postgres container we have
+prepared here, you can run this, instead:
 
 ```bash
+make create-config
 ```
 
-## Codestyle
+This depends on a environment variables file (`.env`) at `docker` folder.
+You can create one based on `docker/.env.tpl`. Or you can use this:
+
+```
+POSTGRES_HOST=localhost
+POSTGRES_PORT=25432
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_EPIGRAPH_USER=dev_epigraph
+POSTGRES_EPIGRAPH_PASSWORD=dev_epigraph
+POSTGRES_EPIGRAPH_DB=dev_epigraphhub
+POSTGRES_EPIGRAPH_DB_PRIVATE=dev_privatehub
+POSTGRES_EPIGRAPH_DB_SANDBOX=dev_sandbox
+```
+
+This is the default environment variables used by development.
+
+## Database for development
+
+If you don't have the databases for development yet,
+you can create one locally using docker:
+
+```bash
+make docker-compose build
+make docker-compose start
+```
+
+## Code Style
 
 After installation you may execute code formatting.
 
 ```bash
-make codestyle
+make linter
 ```
 
 ### Checks
 
-Many checks are configured for this project. Command `make check-codestyle` will check black, isort and darglint.
 The `make check-safety` command will look at the security of your code.
 
 Comand `make lint` applies all checks.
@@ -78,11 +105,12 @@ Comand `make lint` applies all checks.
 
 Before submitting your code please do the following steps:
 
+1. Run `pre-commit install`.
 1. Add any changes you want
 1. Add tests for the new changes
 1. Edit documentation if you have changed something significant
-1. Run `make codestyle` to format your changes.
-1. Run `make lint` to ensure that types, security and docstrings are okay.
+1. Now, any new commit will run some tools to check and format the code.
+
 
 ## Other help
 

@@ -1,5 +1,6 @@
-from dataclasses import dataclass, field
 from typing import List
+
+from dataclasses import dataclass, field
 
 from epigraphhub.utils._config import read
 
@@ -51,9 +52,9 @@ env = Config(
             name: DBCredential(
                 dbname=credential_data["dbname"],
                 username=credential_data["username"],
-                password=credential_data["password"]
+                password=credential_data["password"],
             )
             for name, credential_data in db_credentials.items()
-        }
+        },
     )
 )

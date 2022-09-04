@@ -1,7 +1,10 @@
 import atexit
+import warnings
 
 from sqlalchemy import create_engine
 from sshtunnel import SSHTunnelForwarder
+
+from epigraphhub.settings import env
 
 
 class Tunnel:
@@ -18,12 +21,18 @@ class Tunnel:
             user: user to use for the connection
             ssh_key_passphrase: your SSH key passphrase
         """
+        if self.host == env.db.host:
+            return warnings.warn(
+                "Tunnel is not necessary because remote and local "
+                "address is the same."
+            )
+
         self.server = SSHTunnelForwarder(
             self.host,
-            ssh_username=user,
-            ssh_password="epigraph",
+            ssh_username=env.db.username,
+            ssh_password=env.db.password,
             ssh_private_key_password=ssh_key_passphrase,
-            remote_bind_address=("127.0.0.1", 5432),
+            remote_bind_address=(env.db.host, env.db.password),
         )
 
         self.server.start()
@@ -41,12 +50,15 @@ class Tunnel:
             self.server = None
 
 
-def get_engine(dbuser: str = "epigraph", dbpass: str = "epigraph", db: str = "sandbox"):
+def get_engine(db: str):
     """
-    returns an engine connected to the Epigraphhub database
-    Args:
-        dbuser:
-        dbpass:
+    Returns an engine connected to the Epigraphhub database
     """
-    engine = create_engine(f"postgresql://{dbuser}:{dbpass}@localhost/{db}")
-    return engine
+    with env.db.credentials[db] as credential:
+        uri = (
+            f"postgresql://{credential.username}:"
+            f"{credential.password}@"
+            f"{env.db.host}:{env.db.port}/"
+            f"{credential.dbname}"
+        )
+        return create_engine(uri)

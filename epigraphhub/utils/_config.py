@@ -42,17 +42,17 @@ def create_file() -> None:
                     "username": "postgres",
                     "password": "postgres",
                 },
-                "epigraph_public": {
+                "public": {
                     "dbname": "epigraph",
                     "username": "epigraph",
                     "password": "epigraph",
                 },
-                "epigraph_private": {
+                "private": {
                     "dbname": "epigraph_private",
                     "username": "epigraph_private",
                     "password": "epigraph",
                 },
-                "epigraph_sandbox": {
+                "sandbox": {
                     "dbname": "epigraph_sandbox",
                     "username": "epigraph_sandbox",
                     "password": "epigraph",

@@ -8,3 +8,4 @@ dependencies:
   - poetry
   - nodejs
   - docker-compose
+  - shellcheck

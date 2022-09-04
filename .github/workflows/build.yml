@@ -49,18 +49,13 @@ jobs:
       run: poetry install
 
     - name: Create config file
-      run: |
-        epigraphhub-config \
-          --db-host ${POSTGRES_HOST} \
-          --db-port ${POSTGRES_PORT} \
-          --db-credential "epigraph_public:${POSTGRES_EPIGRAPH_DB}/${POSTGRES_EPIGRAPH_USER}/${POSTGRES_EPIGRAPH_PASSWORD}" \
-          --db-credential "epigraph_private:${POSTGRES_EPIGRAPH_DB_PRIVATE}/${POSTGRES_EPIGRAPH_USER}/${POSTGRES_EPIGRAPH_PASSWORD}" \
-          --db-credential "epigraph_sandbox:${POSTGRES_EPIGRAPH_DB_SANDBOX}/${POSTGRES_EPIGRAPH_USER}/${POSTGRES_EPIGRAPH_PASSWORD}"
+      run: make config-file
 
     - name: start up docker container
       run: |
         make docker-compose-build
         make docker-compose-start
+        sleep 30
 
     - name: Run tests
       run: make test ARGS="--disable-warnings"

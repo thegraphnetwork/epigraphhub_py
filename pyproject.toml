@@ -91,7 +91,6 @@ nbsphinx = "^0.8.8"
 target-version = ["py39"]
 line-length = 88
 color = true
-
 exclude = '''
 /(
     \.git

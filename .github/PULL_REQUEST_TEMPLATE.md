@@ -18,7 +18,7 @@
 - [ ] I've written the docstring in Google format for all the methods and classes that I used.
 - [ ] Semantic-release prefix title used:
   - Use the prefix `chore(docs):` for Examples / docs / tutorials / dependencies update
-  - Use the prefix `fix:` for a bug fix 
+  - Use the prefix `fix:` for a bug fix
     (non-breaking change which fixes an issue).
   - Use the prefix `chore(improvement):` for an improvement
     (non-breaking change which improves an existing feature).
@@ -30,7 +30,7 @@
 
 
 **Note**: The title prefix can be also expanded with more information
-inside the parenthesis. Some examples for a full title (prefix + message): 
+inside the parenthesis. Some examples for a full title (prefix + message):
 - `fix(login): Fix the login page`.
 - `feat(forecast): Add a weather forecast page`.
 - `chore(security-login): Add a weather forecast page`.

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-The functions in this module allow the application of the 
-ngboost regressor model for time series. There are separate functions to train and evaluate (separate 
+The functions in this module allow the application of the
+ngboost regressor model for time series. There are separate functions to train and evaluate (separate
 the data in train and test datasets), train with all the data available, and make
 forecasts. Also, there are functions to apply these methods in just one canton or all
-the cantons of switzerland. 
+the cantons of switzerland.
 """
 
 import pandas as pd

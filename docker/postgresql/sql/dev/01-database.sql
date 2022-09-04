@@ -34,4 +34,7 @@ COMMENT ON ROLE dev_external IS 'External analysts with read-only access to  som
 
 CREATE DATABASE dev_epigraphhub OWNER dev_epigraph;
 CREATE DATABASE dev_privatehub OWNER dev_epigraph;
+CREATE DATABASE dev_sandbox OWNER dev_epigraph;
 CREATE DATABASE dev_airflow OWNER dev_airflow_user;
+
+-- Extensions
