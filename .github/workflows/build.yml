@@ -60,12 +60,12 @@ jobs:
     - name: Run tests
       run: make test ARGS="--disable-warnings"
 
-    - name: Run style checks
-      run: make check-codestyle
+    - name: Linter
+      run: make linter
 
     - name: Run safety checks
       # https://github.com/numpy/numpy/issues/19038
       run: make check-safety || true
 
     - name: teardown docker container
-      run: ${DOCKER} stop
+      run: make docker-compose-stop

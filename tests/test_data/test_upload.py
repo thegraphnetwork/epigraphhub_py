@@ -17,9 +17,7 @@ def test_upload_geo_file():
     # T.open_tunnel("epigraph", phrase)`
     temp_data = gpd.read_file(url)
     temp_data.to_file("test_geopackage.gpkg", driver="GPKG")
-    upload_geo_file(
-        "test_geopackage.gpkg", "antarctica", schema="public", db="sandbox"
-    )
+    upload_geo_file("test_geopackage.gpkg", "antarctica", schema="public", db="sandbox")
     os.unlink("test_geopackage.gpkg")
 
 
