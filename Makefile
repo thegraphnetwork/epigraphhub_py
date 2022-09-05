@@ -18,7 +18,7 @@ linter:
 
 .PHONY: test
 test:
-	poetry run pytest --cov-report=html --cov tests/ ${ARGS}
+	poetry run pytest --cov-report=html -vv --cov tests/ ${ARGS}
 	poetry run coverage-badge -o assets/images/coverage.svg -f
 
 
