@@ -12,7 +12,7 @@ Welcome to epigraphhub's documentation!
 
    overview
    Google Trends<trends.ipynb>
-   
+
 
 
 

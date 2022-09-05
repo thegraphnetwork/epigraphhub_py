@@ -1,0 +1,29 @@
+version: '3.4'
+
+services:
+  postgres:
+    hostname: postgres
+    restart: unless-stopped
+    build:
+      context: ..
+      dockerfile: docker/postgresql/Dockerfile
+    env_file:
+      - .env
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    environment:
+    - POSTGRES_DB=postgres
+    - PGDATA=/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -p ${POSTGRES_PORT} -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - ./postgresql/sql/dev/:/docker-entrypoint-initdb.d/
+      - pgdata:/var/lib/postgresql/data
+    command: -p ${POSTGRES_PORT}
+
+
+volumes:
+  pgdata:

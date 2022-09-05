@@ -1,28 +1,33 @@
 """
-The functions in this module allow the user to get the datasets stored in the 
-epigraphhub database. 
+The functions in this module allow the user to get the datasets stored in the
+epigraphhub database.
 
-The function get_agg_data aggregate the data according to the values of one column, 
-and the method of aggregation applied. 
+The function get_agg_data aggregate the data according to the values of one column,
+and the method of aggregation applied.
 
-The function get_georegion_data filter the datasets for a list of 
+The function get_georegion_data filter the datasets for a list of
 selected regions (in the Switzerland case: cantons).
 
 The function get_cluster_data is focused on being used to apply the forecast models.
-This function returns a table where each column is related to a  different table and 
-region (e.g. the daily number of cases and the daily number of hospitalizations in 
-Geneva and Fribourg). 
+This function returns a table where each column is related to a  different table and
+region (e.g. the daily number of cases and the daily number of hospitalizations in
+Geneva and Fribourg).
 Some parts of the code of this function are focused on the swiss case.
-So the function isn't fully general. 
+So the function isn't fully general.
 """
 
 
 import pandas as pd
 from sqlalchemy import create_engine
 
-engine_public = create_engine(
-    "postgresql://epigraph:epigraph@localhost:5432/epigraphhub"
-)
+from epigraphhub.settings import env
+
+with env.db.credentials[env.db.default_credential] as credential:
+    engine_public = create_engine(
+        f"postgresql://{credential.username}:"
+        f"{credential.password}@{credential.host}:{credential.port}/"
+        f"{credential.dbname}"
+    )
 
 
 def get_agg_data(schema, table_name, columns, method, ini_date):
@@ -55,7 +60,11 @@ def get_agg_data(schema, table_name, columns, method, ini_date):
     table_name = table_name.lower()
     method = method.upper()
 
-    query = f"SELECT {columns[0]}, {columns[1]}, {method}({columns[2]}) FROM {schema}.{table_name} WHERE {columns[0]} > '{ini_date}' GROUP BY ({columns[0]}, {columns[1]})"
+    query = (
+        f"SELECT {columns[0]}, {columns[1]}, {method}({columns[2]}) "
+        f"FROM {schema}.{table_name} WHERE {columns[0]} > '{ini_date}' "
+        f"GROUP BY ({columns[0]}, {columns[1]})"
+    )
 
     df = pd.read_sql(query, engine_public)
     df.set_index(columns[0], inplace=True)

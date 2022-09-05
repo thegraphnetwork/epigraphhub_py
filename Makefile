@@ -1,57 +1,26 @@
 #* Variables
-SHELL := /usr/bin/env bash
-PYTHON := python
-PYTHONPATH := `pwd`
+SHELL:=/usr/bin/env bash
+ARGS:=
 
 #* Docker variables
-IMAGE := epigraphhub_py
-VERSION := latest
-
-#* Poetry
-.PHONY: poetry-download
-poetry-download:
-	curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | $(PYTHON) -
-
-.PHONY: poetry-remove
-poetry-remove:
-	curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | $(PYTHON) - --uninstall
-
-#* Installation
-.PHONY: install
-install:
-	poetry lock -n && poetry export --without-hashes > requirements.txt
-	poetry install -n
-	-poetry run mypy --install-types --non-interactive ./
-
-.PHONY: pre-commit-install
-pre-commit-install:
-	poetry run pre-commit install
+DOCKER=docker-compose --file docker/compose.yaml --env-file docker/.env
+DOCKER_IMAGE:=epigraphhub_py
+DOCKER_VERSION:=latest
+DOCKER_SERVICES:=
 
 #* Formatters
-.PHONY: codestyle
-codestyle:
-	poetry run pyupgrade --exit-zero-even-if-changed --py39-plus **/*.py
-	poetry run isort --settings-path pyproject.toml ./
-	poetry run black --config pyproject.toml ./
-
-.PHONY: formatting
-formatting: codestyle
-
-#* Linting
-.PHONY: test
-test:
-	PYTHONPATH=$(PYTHONPATH) poetry run pytest -c pyproject.toml --cov-report=html --cov tests/
-	poetry run coverage-badge -o assets/images/coverage.svg -f
-
-.PHONY: check-codestyle
-check-codestyle:
-	poetry run isort --diff --check-only --settings-path pyproject.toml ./
-	poetry run black --diff --check --config pyproject.toml ./
+.PHONY: linter
+linter:
+	pre-commit run --all-files --verbose
 	poetry run darglint --verbosity 2 epigraphhub_py tests
 
-.PHONY: mypy
-mypy:
-	poetry run mypy --config-file pyproject.toml ./
+#* Tests
+
+.PHONY: test
+test:
+	poetry run pytest --cov-report=html -vv --cov tests/ ${ARGS}
+	poetry run coverage-badge -o assets/images/coverage.svg -f
+
 
 .PHONY: check-safety
 check-safety:
@@ -59,55 +28,66 @@ check-safety:
 	poetry run safety check --full-report
 	poetry run bandit -ll --recursive epigraphhub_py tests
 
-.PHONY: lint
-lint: test check-codestyle mypy check-safety
-
-.PHONY: update-dev-deps
-update-dev-deps:
-	poetry add -D bandit@latest darglint@latest "isort[colors]@latest" mypy@latest pre-commit@latest pydocstyle@latest pylint@latest pytest@latest pyupgrade@latest safety@latest coverage@latest coverage-badge@latest pytest-html@latest pytest-cov@latest
-	poetry add -D --allow-prereleases black@latest
 
 #* Docker
+
 # Example: make docker-build VERSION=latest
 # Example: make docker-build IMAGE=some_name VERSION=0.1.0
 .PHONY: docker-build
 docker-build:
-	@echo Building docker $(IMAGE):$(VERSION) ...
+	@echo Building docker $(DOCKER_IMAGE):$(DOCKER_VERSION) ...
 	docker build \
-		-t $(IMAGE):$(VERSION) . \
+		-t $(DOCKER_IMAGE):$(DOCKER_VERSION) . \
 		-f ./docker/Dockerfile --no-cache
 
 # Example: make docker-remove VERSION=latest
 # Example: make docker-remove IMAGE=some_name VERSION=0.1.0
 .PHONY: docker-remove
 docker-remove:
-	@echo Removing docker $(IMAGE):$(VERSION) ...
-	docker rmi -f $(IMAGE):$(VERSION)
+	@echo Removing docker $(DOCKER_IMAGE):$(DOCKER_VERSION) ...
+	docker rmi -f $(DOCKER_IMAGE):$(DOCKER_VERSION)
+
+.PHONY: docker-compose-build
+docker-compose-build:
+	$(DOCKER) pull ${DOCKER_SERVICES}
+	$(DOCKER) build ${DOCKER_SERVICES}
+
+.PHONY: docker-compose-start
+docker-compose-start:
+	$(DOCKER) up -d ${DOCKER_SERVICES}
+
+.PHONY: docker-compose-start-no-detatched
+docker-compose-start-no-detatched:  # useful for debugging
+	$(DOCKER) up ${DOCKER_SERVICES}
+
+.PHONY: docker-compose-stop
+docker-compose-stop:
+	$(DOCKER) stop ${DOCKER_SERVICES}
+
+.PHONY: docker-compose-down
+docker-compose-down:
+	$(DOCKER) down --volume ${DOCKER_SERVICES}
+
+.PHONY: docker-compose-logs
+docker-compose-logs:
+	$(DOCKER) logs ${ARGS} ${DOCKER_SERVICES}
+
+.PHONY: docker-compose-restart
+docker-compose-restart: docker-compose-stop docker-compose-stop
+
+
+#* Config
+.PHONY:
+make config-file:  # for development
+	bash scripts/dev/create-config-file.sh
 
 #* Cleaning
-.PHONY: pycache-remove
-pycache-remove:
-	find . | grep -E "(__pycache__|\.pyc|\.pyo$$)" | xargs rm -rf
-
-.PHONY: dsstore-remove
-dsstore-remove:
-	find . | grep -E ".DS_Store" | xargs rm -rf
-
-.PHONY: mypycache-remove
-mypycache-remove:
-	find . | grep -E ".mypy_cache" | xargs rm -rf
-
-.PHONY: ipynbcheckpoints-remove
-ipynbcheckpoints-remove:
-	find . | grep -E ".ipynb_checkpoints" | xargs rm -rf
-
-.PHONY: pytestcache-remove
-pytestcache-remove:
-	find . | grep -E ".pytest_cache" | xargs rm -rf
-
-.PHONY: build-remove
-build-remove:
-	rm -rf build/
 
 .PHONY: cleanup
-cleanup: pycache-remove dsstore-remove mypycache-remove ipynbcheckpoints-remove pytestcache-remove
+cleanup:
+	find . | grep -E "(__pycache__|\.pyc|\.pyo$$)" | xargs rm -rf
+	find . | grep -E ".DS_Store" | xargs rm -rf
+	find . | grep -E ".mypy_cache" | xargs rm -rf
+	find . | grep -E ".ipynb_checkpoints" | xargs rm -rf
+	find . | grep -E ".pytest_cache" | xargs rm -rf
+	rm -rf build/

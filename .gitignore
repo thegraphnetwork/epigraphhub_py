@@ -198,6 +198,10 @@ target/
 # poetry
 .venv
 
+# env
+.env
+docker/.env
+
 # pipenv
 #   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
 #   However, in case of collaboration, if having platform-specific dependencies or dependencies
@@ -623,3 +627,7 @@ healthchecksdb
 MigrationBackup/
 
 # End of https://www.gitignore.io/api/osx,python,pycharm,windows,visualstudio,visualstudiocode
+
+# tmps
+*.gpkg
+temp*.tif

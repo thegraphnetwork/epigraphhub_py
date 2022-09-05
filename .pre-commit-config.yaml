@@ -8,6 +8,7 @@ repos:
     rev: v2.5.0
     hooks:
       - id: check-yaml
+      - id: trailing-whitespace
       - id: end-of-file-fixer
         exclude: LICENSE
 
@@ -34,3 +35,21 @@ repos:
         entry: poetry run black --config pyproject.toml
         types: [python]
         language: system
+
+  - repo: local
+    hooks:
+      - id: shellcheck
+        name: shellcheck
+        language: system
+        entry: shellcheck
+        files: \.sh$
+        types:
+          - shell
+        types_or:
+          - file
+          - sh
+          - ash
+          - bash
+          - bats
+          - dash
+          - ksh

@@ -1,5 +1,5 @@
 """
-The functions in this module allow the user to compute the hierarchical 
+The functions in this module allow the user to compute the hierarchical
 clusterization between time series curves of a data frame.
 """
 

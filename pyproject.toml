@@ -30,6 +30,7 @@ classifiers = [  #! Update me
 [tool.poetry.scripts]
 # Entry points for the package https://python-poetry.org/docs/pyproject/#scripts
 "epigraphhub" = "epigraphhub.__main__:app"
+"epigraphhub-config" = "epigraphhub.utils._config:create_file"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.11"
@@ -61,6 +62,7 @@ requests = "^2.27.1"
 tabulate = "^0.8.9"
 click = "^8.1.0"
 wbgapi = "1.0.7"
+PyYAML = "^6.0"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.2"
@@ -89,7 +91,6 @@ nbsphinx = "^0.8.8"
 target-version = ["py39"]
 line-length = 88
 color = true
-
 exclude = '''
 /(
     \.git

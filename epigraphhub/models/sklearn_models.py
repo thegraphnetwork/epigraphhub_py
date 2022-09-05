@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
 
-The functions in this module allow the application of any scikit-learn regressor model. 
-There are separate functions to train and evaluate (separate 
+The functions in this module allow the application of any scikit-learn regressor model.
+There are separate functions to train and evaluate (separate
 the data in train and test datasets), train with all the data available, and make
-forecasts. 
+forecasts.
 """
 
 import copy

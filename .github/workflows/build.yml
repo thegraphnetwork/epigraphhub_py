@@ -2,6 +2,15 @@ name: build
 
 on: [push, pull_request]
 
+env:
+  POSTGRES_HOST: localhost
+  POSTGRES_PORT: 25432
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+  POSTGRES_EPIGRAPH_USER: dev_epigraph
+  POSTGRES_EPIGRAPH_PASSWORD: dev_epigraph
+  POSTGRES_EPIGRAPH_DB: dev_epigraphhub
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -11,14 +20,19 @@ jobs:
     concurrency:
       group: ci-${{ github.ref }}
       cancel-in-progress: true
-    
+
     defaults:
       run:
         shell: bash -l {0}
 
     steps:
     - uses: actions/checkout@v2
-    
+
+    - name: Create environment variables file
+      run: |
+        cd docker
+        envsubst < .env.tpl > .env
+
     - uses: conda-incubator/setup-miniconda@v2
       with:
         miniconda-version: "latest"
@@ -30,34 +44,26 @@ jobs:
         miniforge-variant: Mambaforge
 
     - name: Install dependencies
+      run: poetry install
+
+    - name: Create config file
+      run: make config-file
+
+    - name: start up docker container
       run: |
-        poetry install
+        make docker-compose-build
+        make docker-compose-start
+        sleep 30
 
     - name: Run tests
-      run: |
-        make test
+      run: make test ARGS="--disable-warnings"
 
-    - name: Run style checks
-      run: |
-        make check-codestyle
+    - name: Linter
+      run: make linter
 
     - name: Run safety checks
-      run: |
-        # https://github.com/numpy/numpy/issues/19038
-        make check-safety || true
+      # https://github.com/numpy/numpy/issues/19038
+      run: make check-safety || true
 
-    - name: Release
-      if: ${{ github.event_name == 'push' }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        npx --yes \
-          -p semantic-release \
-          -p "@semantic-release/commit-analyzer" \
-          -p "@semantic-release/release-notes-generator" \
-          -p "@semantic-release/changelog" \
-          -p "@semantic-release/exec" \
-          -p "@semantic-release/github" \
-          -p "@semantic-release/git" \
-          -p "@google/semantic-release-replace-plugin" \
-          semantic-release --ci
+    - name: teardown docker container
+      run: make docker-compose-stop

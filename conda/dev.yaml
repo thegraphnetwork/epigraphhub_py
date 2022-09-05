@@ -7,3 +7,5 @@ dependencies:
   - libblas
   - poetry
   - nodejs
+  - docker-compose
+  - shellcheck
