@@ -18,7 +18,7 @@ def test_upload_geo_file():
     temp_data = gpd.read_file(url)
     temp_data.to_file("test_geopackage.gpkg", driver="GPKG")
     upload_geo_file(
-        "test_geopackage.gpkg", "antarctica", schema="public", db="epigraphhub"
+        "test_geopackage.gpkg", "antarctica", schema="public", db="dev-epigraphhub"
     )
     os.unlink("test_geopackage.gpkg")
 

@@ -9,4 +9,4 @@ export $(cat "${PROJECT_DIR}/docker/.env" | xargs)
 epigraphhub-config \
   --db-host "${POSTGRES_HOST}" \
   --db-port "${POSTGRES_PORT}" \
-  --db-credential "epigraphhub:${POSTGRES_EPIGRAPH_DB}/${POSTGRES_EPIGRAPH_USER}/${POSTGRES_EPIGRAPH_PASSWORD}"
+  --db-credential "dev-epigraphhub:${POSTGRES_EPIGRAPH_DB}/${POSTGRES_EPIGRAPH_USER}/${POSTGRES_EPIGRAPH_PASSWORD}"
