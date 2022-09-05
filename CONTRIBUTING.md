@@ -42,16 +42,22 @@ After you have the library installed, you can run the following command
 
 ```bash
 epigraphhub-config \
-  --db-host localhost \
-  --db-port 25432 \
-  --db-credential "epigraphhub:dev_epigraphhub/dev_epigraph/dev_epigraph"
+  --name "epigraphhub" \
+  --db-default-credential "epigraphhub" \
+  --db-uri "dev_epigraph:dev_epigraph@localhost:25432/dev_epigraphhub"
 ```
-We can gave any number of credentials or connections, it depends on the
-database configuration you have. The name for the credential doesn't
-matter, but this same name should be used when you are making a connection
-to the database.
 
-For development, if you are using the postgres container we have
+Where:
+
+- `--name` is required, it defines the name for the credential
+- `--db-default-credential` is optional. When you create the first credential,
+  it set automatically `db-default-credential` to this first one created.
+- `--db-uri` specify the URI for the database using SQLAlchemy URI format.
+
+The name for the credential doesn't matter, but this same name should be
+used when you are making a connection to the database with the EpiGraphHub library.
+
+For development, if you are using the postgres container that we have
 prepared here, you can run this, instead:
 
 ```bash

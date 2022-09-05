@@ -19,6 +19,8 @@ class ConfigContext:
 
 @dataclass
 class DBCredential(ConfigContext):
+    host: str = "localhost"
+    port: str = "5432"
     dbname: str = "placeholder"
     username: str = "placeholder"
     password: str = "placeholder"
@@ -26,8 +28,7 @@ class DBCredential(ConfigContext):
 
 @dataclass
 class DBConfig(ConfigContext):
-    host: str = "localhost"
-    port: str = "5432"
+    default_credential: str = "epigraphhub"
     credentials: dict[str, DBCredential] = field(default_factory=dict)
 
 
@@ -39,17 +40,16 @@ class Config(ConfigContext):
 db_data = config_data["db"]
 db_credentials = db_data["credentials"]
 
-print(db_credentials.values())
-
 for credential_data in list(db_credentials.values()):
     print(credential_data)
 
 env = Config(
     db=DBConfig(
-        host=db_data["host"],
-        port=db_data["port"],
+        default_credential=db_data["default-credential"] or "epigraphhub",
         credentials={
             name: DBCredential(
+                host=credential_data["host"],
+                port=credential_data["port"],
                 dbname=credential_data["dbname"],
                 username=credential_data["username"],
                 password=credential_data["password"],

@@ -1,4 +1,5 @@
 import atexit
+from typing import Optional
 import warnings
 
 from sqlalchemy import create_engine
@@ -50,15 +51,16 @@ class Tunnel:
             self.server = None
 
 
-def get_engine(db: str):
+def get_engine(credential_name: str, db: Optional[str] = None):
     """
     Returns an engine connected to the Epigraphhub database
     """
-    with env.db.credentials[db] as credential:
+    with env.db.credentials[credential_name] as credential:
+        db = db or credential.dbname
         uri = (
             f"postgresql://{credential.username}:"
             f"{credential.password}@"
-            f"{env.db.host}:{env.db.port}/"
-            f"{credential.dbname}"
+            f"{credential.host}:{credential.port}/"
+            f"{db}"
         )
         return create_engine(uri)

@@ -6,7 +6,7 @@ PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && cd ../.
 # shellcheck disable=SC2046,SC2002
 export $(cat "${PROJECT_DIR}/docker/.env" | xargs)
 
-epigraphhub-config \
-  --db-host "${POSTGRES_HOST}" \
-  --db-port "${POSTGRES_PORT}" \
-  --db-credential "dev-epigraphhub:${POSTGRES_EPIGRAPH_DB}/${POSTGRES_EPIGRAPH_USER}/${POSTGRES_EPIGRAPH_PASSWORD}"
+DB_URI="${POSTGRES_EPIGRAPH_USER}:${POSTGRES_EPIGRAPH_PASSWORD}"
+DB_URI="${DB_URI}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_EPIGRAPH_DB}"
+
+epigraphhub-config --name "dev-epigraphhub" --db-uri ${DB_URI}

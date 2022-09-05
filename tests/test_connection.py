@@ -9,7 +9,7 @@ from epigraphhub.connection import Tunnel, get_engine
 #     assert t.__repr__().startswith("Port")
 #
 #
-# @pytest.mark.parametrize(("db",), [("epigraphhub",), ("sandbox",)])
-# def test_engine(db):
-#     e = get_engine(db=db)
+# @pytest.mark.parametrize(("credential_name",), [("epigraphhub",), ("sandbox",)])
+# def test_engine(credential_name):
+#     e = get_engine(credential_name=credential_name)
 #     e.connect()
