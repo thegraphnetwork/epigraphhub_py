@@ -9,7 +9,7 @@ and data python stack.
 If you don't have it installed, you can install it via mambaforge:
 https://github.com/conda-forge/miniforge#mambaforge
 
-Mamba is a fastest layer on top of conda that will fast the way
+Mamba is a fast layer on top of conda that will speed up the way that
 conda works.
 
 When you have the conda installed, you can proceed and create
@@ -44,14 +44,12 @@ After you have the library installed, you can run the following command
 epigraphhub-config \
   --db-host localhost \
   --db-port 25432 \
-  --db-credential "public:dev_epigraphhub/dev_epigraph/dev_epigraph" \
-  --db-credential "private:dev_privatehub/dev_epigraph/dev_epigraph" \
-  --db-credential "sandbox:dev_sandbox/dev_epigraph/dev_epigraph"
+  --db-credential "epigraphhub:dev_epigraphhub/dev_epigraph/dev_epigraph"
 ```
-We need to have connection for all these 3 databases:
-  - public,
-  - private
-  - sandbox
+We can gave any number of credentials or connections, it depends on the
+database configuration you have. The name for the credential doesn't
+matter, but this same name should be used when you are making a connection
+to the database.
 
 For development, if you are using the postgres container we have
 prepared here, you can run this, instead:
@@ -71,8 +69,6 @@ POSTGRES_PASSWORD=postgres
 POSTGRES_EPIGRAPH_USER=dev_epigraph
 POSTGRES_EPIGRAPH_PASSWORD=dev_epigraph
 POSTGRES_EPIGRAPH_DB=dev_epigraphhub
-POSTGRES_EPIGRAPH_DB_PRIVATE=dev_privatehub
-POSTGRES_EPIGRAPH_DB_SANDBOX=dev_sandbox
 ```
 
 This is the default environment variables used by development.

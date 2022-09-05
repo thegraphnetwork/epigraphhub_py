@@ -10,8 +10,6 @@ env:
   POSTGRES_EPIGRAPH_USER: dev_epigraph
   POSTGRES_EPIGRAPH_PASSWORD: dev_epigraph
   POSTGRES_EPIGRAPH_DB: dev_epigraphhub
-  POSTGRES_EPIGRAPH_DB_PRIVATE: dev_privatehub
-  POSTGRES_EPIGRAPH_DB_SANDBOX: dev_sandbox
 
 jobs:
   build:

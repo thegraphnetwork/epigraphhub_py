@@ -174,9 +174,7 @@ After you have the library installed, you can run the following command
 epigraphhub-config \
   --db-host localhost \
   --db-port 25432 \
-  --db-credential "public:dev_epigraphhub/dev_epigraph/dev_epigraph" \
-  --db-credential "private:dev_privatehub/dev_epigraph/dev_epigraph" \
-  --db-credential "sandbox:dev_sandbox/dev_epigraph/dev_epigraph"
+  --db-credential "public:dev_epigraphhub/dev_epigraph/dev_epigraph"
 ```
 We need to have connection for all these 3 databases:
   - public,

@@ -42,19 +42,9 @@ def create_file() -> None:
                     "username": "postgres",
                     "password": "postgres",
                 },
-                "public": {
+                "epigraphhub": {
                     "dbname": "epigraph",
                     "username": "epigraph",
-                    "password": "epigraph",
-                },
-                "private": {
-                    "dbname": "epigraph_private",
-                    "username": "epigraph_private",
-                    "password": "epigraph",
-                },
-                "sandbox": {
-                    "dbname": "epigraph_sandbox",
-                    "username": "epigraph_sandbox",
                     "password": "epigraph",
                 },
             },
@@ -82,7 +72,10 @@ def create_file() -> None:
             "password": db_pass,
         }
 
-    config_path = Path.home() / Path(".config/epigraphhub.yaml")
+    config_dir = Path.home() / Path(".config")
+    config_dir.mkdir(exist_ok=True)
+    config_path = config_dir / Path("epigraphhub.yaml")
+
     with open(config_path, "w") as f:
         f.write(yaml.dump(default_content))
 
