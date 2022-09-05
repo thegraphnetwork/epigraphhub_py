@@ -4,7 +4,9 @@ import rioxarray
 from epigraphhub.connection import get_engine
 
 
-def upload_geo_file(fname: str, table_name: str, schema: str, credential_name: str) -> None:
+def upload_geo_file(
+    fname: str, table_name: str, schema: str, credential_name: str
+) -> None:
     """
     Uploads a georeferenced file to the epigraphhub database
     Args:

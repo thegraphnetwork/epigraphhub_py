@@ -20,7 +20,6 @@ from sqlalchemy import create_engine
 
 from epigraphhub.settings import env
 
-
 with env.db.credentials[env.db.default_credential] as credential:
     engine_public = create_engine(
         f"postgresql://{credential.username}:"

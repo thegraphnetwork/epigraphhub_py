@@ -1,5 +1,6 @@
-import atexit
 from typing import Optional
+
+import atexit
 import warnings
 
 from sqlalchemy import create_engine

@@ -9,4 +9,4 @@ export $(cat "${PROJECT_DIR}/docker/.env" | xargs)
 DB_URI="${POSTGRES_EPIGRAPH_USER}:${POSTGRES_EPIGRAPH_PASSWORD}"
 DB_URI="${DB_URI}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_EPIGRAPH_DB}"
 
-epigraphhub-config --name "dev-epigraphhub" --db-uri ${DB_URI}
+epigraphhub-config --name "dev-epigraphhub" --db-uri "${DB_URI}"

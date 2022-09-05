@@ -1,9 +1,8 @@
 import argparse
 from pathlib import Path
 
-from sqlalchemy.engine.url import make_url
 import yaml
-
+from sqlalchemy.engine.url import make_url
 
 # note: use dash (-) instead of underscore (_)
 DEFAULT_CONFIG_CONTENT = {
