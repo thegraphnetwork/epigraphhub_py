@@ -1,6 +1,13 @@
 Release Notes
 ---
 
+## [1.1.1](https://github.com/thegraphnetwork/epigraphhub_py/compare/1.1.0...1.1.1) (2022-09-09)
+
+
+### Bug Fixes
+
+* **depds:** Move from ngboost to ngboost-release ([#171](https://github.com/thegraphnetwork/epigraphhub_py/issues/171)) ([dc80ece](https://github.com/thegraphnetwork/epigraphhub_py/commit/dc80ece59e8bb8531eeb0243dcb5320e35b9982b))
+
 # [1.1.0](https://github.com/thegraphnetwork/epigraphhub_py/compare/1.0.1...1.1.0) (2022-09-08)
 
 
