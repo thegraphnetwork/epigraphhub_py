@@ -1,4 +1,7 @@
 #!/bin/bash
+# shellcheck disable=all
+
+# ref: https://github.com/postgis/docker-postgis/blob/a6a9f021e243c0b6f908cf8ad8d0ae5460dcb1b1/14-3.2/initdb-postgis.sh
 
 set -e
 
