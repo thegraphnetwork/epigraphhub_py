@@ -90,11 +90,11 @@ all = ["bokeh (>=1.4.0)", "dask", "numba", "ujson", "zarr (>=2.5.0)"]
 
 [[package]]
 name = "astor"
-version = "0.7.1"
+version = "0.8.1"
 description = "Read/rewrite/write Python ASTs"
 category = "main"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,>=2.7"
 
 [[package]]
 name = "astroid"
@@ -158,7 +158,7 @@ tests_no_zope = ["cloudpickle", "coverage[toml] (>=5.0.2)", "hypothesis", "mypy"
 
 [[package]]
 name = "autograd"
-version = "1.3"
+version = "1.4"
 description = "Efficiently computes derivatives of numpy code."
 category = "main"
 optional = false
@@ -655,14 +655,14 @@ woff = ["brotli (>=1.0.1)", "brotlicffi (>=0.8.0)", "zopfli (>=0.1.4)"]
 
 [[package]]
 name = "formulaic"
-version = "0.3.3"
+version = "0.3.4"
 description = "An implementation of Wilkinson formulas."
 category = "main"
 optional = false
 python-versions = ">=3.7.1,<4.0.0"
 
 [package.dependencies]
-astor = ">=0.7.0,<0.8.0"
+astor = ">=0.8"
 interface-meta = ">=1.2.0,<2.0.0"
 numpy = ">=1.3"
 pandas = ">=1.2"
@@ -1170,7 +1170,7 @@ python-versions = "*"
 
 [[package]]
 name = "lifelines"
-version = "0.27.0"
+version = "0.27.2"
 description = "Survival analysis in Python, including Kaplan Meier, Nelson Aalen and regression"
 category = "main"
 optional = false
@@ -1491,13 +1491,12 @@ cftime = "*"
 numpy = ">=1.9"
 
 [[package]]
-name = "ngboost"
-version = "0.3.13dev"
-description = "Library for probabilistic predictions via gradient boosting."
+name = "ngboost-release"
+version = "0.3.12.post2"
+description = "It is just a workaround to fix the current ngboost package issue. See: https://github.com/stanfordmlgroup/ngboost/issues/283"
 category = "main"
 optional = false
-python-versions = ">=3.6, <4.0"
-develop = false
+python-versions = ">=3.6,<4.0"
 
 [package.dependencies]
 lifelines = ">=0.25"
@@ -1505,12 +1504,6 @@ numpy = ">=1.17"
 scikit-learn = ">=0.21"
 scipy = ">=1.3"
 tqdm = ">=4.3"
-
-[package.source]
-type = "git"
-url = "https://github.com/stanfordmlgroup/ngboost"
-reference = "v0.3.12"
-resolved_reference = "51a299197ae77dff88826156edf386313201d99b"
 
 [[package]]
 name = "nodeenv"
@@ -2941,7 +2934,7 @@ python-versions = ">= 3.5"
 
 [[package]]
 name = "tqdm"
-version = "4.64.0"
+version = "4.64.1"
 description = "Fast, Extensible Progress Meter"
 category = "main"
 optional = false
@@ -3128,7 +3121,7 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "89a4d5ca5c8d1bbdb52e8c529dd6abb6902814e4589071714f170ef1c26e2ddd"
+content-hash = "f5458d8ed2f8f4ff81de9881c05eb895b9d62722ef0bb7db6267a996709789b3"
 
 [metadata.files]
 absl-py = [
@@ -3176,8 +3169,8 @@ arviz = [
     {file = "arviz-0.11.4.tar.gz", hash = "sha256:01872758eeabb9941479ec5dd378117337bf95d14cc2c298b437cfda1780b436"},
 ]
 astor = [
-    {file = "astor-0.7.1-py2.py3-none-any.whl", hash = "sha256:fb503b9e2fdd05609fbf557b916b4a7824171203701660f0c55bbf5a7a68713e"},
-    {file = "astor-0.7.1.tar.gz", hash = "sha256:95c30d87a6c2cf89aa628b87398466840f0ad8652f88eb173125a6df8533fb8d"},
+    {file = "astor-0.8.1-py2.py3-none-any.whl", hash = "sha256:070a54e890cefb5b3739d19f30f5a5ec840ffc9c50ffa7d23cc9fc1a38ebbfc5"},
+    {file = "astor-0.8.1.tar.gz", hash = "sha256:6a6effda93f4e1ce9f618779b2dd1d9d84f1e32812c23a29b3fff6fd7f63fa5e"},
 ]
 astroid = [
     {file = "astroid-2.11.2-py3-none-any.whl", hash = "sha256:cc8cc0d2d916c42d0a7c476c57550a4557a083081976bf42a73414322a6411d9"},
@@ -3200,7 +3193,8 @@ attrs = [
     {file = "attrs-21.4.0.tar.gz", hash = "sha256:626ba8234211db98e869df76230a137c4c40a12d72445c45d5f5b716f076e2fd"},
 ]
 autograd = [
-    {file = "autograd-1.3.tar.gz", hash = "sha256:a15d147577e10de037de3740ca93bfa3b5a7cdfbc34cfb9105429c3580a33ec4"},
+    {file = "autograd-1.4-py3-none-any.whl", hash = "sha256:5cd6051bf1440643bf8f1104c933b2dedefb7610b951091768c1c680b1e0ceda"},
+    {file = "autograd-1.4.tar.gz", hash = "sha256:383de0f537ef2e38b85ff9692593b0cfae8958c9b3bd451b52c255fd9171ffce"},
 ]
 autograd-gamma = [
     {file = "autograd-gamma-0.5.0.tar.gz", hash = "sha256:f27abb7b8bb9cffc8badcbf59f3fe44a9db39e124ecacf1992b6d952934ac9c4"},
@@ -3552,8 +3546,8 @@ fonttools = [
     {file = "fonttools-4.31.2.zip", hash = "sha256:236b29aee6b113e8f7bee28779c1230a86ad2aac9a74a31b0aedf57e7dfb62a4"},
 ]
 formulaic = [
-    {file = "formulaic-0.3.3-py3-none-any.whl", hash = "sha256:a126d337741c6b4c699db5a52e3e5954abe0865949424f153be45c4a9c02422e"},
-    {file = "formulaic-0.3.3.tar.gz", hash = "sha256:e728f1be7363d06f68c066140ab762d7cdd95e5cd4daba3cbe6b0f40449a082e"},
+    {file = "formulaic-0.3.4-py3-none-any.whl", hash = "sha256:5ee1f3f4a5990c0947a68f90d051a4ca497d6eb0f9f387d2cf1e732a9cbf76ec"},
+    {file = "formulaic-0.3.4.tar.gz", hash = "sha256:2f841297d27dbd19f51dadea35887c363512d6eed70503b453e0f59c679d0f54"},
 ]
 future = [
     {file = "future-0.18.2.tar.gz", hash = "sha256:b1bead90b70cf6ec3f0710ae53a525360fa360d306a86583adc6bf83a4db537d"},
@@ -3907,8 +3901,8 @@ libclang = [
     {file = "libclang-13.0.0-py2.py3-none-win_amd64.whl", hash = "sha256:b61dedc1b941f43acca1fa15df0a6669c6c3983197c6f3226ae03a766281dd37"},
 ]
 lifelines = [
-    {file = "lifelines-0.27.0-py3-none-any.whl", hash = "sha256:afa890dd2a49a55453502accc9ecf825b88fb0decb536306e369df7d574f049c"},
-    {file = "lifelines-0.27.0.tar.gz", hash = "sha256:55386b0edc607d4316ed96f9e815abfe83120f0ec34ddffa6b4329ee3a55e5fd"},
+    {file = "lifelines-0.27.2-py3-none-any.whl", hash = "sha256:524d37e833bb1fe4d27e7d452b9af1bf625cc6bc5ca2176bdb257d598706cc5d"},
+    {file = "lifelines-0.27.2.tar.gz", hash = "sha256:4601df0ea0ef47ddb20b16aff70acfc15c1c14f7038fec23270e43901d898c82"},
 ]
 lxml = [
     {file = "lxml-4.8.0-cp27-cp27m-macosx_10_14_x86_64.whl", hash = "sha256:e1ab2fac607842ac36864e358c42feb0960ae62c34aa4caaf12ada0a1fb5d99b"},
@@ -4171,7 +4165,10 @@ netcdf4 = [
     {file = "netCDF4-1.5.8-cp39-cp39-win_amd64.whl", hash = "sha256:318ef7dd29b365f3921f9b359ba54f62cfe3aa46ab4464f45c43624d15c4bf55"},
     {file = "netCDF4-1.5.8.tar.gz", hash = "sha256:ca3d468f4812c0999df86e3f428851fb0c17ac34ce0827115c246b0b690e4e84"},
 ]
-ngboost = []
+ngboost-release = [
+    {file = "ngboost-release-0.3.12.post2.tar.gz", hash = "sha256:8b50c3c1fe4598cd909667be9960970092f3448545151a33c671fa00b1fe76a0"},
+    {file = "ngboost_release-0.3.12.post2-py3-none-any.whl", hash = "sha256:e05723e315f36eff6d68b2f3a574e8e7d66207958a6e6b669da6d76984b26404"},
+]
 nodeenv = [
     {file = "nodeenv-1.6.0-py2.py3-none-any.whl", hash = "sha256:621e6b7076565ddcacd2db0294c0381e01fd28945ab36bcf00f41c5daf63bef7"},
     {file = "nodeenv-1.6.0.tar.gz", hash = "sha256:3ef13ff90291ba2a4a7a4ff9a979b63ffdd00a464dbe04acf0ea6471517a4c2b"},
@@ -5241,8 +5238,8 @@ tornado = [
     {file = "tornado-6.1.tar.gz", hash = "sha256:33c6e81d7bd55b468d2e793517c909b139960b6c790a60b7991b9b6b76fb9791"},
 ]
 tqdm = [
-    {file = "tqdm-4.64.0-py2.py3-none-any.whl", hash = "sha256:74a2cdefe14d11442cedf3ba4e21a3b84ff9a2dbdc6cfae2c34addb2a14a5ea6"},
-    {file = "tqdm-4.64.0.tar.gz", hash = "sha256:40be55d30e200777a307a7585aee69e4eabb46b4ec6a4b4a5f2d9f11e7d5408d"},
+    {file = "tqdm-4.64.1-py2.py3-none-any.whl", hash = "sha256:6fee160d6ffcd1b1c68c65f14c829c22832bc401726335ce92c52d395944a6a1"},
+    {file = "tqdm-4.64.1.tar.gz", hash = "sha256:5f4f682a004951c1b450bc753c710e9280c5746ce6ffedee253ddbcbf54cf1e4"},
 ]
 traitlets = [
     {file = "traitlets-5.1.1-py3-none-any.whl", hash = "sha256:2d313cc50a42cd6c277e7d7dc8d4d7fedd06a2c215f78766ae7b1a66277e0033"},

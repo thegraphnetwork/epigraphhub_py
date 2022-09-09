@@ -1,12 +1,16 @@
 #* Variables
 SHELL:=/usr/bin/env bash
 ARGS:=
+CONSOLE:=bash
 
 #* Docker variables
 DOCKER=docker-compose --file docker/compose.yaml --env-file docker/.env
 DOCKER_IMAGE:=epigraphhub_py
 DOCKER_VERSION:=latest
 DOCKER_SERVICES:=
+DOCKER_SERVICE:=
+TIMEOUT:=90
+
 
 #* Formatters
 .PHONY: linter
@@ -56,6 +60,11 @@ docker-compose-build:
 docker-compose-start:
 	$(DOCKER) up -d ${DOCKER_SERVICES}
 
+.PHONY: docker-compose-run-console
+docker-compose-run-console:
+	$(DOCKER) run ${DOCKER_SERVICE} ${CONSOLE}
+
+
 .PHONY: docker-compose-start-no-detatched
 docker-compose-start-no-detatched:  # useful for debugging
 	$(DOCKER) up ${DOCKER_SERVICES}
@@ -74,6 +83,10 @@ docker-compose-logs:
 
 .PHONY: docker-compose-restart
 docker-compose-restart: docker-compose-stop docker-compose-stop
+
+.PHONY: docker-compose-wait
+docker-compose-wait:
+	timeout ${TIMEOUT} ./docker/healthcheck.sh ${SERVICE}
 
 
 #* Config
