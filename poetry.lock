@@ -1492,7 +1492,7 @@ numpy = ">=1.9"
 
 [[package]]
 name = "ngboost-release"
-version = "0.3.12"
+version = "0.3.12.post2"
 description = "It is just a workaround to fix the current ngboost package issue. See: https://github.com/stanfordmlgroup/ngboost/issues/283"
 category = "main"
 optional = false
@@ -3121,7 +3121,7 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "7b6cc2dc3275dd4672acb8ed12736d1c6c5eaeec99c7667e44d76d3761a4d7a3"
+content-hash = "f5458d8ed2f8f4ff81de9881c05eb895b9d62722ef0bb7db6267a996709789b3"
 
 [metadata.files]
 absl-py = [
@@ -4166,8 +4166,8 @@ netcdf4 = [
     {file = "netCDF4-1.5.8.tar.gz", hash = "sha256:ca3d468f4812c0999df86e3f428851fb0c17ac34ce0827115c246b0b690e4e84"},
 ]
 ngboost-release = [
-    {file = "ngboost-release-0.3.12.tar.gz", hash = "sha256:a706b2ffc858411ba166b83c6ec6b9fd4a80205e89ff3af2d2d7d693700b7f93"},
-    {file = "ngboost_release-0.3.12-py3-none-any.whl", hash = "sha256:e08a1780f6fc62f7c1fa4d57a028cdb4ea1970de400b0bd794a5bbc98a3fb237"},
+    {file = "ngboost-release-0.3.12.post2.tar.gz", hash = "sha256:8b50c3c1fe4598cd909667be9960970092f3448545151a33c671fa00b1fe76a0"},
+    {file = "ngboost_release-0.3.12.post2-py3-none-any.whl", hash = "sha256:e05723e315f36eff6d68b2f3a574e8e7d66207958a6e6b669da6d76984b26404"},
 ]
 nodeenv = [
     {file = "nodeenv-1.6.0-py2.py3-none-any.whl", hash = "sha256:621e6b7076565ddcacd2db0294c0381e01fd28945ab36bcf00f41c5daf63bef7"},
