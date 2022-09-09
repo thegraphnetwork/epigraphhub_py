@@ -53,7 +53,7 @@ jobs:
       run: |
         make docker-compose-build
         make docker-compose-start
-        sleep 30
+        make docker-compose-wait SERVICE=postgres
 
     - name: Run tests
       run: make test ARGS="--disable-warnings"

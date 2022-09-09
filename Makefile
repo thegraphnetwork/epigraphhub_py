@@ -7,6 +7,8 @@ DOCKER=docker-compose --file docker/compose.yaml --env-file docker/.env
 DOCKER_IMAGE:=epigraphhub_py
 DOCKER_VERSION:=latest
 DOCKER_SERVICES:=
+TIMEOUT:=90
+
 
 #* Formatters
 .PHONY: linter
@@ -74,6 +76,10 @@ docker-compose-logs:
 
 .PHONY: docker-compose-restart
 docker-compose-restart: docker-compose-stop docker-compose-stop
+
+.PHONY: docker-compose-wait
+docker-compose-wait:
+	timeout ${TIMEOUT} ./docker/healthcheck.sh ${SERVICE}
 
 
 #* Config
