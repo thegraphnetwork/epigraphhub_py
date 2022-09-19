@@ -2,7 +2,7 @@ from typing import Union
 
 import numpy as np
 import scipy.stats as st
-from scipy.stats.contingency import relative_risk
+from scipy.stats.contingency import relative_risk, RelativeRiskResult
 
 
 def posterior_prevalence(pop_size: int, positives: int, a: float = 1, b: float = 1) -> st.rv_continuous:
@@ -50,7 +50,7 @@ def incidence_rate(pop_size: int, new_cases: int, scaling: float = 1e5) -> Union
     return IR
 
 
-def risk_ratio(exposed_cases, exposed_total, control_cases, control_total):
+def risk_ratio(exposed_cases: int, exposed_total: int, control_cases: int, control_total: int) -> RelativeRiskResult:
     """
     Also known as relative risk, computed the risk of contracting a disease given exposure to a risk factor.
     Parameters:
