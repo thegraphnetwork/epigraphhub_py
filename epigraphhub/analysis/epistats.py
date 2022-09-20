@@ -2,7 +2,8 @@ from typing import Union
 
 import numpy as np
 import scipy.stats as st
-from scipy.stats.contingency import relative_risk, RelativeRiskResult
+from scipy.stats.contingency import relative_risk
+from scipy.stats._result_classes import RelativeRiskResult
 
 
 def posterior_prevalence(pop_size: int, positives: int, a: float = 1, b: float = 1) -> st.rv_continuous:
@@ -28,7 +29,7 @@ def posterior_prevalence(pop_size: int, positives: int, a: float = 1, b: float =
 @np.vectorize
 def incidence_rate(pop_size: int, new_cases: int, scaling: float = 1e5) -> Union[float, np.ndarray, np.ndarray]:
     """
-    incidence is defined as the number of new cases in a population over a period of time, typically 1 year. The incidence rate is also usually scale to 100k people to facilitate comparisons between localities withe different populations.
+    incidence is defined as the number of new cases in a population over a period of time, typically 1 year. The incidence rate is also usually scale to 100k people to facilitate comparisons between localities with different populations.
     Parameters
     ----------
     pop_size: population pop_size
