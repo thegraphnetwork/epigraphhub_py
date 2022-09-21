@@ -42,7 +42,7 @@ def test_training_model(get_df_test):
     models = ngb_m.train(
         target_name,
         df,
-        path="tests/saved_models_for_test/",
+        path="tests/saved_models_for_test",
         save=True,
     )
 
@@ -55,6 +55,6 @@ def test_rolling_forecast(get_df_test):
 
     ngb_m = ngb.NGBModel(predict_n=2, look_back=3, validation_split=0.1, early_stop=10)
 
-    df_for = ngb_m.forecast(df, path="tests/saved_models_for_test/")
+    df_for = ngb_m.forecast(df, path="tests/saved_models_for_test")
 
     assert not df_for.empty
