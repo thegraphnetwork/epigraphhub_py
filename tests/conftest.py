@@ -21,3 +21,12 @@ def get_df_test():
 def get_df_cases():
     df = pd.read_csv("tests/data_for_test/df_cases.csv")
     return df
+
+
+@pytest.fixture
+def get_df_inf():
+    df = pd.read_csv("tests/data_for_test/data_to_inf.csv")
+    df.set_index("datum", inplace=True)
+    df.index = pd.to_datetime(df.index)
+    df = df.loc["2021-01-01":"2022-01-01"]
+    return df

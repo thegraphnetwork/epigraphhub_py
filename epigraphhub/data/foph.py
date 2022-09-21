@@ -18,6 +18,7 @@ So the function isn't fully general.
 import pandas as pd
 from sqlalchemy import create_engine
 
+from epigraphhub.data.epigraphhub_db import get_data_by_location
 from epigraphhub.settings import env
 
 with env.db.credentials[env.db.default_credential] as credential:
@@ -26,106 +27,6 @@ with env.db.credentials[env.db.default_credential] as credential:
         f"{credential.password}@{credential.host}:{credential.port}/"
         f"{credential.dbname}"
     )
-
-
-def get_agg_data(schema, table_name, columns, method, ini_date):
-    """
-    This function provides an aggregate data frame for the table selected in the param
-    table_name. The columns should be a list with three values. The first should be
-    a date column, the second a column that will be used for the aggregation
-    (e.g. regions name), and the third the column that will be used to compute the
-    result of the aggregation.
-
-    :params schema: string. The schema where the data that you want to get is saved.
-
-    :params table_name: string. Name of the table that you want to get the data.
-
-    :params columns: list of strings. Columns from the table that will be used in the
-                    aggregation. The first column should be a date column,
-                    the second should be a column with the regions name that we want
-                    to aggregate (e.g. regions name), and the third will be used
-                    to compute the result of aggregation.
-
-    :params method: string. The method name to be applied in the aggregation the
-                            possible options are: 'COUNT', 'SUM',  and 'AVG'.
-
-    :params ini_date: string. Initial data to start the aggregation.
-
-    :return: Dataframe
-    """
-
-    table_name = table_name.lower()
-    method = method.upper()
-
-    query = f"SELECT {columns[0]}, {columns[1]}, {method}({columns[2]}) FROM {schema}.{table_name} WHERE {columns[0]} > '{ini_date}' GROUP BY ({columns[0]}, {columns[1]})"
-
-    df = pd.read_sql(query, engine_public)
-    df.set_index(columns[0], inplace=True)
-    df.index = pd.to_datetime(df.index)
-
-    return df
-
-
-def get_georegion_data(schema, table_name, georegion, columns, georegion_column):
-    """
-    This function provides a data frame for the table selected in the param table_name and
-    the chosen regions in the param georegion.
-
-    :params schema: string. The schema where the data that you want to get is saved.
-
-    :params table_name: string. Name of the table that you want to get the data.
-
-    :param sgeoregion: list of strings| string. This list contains all the regions of the country of interest or the string 'All'
-                            to return all the regions.
-
-    :params columns: list of strings| None. Columns that you want to select from the table table_name. If None all the columns will be returned.
-
-    :params georegion_column: string. Name of the column to filter by georegion name.
-
-    :return: Dataframe
-    """
-
-    schema = schema.lower()
-    table_name = table_name.lower()
-
-    if type(georegion) != list and georegion != "All":
-        raise Exception(
-            """Error. The georegion param should be a list or the string All to
-        return all the georegions."""
-        )
-
-    if type(columns) != list and columns != None:
-        raise Exception(
-            "Error. The columns param should be a list or None. If None all the columns will be returned."
-        )
-
-    if columns == None:
-        s_columns = "*"
-
-    else:
-        # separe the columns by comma to apply in the sql query
-        s_columns = ""
-        for i in columns:
-
-            s_columns = s_columns + i + ","
-
-        s_columns = s_columns[:-1]
-
-    if georegion == "All":
-        query = f"select {s_columns} from {schema}.{table_name}"
-
-    if len(georegion) == 1:
-
-        query = f"select {s_columns}  from {schema}.{table_name} where {georegion_column} = '{georegion[0]}' ;"
-
-    if len(georegion) > 1 and type(georegion) == list:
-        georegion_tuple = tuple(i for i in georegion)
-        query = f'select {s_columns} from {schema}.{table_name} where "{georegion_column}" in {georegion_tuple} ;'
-
-    df = pd.read_sql(query, engine_public)
-
-    return df
-
 
 dict_cols = {
     "foph_cases_d": ["datum", "georegion", "entries"],
@@ -217,12 +118,12 @@ def get_cluster_data(
 
     for table in table_name:
 
-        df = get_georegion_data(
+        df = get_data_by_location(
             schema,
             table,
             georegion,
             dict_cols[table],
-            georegion_column=georegion_columns[table],
+            loc_column=georegion_columns[table],
         )
         df.set_index(date_columns[table], inplace=True)
         df.index = pd.to_datetime(df.index)

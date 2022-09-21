@@ -19,7 +19,9 @@ def test_list_datasets():
 
 def test_print():
     WP = WorldPop()
+
     p = WP.__repr__()
+
     assert p.startswith("|")
     assert "alias" in p
     assert "title" in p
