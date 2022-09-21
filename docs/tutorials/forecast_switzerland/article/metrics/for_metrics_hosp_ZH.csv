@@ -1,6 +1,6 @@
 ,metrics,forecast_error
-0,mean_absolute_error,1.48873565288595
-1,mean_squared_error,3.243875614932295
-2,root_mean_squared_error,1.8010762379567098
-3,mean_squared_log_error,0.14438249828623984
-4,mean_absolute_percentage_error,0.5401977401931265
+0,mean_absolute_error,1.390075488603794
+1,mean_squared_error,2.74971876698277
+2,root_mean_squared_error,1.6582275980645027
+3,mean_squared_log_error,0.1266956129835958
+4,mean_absolute_percentage_error,0.5006693302564401
