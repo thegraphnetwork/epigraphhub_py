@@ -1,6 +1,6 @@
 """
 Last change on 2022/09/22
-This module is responsible for including missing index in the OWID 
+This module is responsible for including missing index in the OWID
 SQL table. Connects to the SQL server as defined in the connection.
 @see epigraphhub.connection
 
@@ -12,17 +12,15 @@ parse_indexes(table, remote):
 """
 import shlex
 import subprocess
+
 from loguru import logger
 
 from epigraphhub.connection import get_engine
+from epigraphhub.data.data_collection.config import OWID_HOST, OWID_LOG_PATH
 from epigraphhub.settings import env
 
-from epigraphhub.data.data_collection.config import (
-    OWID_HOST,
-    OWID_LOG_PATH,
-)
-
 logger.add(OWID_LOG_PATH, retention="7 days")
+
 
 def parse_indexes(remote=True):
     """
@@ -31,7 +29,7 @@ def parse_indexes(remote=True):
 
     Args:
         remote (bool)         : If the SQL container is not locally configured,
-                                creates a ssh tunnel with the Database.    
+                                creates a ssh tunnel with the Database.
 
     Raises:
         Exception (Exception) : Unable to create index. Bad connection config.
@@ -39,7 +37,7 @@ def parse_indexes(remote=True):
     if remote:
         proc = subprocess.Popen(
             shlex.split(f"ssh -f epigraph@{OWID_HOST} -L 5432:localhost:5432 -NC")
-        )    
+        )
     engine = get_engine(env.db.default_credential)
 
     with engine.connect() as connection:
@@ -69,4 +67,4 @@ def parse_indexes(remote=True):
         finally:
             logger.warning("Database indexes created on OWID table")
             if remote:
-                proc.kill()            
+                proc.kill()
