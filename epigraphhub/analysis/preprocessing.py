@@ -145,7 +145,6 @@ def get_next_n_days(ini_date: str, next_days: int) -> list:
     a = datetime.strptime(ini_date, "%Y-%m-%d")
 
     for i in np.arange(1, next_days + 1):
-
         d_i = datetime.strftime(a + timedelta(days=int(i)), "%Y-%m-%d")
 
         next_dates.append(datetime.strptime(d_i, "%Y-%m-%d"))
@@ -195,7 +194,7 @@ def lstm_split_data(
     data = np.empty((n_ts, look_back + predict_n, df.shape[1]))
     for i in range(n_ts):  # - predict_):
         #         print(i, df[i: look_back+i+predict_n,0])
-        data[i, :, :] = df[i : look_back + i + predict_n, :]
+        data[i, :, :] = df[i: look_back + i + predict_n, :]
     # train_size = int(n_ts * ratio)
     train_size = int(df.shape[0] * ratio) - look_back - predict_n + 1
     # print(train_size)

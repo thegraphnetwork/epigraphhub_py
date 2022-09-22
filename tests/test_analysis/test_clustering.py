@@ -74,7 +74,6 @@ def test_plot_curves(get_df_cases):
 
 
 def test_plot_xcorr(get_df_cases):
-
     df = get_df_cases
     df.index = pd.to_datetime(df["datum"])
 

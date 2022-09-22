@@ -102,7 +102,6 @@ def train_eval_single_canton(
     predict_n=14,
     look_back=14,
 ):
-
     """
     Function to train and evaluate the model for one georegion.
 
@@ -410,7 +409,6 @@ def train_all_cantons(
             )
 
             if any(df_c[target_name] > 1):
-
                 ngb_m.train(
                     target_name,
                     df_c,

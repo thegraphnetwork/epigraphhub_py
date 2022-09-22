@@ -40,7 +40,7 @@ def get_lag(
         x = pd.Series(x).rolling(7).mean().dropna().values
         y = pd.Series(y).rolling(7).mean().dropna().values
     corr = correlate(x, y, mode="full") / np.sqrt(np.dot(x, x) * np.dot(y, y))
-    slice = np.s_[(len(corr) - maxlags) // 2 : -(len(corr) - maxlags) // 2]
+    slice = np.s_[(len(corr) - maxlags) // 2: -(len(corr) - maxlags) // 2]
     corr = corr[slice]
     lags = correlation_lags(x.size, y.size, mode="full")
     lags = lags[slice]
@@ -327,7 +327,6 @@ def plot_clusters(
     if normalize:
 
         for i in inc_canton.columns:
-
             inc_canton[i] = inc_canton[i] / max(inc_canton[i])
 
     figs = []

@@ -13,7 +13,6 @@ from epigraphhub.analysis.forecast_models.metrics import compute_metrics
 
 
 def test_rolling_predictions(get_df_test):
-
     df = get_df_test
     target_name = "hosp_GE"
 
@@ -33,7 +32,6 @@ def test_rolling_predictions(get_df_test):
 
 
 def test_training_model(get_df_test):
-
     df = get_df_test
     target_name = "hosp_GE"
 
@@ -50,7 +48,6 @@ def test_training_model(get_df_test):
 
 
 def test_rolling_forecast(get_df_test):
-
     df = get_df_test
 
     ngb_m = ngb.NGBModel(predict_n=2, look_back=3, validation_split=0.1, early_stop=10)

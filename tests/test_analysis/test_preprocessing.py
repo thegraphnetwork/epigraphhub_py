@@ -37,7 +37,6 @@ def test_get_next_n_days():
 
 
 def test_lstm_split_data(get_df_test):
-
     df = get_df_test
 
     look_back = 12

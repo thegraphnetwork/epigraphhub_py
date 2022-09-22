@@ -126,7 +126,6 @@ def get_data_by_location(
         # separe the columns by comma to apply in the sql query
         s_columns = ""
         for i in columns:
-
             s_columns = s_columns + i + ","
 
         s_columns = s_columns[:-1]
@@ -135,7 +134,6 @@ def get_data_by_location(
         query = f"select {s_columns} from {schema}.{table_name}"
 
     if len(loc) == 1:
-
         query = f"select {s_columns} from {schema}.{table_name} where {loc_column} = '{loc[0]}' ;"
 
     if len(loc) > 1 and loc != "All":

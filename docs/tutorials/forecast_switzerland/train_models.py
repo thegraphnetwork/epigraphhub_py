@@ -11,7 +11,6 @@ train_all_cantons(
     path="saved_models_dash",
 )
 
-
 target_curve_name = "total_hosp"
 predictors = ["foph_test_d", "foph_cases_d", "foph_hosp_d", "foph_hospcapacity_d"]
 ini_date = "2020-05-01"

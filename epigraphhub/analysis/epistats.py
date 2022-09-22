@@ -1,14 +1,13 @@
 from typing import Union
 
-import arviz as az
 import numpy as np
 import pandas as pd
-import plotly.express as px
-import pymc3 as pm
 import scipy.stats as st
+from scipy.stats.contingency import relative_risk
+from scipy.stats._result_classes import RelativeRiskResult
 
 
-def prevalence(pop_size: int, positives: int, a: float = 1, b: float = 1) -> object:
+def posterior_prevalence(pop_size: int, positives: int, a: float = 1, b: float = 1) -> st.rv_continuous:
     """
     Returns the Bayesian posterior prevalence of a disease for a point in time.
     It assumes number of cases follow a binomial distribution with probability described as a beta(a,b) distribution
@@ -23,10 +22,14 @@ def prevalence(pop_size: int, positives: int, a: float = 1, b: float = 1) -> obj
     b : float, optional
         prior beta parameter beta, by default 1
 
-    Returns
-    -------
-    object
-        Returns a scipy stats frozen beta distribution that represents the posterior probability of the prevalence
+    Args:
+        pop_size: population size
+        positives: number of positives
+        a: prior beta parameter alpha
+        b: prior beta parameter beta
+
+    Returns:
+        object: Returns a scipy stats frozen beta distribution that represents the posterior probability of the prevalence
     """
     a, b = 1, 1  # prior beta parameters
     pa = a + positives
@@ -34,192 +37,48 @@ def prevalence(pop_size: int, positives: int, a: float = 1, b: float = 1) -> obj
     return st.beta(pa, pb)
 
 
-def inf_pos_prob_cases_hosp(
-    df: pd.DataFrame,
-    alpha: float = 0.5,
-    beta: float = 0.5,
-    draws: int = 2000,
-    tune: int = 500,
-) -> az.data.inference_data.InferenceData:
+@np.vectorize
+def incidence_rate(pop_size: int, new_cases: int, scaling: float = 1e5) -> Union[float, np.ndarray, np.ndarray]:
     """
-    This function compute the posterior probability distribution for the prevalence of cases and the probability of hospitalization over time.
-
+    incidence is defined as the number of new cases in a population over a period of time, typically 1 year. The incidence rate is also usually scale to 100k people to facilitate comparisons between localities with different populations.
     Parameters
     ----------
-    df : pd.DataFrame
-        It takes as input a dataframe with four columns:
-            - cases: Number of cases over time.
-            - hospiotalizations: Number of hospitalizations over time.
-            - tests: Number of tests over time.
-            - tests_pos: Proportion of the positive tests over time.
-        This data frame must have a datetime index.
-    alpha:float
-        The alpha parameter of the Beta distribution
-    beta:float
-        The beta parameter of the Beta distribution
-    draws: int
-        The number of samples to draw.
-    tune: int
-        Number of iterations to tune. Samplers adjust the step sizes,
-        scalings or similar during tuning. Tuning samples will be drawn in addition to the number specified in the
-        draws argument, and will be discarded.
+    pop_size: population pop_size
+    new_cases: number of new cases observed in the period
+    scaling: number to scale the rate to. If ommitted, the rate is return as cases per 100k.
 
     Returns
     -------
-    az.data.inference_data.InferenceData
-        An array with the posterior probabilities infered.
+    A float or a np.ndarray of floats
+
+    Examples
+    --------
+    >>> incidence_rate(1000, 5)
+    500.0
+    >>> incidence_rate([1000,5000,10000], [5,5,5])
+    array([500, 100, 50])
     """
-
-    with pm.Model() as var_bin:
-        prev = pm.Beta("prevalence", alpha, beta, shape=len(df["cases"]))
-
-        cases = pm.Binomial("cases", n=df["tests"].values, p=prev, observed=df["cases"])
-
-        probs = pm.Beta("phosp", alpha, beta, shape=len(df["cases"]))
-
-        hosp = pm.Binomial(
-            "hospitalizations", n=df["cases"], p=probs, observed=df["hospitalizations"]
-        )
-
-    with var_bin:
-        tracevb = pm.sample(draws, tune=tune, return_inferencedata=True)
-
-    return tracevb
+    IR = new_cases / pop_size * scaling
+    return IR
 
 
-def plot_pos_prob_prev(
-    df: pd.DataFrame,
-    tracevb: az.data.inference_data.InferenceData,
-    ci: bool = False,
-    save: bool = False,
-    name: Union[str, None] = None,
-    plot: bool = True,
-):
+def risk_ratio(exposed_cases: int, exposed_total: int, control_cases: int, control_total: int) -> RelativeRiskResult:
     """
-    This function plots the posterior probability distribution of the prevalence
-    generated with the `inf_pos_prob_cases_hosp()` function.
+    Also known as relative risk, computed the risk of contracting a disease given exposure to a risk factor.
+    Parameters:
+        exposed_cases: number of cases in the exposed group
+        exposed_total: size of the exposed group
+        control_cases: number of cases in the control group
+        control_total: size of the control group
+    Returns:
+    RelativeRiskResult object
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        A dataframe with four columns:
-        - cases: Number of cases over time.
-        - hospitalizations: Number of hospitalizations over time.
-        - tests: Number of tests over time.
-        - tests_pos: Proportion of the positive tests over time.
-        This data frame must have a datetime index.
-    tracevb : az.data.inference_data.InferenceData
-        the return of the inf_pos_prob_cases_hosp() function.
-    ci : bool, optional
-        If True the confidence interval is computed, by default False
-    save : bool, optional
-        If True the plot is saved, by default False
-
-    Returns
-    -------
-    fig
-        A plotly figure.
+    Examples:
+    >>> rr = risk_ratio(27, 122, 44, 487)
+    >>> rr.relative_risk
+    2.4495156482861398
+    >>> rr.confidence_interval(confidence_level=0.95)
+    ConfidenceInterval(low=1.5836990926700116, high=3.7886786315466354)
     """
-
-    Prev_post = pd.DataFrame(
-        index=df["cases"].index,
-        data={
-            "median": tracevb.posterior.prevalence.median(axis=(0, 1)),
-            "lower": np.percentile(tracevb.posterior.prevalence, 2.5, axis=(0, 1)),
-            "upper": np.percentile(tracevb.posterior.prevalence, 97.5, axis=(0, 1)),
-        },
-    )
-
-    fig = px.line(Prev_post.rolling(7).mean().dropna())
-
-    if ci:
-        fig.add_scatter(
-            x=Prev_post.index,
-            y=Prev_post.lower,
-            mode="none",
-            fill="tonexty",
-            name="95% CI",
-        )
-
-    fig.add_scatter(
-        x=df["tests_pos"].index,
-        y=df["tests_pos"].values,
-        name="Test positivity",
-        mode="markers",
-    )
-    fig.update_layout(
-        title="Estimated prevalence of COVID",
-        yaxis_title="Prevalence of infected",
-        xaxis_title="Time (days)",
-    )
-    if save:
-        if name == None:
-            fig.write_image("prevalence_est.png", scale=3)
-        else:
-            fig.write_image(f"{name}.png", scale=3)
-
-    if plot:
-        fig.show()
-
-    return fig
-
-
-def plot_pos_prob_hosp(
-    df: pd.DataFrame,
-    tracevb: az.data.inference_data.InferenceData,
-    save: bool = False,
-    name: Union[str, None] = None,
-    plot: bool = False,
-):
-    """
-    This function plots the posterior probability distribution of hospitalization
-    generated with the `inf_pos_prob_cases_hosp()` function.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        A dataframe with four columns:
-        - cases: Number of cases over time.
-        - hospitalizations: Number of hospitalizations over time.
-        - tests: Number of tests over time.
-        - tests_pos: Proportion of the positive tests over time.
-        This data frame must have a datetime index.
-    tracevb : az.data.inference_data.InferenceData
-        the return of the inf_pos_prob_cases_hosp() function.
-    ci : bool, optional
-        If True the confidence interval is computed, by default False
-    save : bool, optional
-        If True the plot is saved, by default False
-
-    Returns
-    -------
-    fig
-        A plotly figure.
-    """
-
-    Phosp_post = pd.DataFrame(
-        index=df.index,
-        data={
-            "median": tracevb.posterior.phosp.median(axis=(0, 1)),
-            "lower": np.percentile(tracevb.posterior.phosp, 2.5, axis=(0, 1)),
-            "upper": np.percentile(tracevb.posterior.phosp, 97.5, axis=(0, 1)),
-        },
-    )
-
-    fig = px.line(Phosp_post.rolling(7).mean().dropna())
-
-    fig.update_layout(
-        title="Estimated Probability of Hospitalization",
-        yaxis_title="probability",
-    )
-
-    if plot:
-        fig.show()
-
-    if save:
-        if name == None:
-            fig.write_image("prob_hosp_est.png", scale=3)
-        else:
-            fig.write_image(f"{name}.png", scale=3)
-
-    return fig
+    rr = relative_risk(exposed_cases, exposed_total, control_cases, control_total)
+    return rr
