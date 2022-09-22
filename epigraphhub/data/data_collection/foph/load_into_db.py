@@ -2,7 +2,7 @@
 Last change on 2022/09/22
 This module will retrieve the data from a CSV file, create a connection
 with the SQL Database and update it with the new information. Pangres
-will generate chunks with total lenth of 1000 and insert them into the
+will generate chunks with total length of 1000 and insert them into the
 corresponding table as specified by the downloaded CSV file.
 @see epigraphhub.data.data_collection.foph.download
 @see epigraphhub.connection

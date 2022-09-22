@@ -1,6 +1,6 @@
 """
 Last change on 2022/09/22
-This module is responsible for including missing index in the FOPH 
+This module is responsible for including missing index in the FOPH
 SQL tables. Connects to the SQL server as defined in the connection.
 @see epigraphhub.connection
 
