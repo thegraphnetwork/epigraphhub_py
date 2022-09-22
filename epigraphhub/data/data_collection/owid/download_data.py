@@ -1,12 +1,14 @@
 import os
 import subprocess
+
+from loguru import logger
+
 from epigraphhub.data.data_collection.config import (
     OWID_CSV_PATH,
     OWID_CSV_URL,
     OWID_FILENAME,
     OWID_LOG_PATH,
 )
-from loguru import logger
 
 logger.add(OWID_LOG_PATH, retention="7 days")
 

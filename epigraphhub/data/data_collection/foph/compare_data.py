@@ -1,11 +1,10 @@
-from epigraphhub.data.data_collection.config import (
-    FOPH_LOG_PATH,
-    FOPH_CSV_PATH,
-)
-from epigraphhub.connection import get_engine
 from datetime import datetime
-from loguru import logger
+
 import pandas as pd
+from loguru import logger
+
+from epigraphhub.connection import get_engine
+from epigraphhub.data.data_collection.config import FOPH_CSV_PATH, FOPH_LOG_PATH
 from epigraphhub.settings import env
 
 logger.add(FOPH_LOG_PATH, retention="7 days")

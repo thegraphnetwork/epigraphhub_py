@@ -4,18 +4,15 @@ Created on Mon Jan 31 08:53:59 2022
 @author: eduardoaraujo
 """
 
-from epigraphhub.data.data_collection.colombia.data_chunk import (
-    DFChunkGenerator as gen,
-)
-from epigraphhub.data.data_collection.config import (
-    COLOMBIA_LOG_PATH,
-    COLOMBIA_CLIENT,
-)
-from epigraphhub.connection import get_engine
 from datetime import datetime, timedelta
-from pangres import upsert
+
 from loguru import logger
+from pangres import upsert
 from sqlalchemy import create_engine
+
+from epigraphhub.connection import get_engine
+from epigraphhub.data.data_collection.colombia.data_chunk import DFChunkGenerator as gen
+from epigraphhub.data.data_collection.config import COLOMBIA_CLIENT, COLOMBIA_LOG_PATH
 from epigraphhub.settings import env
 
 logger.add(COLOMBIA_LOG_PATH, retention="7 days")
@@ -43,7 +40,6 @@ def gen_chunks_into_db():
     start = 0
     chunk_size = 10000
     maxrecords = int(record_count["COUNT"])
-
 
     with env.db.credentials[env.db.default_credential] as credential:
         engine = create_engine(

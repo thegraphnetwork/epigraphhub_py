@@ -1,10 +1,9 @@
-from loguru import logger
 from datetime import datetime
+
+from loguru import logger
+
 from epigraphhub.connection import get_engine
-from epigraphhub.data.data_collection.config import (
-    COLOMBIA_LOG_PATH,
-    COLOMBIA_CLIENT,
-)
+from epigraphhub.data.data_collection.config import COLOMBIA_CLIENT, COLOMBIA_LOG_PATH
 from epigraphhub.settings import env
 
 logger.add(COLOMBIA_LOG_PATH, retention="7 days")
@@ -29,10 +28,7 @@ def table_last_update() -> datetime:
 def web_last_update() -> datetime:
     try:
         report_date = [
-            r
-            for r in client.get_all(
-                "gt2j-8ykr", select="max(fecha_reporte_web)"
-            )
+            r for r in client.get_all("gt2j-8ykr", select="max(fecha_reporte_web)")
         ][0]
         last_update = datetime.strptime(
             report_date["max_fecha_reporte_web"], "%Y-%m-%d %H:%M:%S"

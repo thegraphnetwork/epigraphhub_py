@@ -1,11 +1,13 @@
 import os
-import requests
 import subprocess
+
+import requests
 from loguru import logger
+
 from epigraphhub.data.data_collection.config import (
     FOPH_CSV_PATH,
-    FOPH_URL,
     FOPH_LOG_PATH,
+    FOPH_URL,
 )
 
 logger.add(FOPH_LOG_PATH, retention="7 days")

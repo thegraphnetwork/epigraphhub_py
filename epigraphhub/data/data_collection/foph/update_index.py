@@ -1,7 +1,8 @@
-
 from loguru import logger
+
 from epigraphhub.connection import get_engine
 from epigraphhub.settings import env
+
 
 def parse_date_region(table):
     engine = get_engine(env.db.default_credential)

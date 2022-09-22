@@ -1,15 +1,17 @@
 import os
-import subprocess
 import shlex as sx
+import subprocess
+
+from loguru import logger
+
+from epigraphhub.connection import get_engine
 from epigraphhub.data.data_collection.config import (
-    OWID_HOST,
     OWID_CSV_PATH,
     OWID_FILENAME,
+    OWID_HOST,
     OWID_LOG_PATH,
 )
-from epigraphhub.connection import get_engine
 from epigraphhub.settings import env
-from loguru import logger
 
 logger.add(OWID_LOG_PATH, retention="7 days")
 

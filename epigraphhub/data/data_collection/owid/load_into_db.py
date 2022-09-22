@@ -1,18 +1,18 @@
-
-import pandas as pd
 import os
 import shlex
 import subprocess
+
+import pandas as pd
 from loguru import logger
 from sqlalchemy import create_engine
-from epigraphhub.settings import env
+
 from epigraphhub.data.data_collection.config import (
     OWID_CSV_PATH,
     OWID_FILENAME,
-    OWID_LOG_PATH,
     OWID_HOST,
+    OWID_LOG_PATH,
 )
-
+from epigraphhub.settings import env
 
 with env.db.credentials[env.db.default_credential] as credential:
     engine_public = create_engine(
@@ -35,9 +35,7 @@ def parse_types(df):
 def load(remote=True):
     if remote:
         proc = subprocess.Popen(
-            shlex.split(
-                f"ssh -f epigraph@{OWID_HOST} -L 5432:localhost:5432 -NC"
-            )
+            shlex.split(f"ssh -f epigraph@{OWID_HOST} -L 5432:localhost:5432 -NC")
         )
     try:
         data = pd.read_csv(os.path.join(OWID_CSV_PATH, OWID_FILENAME))
@@ -55,7 +53,7 @@ def load(remote=True):
         with engine.connect() as connection:
             connection.execute(
                 """
-                CREATE INDEX IF NOT EXISTS country_idx 
+                CREATE INDEX IF NOT EXISTS country_idx
                 ON owid_covid (location);
                 """
             )

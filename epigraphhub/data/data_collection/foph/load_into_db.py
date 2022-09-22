@@ -1,11 +1,9 @@
 import pandas as pd
 from loguru import logger
 from pangres import upsert
+
 from epigraphhub.connection import get_engine
-from epigraphhub.data.data_collection.config import (
-    FOPH_LOG_PATH,
-    FOPH_CSV_PATH,
-)
+from epigraphhub.data.data_collection.config import FOPH_CSV_PATH, FOPH_LOG_PATH
 from epigraphhub.settings import env
 
 logger.add(FOPH_LOG_PATH, retention="7 days")
@@ -36,4 +34,3 @@ def load(table, filename):
             create_table=True,
         )
     logger.info(f"Table foph_{table.lower()}_d updated")
-

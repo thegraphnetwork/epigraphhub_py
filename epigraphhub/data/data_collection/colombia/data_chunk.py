@@ -4,11 +4,11 @@ Created on Mon Jan 31 08:53:59 2022
 @author: eduardoaraujo
 """
 
-import pandas as pd
 from datetime import datetime, timedelta
-from epigraphhub.data.data_collection.config import (
-    COLOMBIA_CLIENT,
-)
+
+import pandas as pd
+
+from epigraphhub.data.data_collection.config import COLOMBIA_CLIENT
 
 client = COLOMBIA_CLIENT
 
