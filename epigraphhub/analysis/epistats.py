@@ -1,6 +1,7 @@
 from typing import Union
 
 import numpy as np
+import pandas as pd
 import scipy.stats as st
 from scipy.stats.contingency import relative_risk
 from scipy.stats._result_classes import RelativeRiskResult
@@ -10,6 +11,16 @@ def posterior_prevalence(pop_size: int, positives: int, a: float = 1, b: float =
     """
     Returns the Bayesian posterior prevalence of a disease for a point in time.
     It assumes number of cases follow a binomial distribution with probability described as a beta(a,b) distribution
+    Parameters
+    ----------
+    pop_size : int
+        population size
+    positives : int
+        number of positives
+    a : float, optional
+        prior beta parameter alpha, by default 1
+    b : float, optional
+        prior beta parameter beta, by default 1
 
     Args:
         pop_size: population size
