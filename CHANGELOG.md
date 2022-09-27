@@ -1,6 +1,13 @@
 Release Notes
 ---
 
+# [1.2.0](https://github.com/thegraphnetwork/epigraphhub_py/compare/1.1.1...1.2.0) (2022-09-27)
+
+
+### Features
+
+* 52 added a module to calculate basic epidemiological indicators ([#172](https://github.com/thegraphnetwork/epigraphhub_py/issues/172)) ([6f76dc3](https://github.com/thegraphnetwork/epigraphhub_py/commit/6f76dc302f7191e6c86c78196cc18640d3cf5b32))
+
 ## [1.1.1](https://github.com/thegraphnetwork/epigraphhub_py/compare/1.1.0...1.1.1) (2022-09-09)
 
 
