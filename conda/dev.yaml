@@ -3,9 +3,15 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - python 3.9.*
-  - libblas
-  - poetry
-  - nodejs
   - docker-compose
+  - libblas
+  - nodejs
+  - pandas
+  - pip
+  - poetry
+  - psycopg2
+  - python 3.9.*
   - shellcheck
+  - sqlalchemy
+  - pip:
+    - pysus
