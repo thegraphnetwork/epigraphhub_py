@@ -2833,19 +2833,6 @@ tornado = ">=6.1.0"
 test = ["pre-commit", "pytest (>=6.0)", "pytest-timeout"]
 
 [[package]]
-name = "theano-pymc"
-version = "1.1.2"
-description = "Optimizing compiler for evaluating mathematical expressions on CPUs and GPUs."
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-filelock = "*"
-numpy = ">=1.9.1"
-scipy = ">=0.14"
-
-[[package]]
 name = "threadpoolctl"
 version = "3.1.0"
 description = "threadpoolctl"
@@ -3123,7 +3110,7 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "96293c912fa10317c99a22c0d305116bfe1d2d4e739b8e4ff229529b3ae1674d"
+content-hash = "eb3f9c5c58aea9ec3b33947b505744028ff8f6a6d83aeac9f64d88ea4d144438"
 
 [metadata.files]
 absl-py = [
@@ -5173,9 +5160,6 @@ termcolor = [
 terminado = [
     {file = "terminado-0.15.0-py3-none-any.whl", hash = "sha256:0d5f126fbfdb5887b25ae7d9d07b0d716b1cc0ccaacc71c1f3c14d228e065197"},
     {file = "terminado-0.15.0.tar.gz", hash = "sha256:ab4eeedccfcc1e6134bfee86106af90852c69d602884ea3a1e8ca6d4486e9bfe"},
-]
-theano-pymc = [
-    {file = "Theano-PyMC-1.1.2.tar.gz", hash = "sha256:5da6c2242ea72a991c8446d7fe7d35189ea346ef7d024c890397011114bf10fc"},
 ]
 threadpoolctl = [
     {file = "threadpoolctl-3.1.0-py3-none-any.whl", hash = "sha256:8b99adda265feb6773280df41eece7b2e6561b772d21ffd52e372f999024907b"},
