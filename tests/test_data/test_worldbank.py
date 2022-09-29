@@ -34,11 +34,8 @@ def test_search_in_indicators(keyword, db):
 @pytest.mark.parametrize(
     "ind,country, db",
     [
-        (["SP.POP.TOTL.FE.IN", "SP.POP.TOTL.MA.IN"], ["BRA"], 2),
         (["SP.POP.TOTL.FE.IN", "SP.POP.TOTL.MA.IN"], ["BRA", "USA"], 2),
         (["SP.POP.TOTL.MA.IN"], ["BRA"], 2),
-        (["DMGSRMRCHSAXD", "CPTOTNSXN"], ["USA", "CHE"], 15),
-        (["DMGSRMRCHSAXD", "CPTOTNSXN"], ["CHE"], 15),
         (["CPTOTNSXN"], ["USA", "CHE"], 15),
     ],
 )
