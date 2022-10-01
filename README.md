@@ -3,7 +3,7 @@
 <div align="center">
 
 [![Build status](https://github.com/thegraphnetwork/epigraphhub_py/workflows/build/badge.svg?branch=master&event=push)](https://github.com/thegraphnetwork/epigraphhub_py/actions?query=workflow%3Abuild)
-[![Python Version](https://img.shields.io/pypi/pyversions/epigraphhub_py.svg)](https://pypi.org/project/epigraphhub_py/)
+[![Python Version](https://img.shields.io/pypi/pyversions/epigraphhub.svg)](https://pypi.org/project/epigraphhub/)
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Security: bandit](https://img.shields.io/badge/security-bandit-green.svg)](https://github.com/PyCQA/bandit)
@@ -22,14 +22,14 @@ The EpiGraphHub library is also available for the [R](https://github.com/thegrap
 
 EpiGraphHub library allows users make and apply:
 
-● Bayesian Statistics
-● Epidemiological analysis
-● Mathematical modelling
-● Cost-effectiveness analysis
-● Forecasting
-● Machine Learning
-● Text Mining
-● Geo-Spatial analysis
+- Bayesian Statistics
+- Epidemiological analysis
+- Mathematical modelling
+- Cost-effectiveness analysis
+- Forecasting
+- Machine Learning
+- Text Mining
+- Geo-Spatial analysis
 
 ## Installation
 
