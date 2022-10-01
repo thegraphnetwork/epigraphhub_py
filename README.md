@@ -17,8 +17,8 @@ Epigraphhub Python package
 </div>
 
 The *EpiGraphHub library* is designed to provide external users with all of the analytical functionality used to power the [EpiGraphHub platform](https://epigraphhub.org/superset/welcome/) and its applications. In fact, all applications designed to run on the EpiGraphHub platform rely heavily on it.
+
 This library should be used by users that want to contribute to the platform as well as by users that want to borrow some of the tools developed by our team in other opensource projects.
-The EpiGraphHub library is also available for the [R](https://github.com/thegraphnetwork/r-epigraphhub/blob/main/epigraphhub.Rproj) language.
 
 EpiGraphHub library allows users make and apply:
 
@@ -31,11 +31,15 @@ EpiGraphHub library allows users make and apply:
 - Text Mining
 - Geo-Spatial analysis
 
+The EpiGraphHub library is also available for the [R](https://github.com/thegraphnetwork/r-epigraphhub/blob/main/epigraphhub.Rproj) language.
+
 ## Installation
 
 The EpigraphHub library can be installed using pip:
 
-`$ pip install epigraphhub`
+```
+$ pip install epigraphhub
+```
 
 ## Usage
 View Example EpiGraphHub Applications in Our Documentation:
@@ -47,7 +51,7 @@ View Example EpiGraphHub Applications in Our Documentation:
 
 ## Documentation
 
-The official documentation is hosted on [ReadtheDocs](https://readthedocs.org/projects/epigraphhub-libraries/)
+The official documentation is hosted on [ReadtheDocs](https://readthedocs.org/projects/epigraphhub-libraries/).
 
 Check our [website](https://www.epigraphhub.org/) for most details about the EpiGraphHub project.
 
@@ -62,25 +66,6 @@ Check our [Code of conduct](https://github.com/thegraphnetwork/epigraphhub_py/bl
 ## 📈 Releases
 
 You can see the list of available releases on the [GitHub Releases](https://github.com/thegraphnetwork/epigraphhub_py/releases) page.
-
-We follow [Semantic Versions](https://semver.org/) specification.
-
-We use [`Release Drafter`](https://github.com/marketplace/actions/release-drafter). As pull requests are merged, a draft release is kept up-to-date listing the changes, ready to publish when you’re ready. With the categories option, you can categorize pull requests in release notes using labels.
-
-### List of labels and corresponding titles
-
-|               **Label**               |  **Title in Releases**  |
-| :-----------------------------------: | :---------------------: |
-|       `enhancement`, `feature`        |       🚀 Features       |
-| `bug`, `refactoring`, `bugfix`, `fix` | 🔧 Fixes & Refactoring  |
-|       `build`, `ci`, `testing`        | 📦 Build System & CI/CD |
-|              `breaking`               |   💥 Breaking Changes   |
-|            `documentation`            |    📝 Documentation     |
-|            `dependencies`             | ⬆️ Dependencies updates |
-
-You can update it in [`release-drafter.yml`](https://github.com/thegraphnetwork/epigraphhub_py/blob/master/.github/release-drafter.yml).
-
-GitHub creates the `bug`, `enhancement`, and `documentation` labels for you. Create the remaining labels on the Issues tab of your GitHub repository, when you need them.
 
 ## 🛡 License
 
