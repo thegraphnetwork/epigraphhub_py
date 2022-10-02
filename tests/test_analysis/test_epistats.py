@@ -1,12 +1,16 @@
 """
 Tests for epistats module
 """
+import numpy as np
 import pytest
 import scipy.stats as st
-import numpy as np
 from numpy.testing import assert_equal
 
-from epigraphhub.analysis.epistats import posterior_prevalence, incidence_rate, risk_ratio
+from epigraphhub.analysis.epistats import (
+    incidence_rate,
+    posterior_prevalence,
+    risk_ratio,
+)
 
 
 @pytest.mark.parametrize(("a", "b"), [(1, 1), (2, 2)])
@@ -17,10 +21,10 @@ def test_prevalence(a, b):
     assert p.std() > 0
 
 
-@pytest.mark.parametrize(("pop", "cases", "expected"),
-                         [(1000, 5, 500),
-                          ([1000, 5000, 10000], [5, 5, 5], np.array([500, 100, 50]))]
-                         )
+@pytest.mark.parametrize(
+    ("pop", "cases", "expected"),
+    [(1000, 5, 500), ([1000, 5000, 10000], [5, 5, 5], np.array([500, 100, 50]))],
+)
 def test_incidence_rate(pop, cases, expected):
     ir = incidence_rate(pop, cases)
     assert isinstance(ir, np.ndarray)

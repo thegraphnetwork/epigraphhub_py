@@ -3,11 +3,13 @@ from typing import Union
 import numpy as np
 import pandas as pd
 import scipy.stats as st
-from scipy.stats.contingency import relative_risk
 from scipy.stats._result_classes import RelativeRiskResult
+from scipy.stats.contingency import relative_risk
 
 
-def posterior_prevalence(pop_size: int, positives: int, a: float = 1, b: float = 1) -> st.rv_continuous:
+def posterior_prevalence(
+    pop_size: int, positives: int, a: float = 1, b: float = 1
+) -> st.rv_continuous:
     """
     Returns the Bayesian posterior prevalence of a disease for a point in time.
     It assumes number of cases follow a binomial distribution with probability described as a beta(a,b) distribution
@@ -38,7 +40,9 @@ def posterior_prevalence(pop_size: int, positives: int, a: float = 1, b: float =
 
 
 @np.vectorize
-def incidence_rate(pop_size: int, new_cases: int, scaling: float = 1e5) -> Union[float, np.ndarray, np.ndarray]:
+def incidence_rate(
+    pop_size: int, new_cases: int, scaling: float = 1e5
+) -> Union[float, np.ndarray, np.ndarray]:
     """
     incidence is defined as the number of new cases in a population over a period of time, typically 1 year. The incidence rate is also usually scale to 100k people to facilitate comparisons between localities with different populations.
     Parameters
@@ -62,7 +66,9 @@ def incidence_rate(pop_size: int, new_cases: int, scaling: float = 1e5) -> Union
     return IR
 
 
-def risk_ratio(exposed_cases: int, exposed_total: int, control_cases: int, control_total: int) -> RelativeRiskResult:
+def risk_ratio(
+    exposed_cases: int, exposed_total: int, control_cases: int, control_total: int
+) -> RelativeRiskResult:
     """
     Also known as relative risk, computed the risk of contracting a disease given exposure to a risk factor.
     Parameters:
