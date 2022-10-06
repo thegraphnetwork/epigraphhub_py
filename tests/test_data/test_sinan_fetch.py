@@ -45,7 +45,3 @@ class TestFethSinan(unittest.TestCase):
         self.assertEqual(table_name, '"brasil"."zikabr17"')
         self.assertIn("CREATE TABLE brasil.zikabr17", query_sql)
         self.assertEqual(int(df1["count"]), df2.shape[0])
-
-
-if __name__ == "__main__":
-    unittest.main()

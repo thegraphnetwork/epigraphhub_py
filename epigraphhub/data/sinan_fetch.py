@@ -1,4 +1,3 @@
-# import argparse
 import time
 from pathlib import Path
 
@@ -12,25 +11,6 @@ from pysus.online_data import SINAN
 from sqlalchemy import create_engine
 
 from epigraphhub.settings import env
-
-"""
-parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument(
-    "--disease",
-    "-d",
-    type=str,
-    help="{disease: str} Disease name.",
-)
-parser.add_argument(
-    "--year", "-y", type=int, help="{year: int} - Year with 4 digits."
-)
-# python tests/test_data/test_command_line.py --help
-
-
-args = parser.parse_args()
-disease, year = args.disease, args.year
-
-"""
 
 logger.add("/tmp/pysus_insertions.log", retention="7 days")
 
@@ -171,10 +151,3 @@ def save_to_pgsql(disease: str, year: int) -> conn.commit:
 
         except Exception as e:
             logger.info(e)
-
-
-"""
-if __name__ == "__main__":
-    # TODO: Create function to receive parameters.
-    save_to_pgsql(disease, year)
-"""
