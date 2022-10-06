@@ -45,7 +45,7 @@ def download_csv():
             f"{OWID_CSV_URL}",
         ]
     )
-    logger.warning("OWID csv downloaded.")
+    logger.info("OWID csv downloaded.")
 
 
 def remove_csv():
@@ -53,4 +53,4 @@ def remove_csv():
     This method deletes the OWID CSV file recursively.
     """
     os.remove(f"{OWID_CSV_PATH}/{OWID_FILENAME}")
-    logger.warning("OWID csv removed.")
+    logger.info("OWID csv removed.")

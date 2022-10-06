@@ -65,6 +65,6 @@ def parse_indexes(remote=True):
         except Exception as e:
             logger.info(f"Could not create date index: {e}")
         finally:
-            logger.warning("Database indexes created on OWID table")
+            logger.info("Database indexes created on OWID table")
             if remote:
                 proc.kill()

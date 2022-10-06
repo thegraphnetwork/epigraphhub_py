@@ -50,7 +50,7 @@ def parse_types(df):
     """
     df = df.convert_dtypes()
     df["date"] = pd.to_datetime(df.date)
-    logger.warning("OWID data types parsed.")
+    logger.info("OWID data types parsed.")
     return df
 
 
@@ -80,7 +80,7 @@ def load(remote=True):
             method="multi",
             chunksize=10000,
         )
-        logger.warning("OWID data inserted into database")
+        logger.info("OWID data inserted into database")
     except Exception as e:
         logger.error(f"Could not update OWID table\n{e}")
         raise (e)
