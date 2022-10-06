@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "epigraphhub"
-version = "1.2.0"  # changed by semantic-release
+version = "1.1.1"  # changed by semantic-release
 description = "Epigraphhub Python package"
 readme = "README.md"
 authors = ["thegraphnetwork <fccoelho@gmail.com>"]
@@ -37,10 +37,10 @@ python = ">=3.9,<3.11"
 
 typer = {extras = ["all"], version = "^0.4.0"}
 rich = "^11.2.0"
-numpy = "^1.20.3"
 pandas = "^1.2"
+pymc3 = "^3.11.4"
 scipy = "^1.8.0"
-arviz = "^0.12.0"
+arviz = "^0.11.4"
 matplotlib = "^3.5.1"
 plotly = "^5"
 geopandas = "^0.10.2"
@@ -49,10 +49,12 @@ SQLAlchemy = "^1.4.29"
 psycopg2-binary = "^2.9.3"
 GeoAlchemy2 = "^0.10.0"
 pytrends = "^4.7.3"
+Theano-PyMC = "^1.1.2"
 jupyter = "^1.0.0"
 joblib = "^1.1.0"
 tensorflow = "^2.5.0"
 scikit-learn = "^1.0.2"
+ngboost = {git = "https://github.com/stanfordmlgroup/ngboost", rev = "v0.3.12"}
 wbgapi = "^1.0.7"
 rioxarray = "^0.10.2"
 wget = "^3.2"
@@ -60,8 +62,10 @@ requests = "^2.27.1"
 tabulate = "^0.8.9"
 click = "^8.1.0"
 PyYAML = "^6.0"
-ngboost-release = "^0.3.12.post2"
-pymc = "^4.2.0"
+sodapy = "^2.2.0"
+loguru = "^0.6.0"
+pangres = "^4.1.2"
+numpy = "1.21.6"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.2"
