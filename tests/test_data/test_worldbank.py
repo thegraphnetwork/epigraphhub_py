@@ -5,6 +5,7 @@ from numpy import empty
 from epigraphhub.data import worldbank as wbg
 
 
+@pytest.mark.skip(reason="work in progress")
 @pytest.mark.parametrize(
     "country, fx_et", [("BRA", "5Y"), ("BRA", "IN"), ("BRA", "TOTL")]
 )
@@ -33,6 +34,7 @@ def test_search_in_indicators(keyword, db):
     assert type(df) == pandas.core.frame.DataFrame
 
 
+@pytest.mark.skip(reason="work in progress")
 @pytest.mark.parametrize(
     "ind,country, db",
     [
