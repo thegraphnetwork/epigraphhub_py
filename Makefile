@@ -91,7 +91,7 @@ docker-compose-wait:
 
 #* Config
 .PHONY:
-make config-file:  # for development
+config-file:  # for development
 	bash scripts/dev/create-config-file.sh
 
 #* Cleaning
