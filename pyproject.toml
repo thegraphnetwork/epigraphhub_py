@@ -62,6 +62,8 @@ click = "^8.1.0"
 PyYAML = "^6.0"
 ngboost-release = "^0.3.12.post2"
 pymc = "^4.2.0"
+loguru = "^0.6.0"
+sodapy = "^2.2.0"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.2"
