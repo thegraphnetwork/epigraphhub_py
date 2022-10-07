@@ -15,4 +15,3 @@ dependencies:
   - sqlalchemy
   - pip:
     - pysus
-
