@@ -2,4 +2,4 @@
 
 set -e
 
-echo "${1}" | grep -Ei "^(chore|fix|docs|feat|breaking change|test)(\(.+\))?\:"
+echo "${1}" | grep -E "^(BREAKING CHANGE|chore|fix|docs|feat|test)(\(.+\))?\:"
