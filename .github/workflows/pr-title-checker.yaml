@@ -34,4 +34,4 @@ jobs:
         uses: actions/checkout@v3
         
       - name: Check if PR Title contains semantic-release tag
-        run: make check-pr-title-label
+        run: bash scripts/ci/pr-title-linter.sh ${{ github.event.pull_request.title }}
