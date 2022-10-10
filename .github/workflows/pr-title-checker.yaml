@@ -1,12 +1,12 @@
 name: pr-title-linter
 
-on: 
+on:
   pull_request:
-    types: [ 
-      assigned, 
-      opened, 
-      synchronize, 
-      reopened, 
+    types: [
+      assigned,
+      opened,
+      synchronize,
+      reopened,
       unassigned,
       labeled,
       unlabeled,
@@ -32,6 +32,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        
+
       - name: Check if PR Title contains semantic-release tag
         run: bash scripts/ci/pr-title-linter.sh "${{ github.event.pull_request.title }}"
