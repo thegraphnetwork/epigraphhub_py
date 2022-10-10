@@ -16,7 +16,7 @@
 - [ ] I've used pre-commit hook locally.
 - [ ] I've written tests for all new methods and classes that I created.
 - [ ] I've written the docstring in Google format for all the methods and classes that I used.
-- [ ] Semantic-release prefix title used:
+- [ ] Semantic-release prefix title used (case sensitive):
   - Use the prefix `chore(docs):` for Examples / docs / tutorials / dependencies update
   - Use the prefix `fix:` for a bug fix
     (non-breaking change which fixes an issue).
@@ -24,7 +24,7 @@
     (non-breaking change which improves an existing feature).
   - Use the prefix `feat:` for a new feature
     (non-breaking change which adds functionality).
-  - Use the prefix `breaking change:` for a breaking change
+  - Use the prefix `BREAKING CHANGE:` for a breaking change
     (fix or feature that would cause existing functionality to change).
   - Use the prefix `chore(security):` for a security fix.
 
