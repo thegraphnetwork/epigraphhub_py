@@ -1,6 +1,13 @@
 Release Notes
 ---
 
+## [1.2.1](https://github.com/thegraphnetwork/epigraphhub_py/compare/1.2.0...1.2.1) (2022-10-10)
+
+
+### Bug Fixes
+
+* Remove release drafter ([#188](https://github.com/thegraphnetwork/epigraphhub_py/issues/188)) ([55f9935](https://github.com/thegraphnetwork/epigraphhub_py/commit/55f9935250164ed120f16bc75b994cac1df40395))
+
 # [1.2.0](https://github.com/thegraphnetwork/epigraphhub_py/compare/1.1.1...1.2.0) (2022-09-27)
 
 
