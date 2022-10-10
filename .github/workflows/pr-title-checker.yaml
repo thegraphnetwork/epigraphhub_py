@@ -1,0 +1,37 @@
+name: pr-title-linter
+
+on: 
+  pull_request:
+    types: [ 
+      assigned, 
+      opened, 
+      synchronize, 
+      reopened, 
+      unassigned,
+      labeled,
+      unlabeled,
+      edited,
+      ready_for_review,
+      review_requested,
+    ]
+
+jobs:
+  pr-title-linter:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9"]
+    concurrency:
+      group: ci-${{ github.ref }}
+      cancel-in-progress: true
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Check if PR Title contains semantic-release tag
+        run: make check-pr-title-label
