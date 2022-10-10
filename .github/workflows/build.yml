@@ -33,11 +33,6 @@ jobs:
         cd docker
         envsubst < .env.tpl > .env
 
-    - name: Create log folder
-      run: |
-        mkdir -p /var/log/
-        sudo chmod -R 777 /var/log/
-
     - uses: conda-incubator/setup-miniconda@v2
       with:
         miniconda-version: "latest"
@@ -72,3 +67,13 @@ jobs:
 
     - name: teardown docker container
       run: make docker-compose-stop
+
+    - name : Print Title of PR 
+      on:
+        pull_request:
+        types: [opened, synchronize]
+
+        print_title_of_pr:
+          steps:
+          
+            run: echo The Title of your PR is ${{ github.event.pull_request.title }}
