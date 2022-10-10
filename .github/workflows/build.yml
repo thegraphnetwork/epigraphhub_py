@@ -72,3 +72,7 @@ jobs:
 
     - name: teardown docker container
       run: make docker-compose-stop
+
+    - name: Check if PR Title contains semantic-release tag
+      if: ${{ github.event_name == 'pull_request' && always() }}
+      run: bash scripts/ci/pr-title-linter.sh "${{ github.event.pull_request.title }}"
