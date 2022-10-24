@@ -1,5 +1,5 @@
 """
-Last change on 2022/09/22
+Last change on 2022/10/24
 This module will retrieve the data from a CSV file, create a connection
 with the SQL Database and update it with the new information. Pangres
 will generate chunks with total length of 1000 and insert them into the
@@ -19,7 +19,7 @@ from pangres import upsert
 from datetime import datetime
 
 from epigraphhub.connection import get_engine
-from epigraphhub.data.config import FOPH_CSV_PATH, FOPH_LOG_PATH
+from epigraphhub.data._config import FOPH_CSV_PATH, FOPH_LOG_PATH
 from epigraphhub.settings import env
 
 logger.add(FOPH_LOG_PATH, retention="7 days")

@@ -1,5 +1,5 @@
 """
-Last change on 2022/09/22
+Last change on 2022/10/24
 This module is used for fetching and downloading COVID
 data from Federal Office of Public Health. The data
 of interest consists in the following CSV tables:
@@ -40,7 +40,7 @@ import requests
 from loguru import logger
 from pathlib import Path
 
-from epigraphhub.data.config import (
+from epigraphhub.data._config import (
     FOPH_CSV_PATH,
     FOPH_LOG_PATH,
     FOPH_URL,
@@ -97,7 +97,7 @@ def remove(filename: str = None, entire_dir: bool = False):
     if entire_dir:
         subprocess.run(["rm", "-rf", FOPH_CSV_PATH])
         logger.info(f"{FOPH_CSV_PATH} removed.")
-    
+
     elif filename:
         file_path = Path(FOPH_CSV_PATH) / filename
         if file_path.exists():
@@ -108,4 +108,4 @@ def remove(filename: str = None, entire_dir: bool = False):
 
     else:
         logger.error(f"Set `entire_dir=True` to remove CSV dir")
-        raise Exception('Nothing was selected to remove')
+        raise Exception("Nothing was selected to remove")

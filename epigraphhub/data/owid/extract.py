@@ -1,39 +1,70 @@
 """
-Last change on 2022/09/22
-Comparing Our World in Data (OWID) COVID data consists in
-a step before pushing it to the database. Is responsible for retrieving
-the table size in both CSV and in the SQL Database.
-@see epigraphhub.connection
+Last change on 2022/10/24
+This module is used for fetching and downloading COVID
+data from Our World in Data. The data of interest consists in a
+CSV table containing COVID information around the globe.
+
 
 Methods
 -------
 
-database_size(remote):
-    If remote, creates the ssh connection with the SQL server. Then returns
-    the total count of the OWID table.
+download_csv():
+    Runs curl from the OWID database and stores the CSV file in the tmp dir.
 
-csv_size():
-    Looks for the OWID CSV file and returns its total rows count.
+remove_csv():
+    Removes the CSV file recursively.
 """
 import os
-import shlex as sx
 import subprocess
+import shlex as sx
 
 from loguru import logger
+from epigraphhub.settings import env
 
-from epigraphhub.connection import get_engine
-from epigraphhub.data.data_collection.config import (
+from epigraphhub.data._config import (
     OWID_CSV_PATH,
+    OWID_CSV_URL,
     OWID_FILENAME,
-    OWID_HOST,
     OWID_LOG_PATH,
 )
-from epigraphhub.settings import env
 
 logger.add(OWID_LOG_PATH, retention="7 days")
 
 
-def database_size(remote=True):
+def download() -> None:
+    """
+    This method is responsible for download the CSV file from the
+    OWID database. The file contains world information about COVID.
+    """
+    os.makedirs(OWID_CSV_PATH, exist_ok=True)
+    subprocess.run(
+        [
+            "curl",
+            "--silent",
+            "-f",
+            "-o",
+            f"{OWID_CSV_PATH}/{OWID_FILENAME}",
+            f"{OWID_CSV_URL}",
+        ]
+    )
+    logger.info("OWID csv downloaded.")
+
+
+def compare() -> bool:
+    table_size = _get_database_size(remote=False)
+    csv_size = _get_csv_size()
+    return table_size == csv_size
+
+
+def remove() -> None:
+    """
+    This method deletes the OWID CSV file recursively.
+    """
+    os.remove(f"{OWID_CSV_PATH}/{OWID_FILENAME}")
+    logger.info("OWID csv removed.")
+
+
+def _get_database_size(remote=True) -> int:
     """
     Method responsible for connecting in the SQL database and return
     the total count of the OWID table.
@@ -64,18 +95,13 @@ def database_size(remote=True):
             proc.kill()
 
 
-def csv_size():
+def _get_csv_size() -> int:
     """
     Method responsible for connecting in the SQL database and return
-    the total count of the OWID table.
-
-    Args:
-        remote (bool)         : If the SQL container is not locally configured,
-                                creates a ssh tunnel with the Database.
+    the total count of the OWID CSV file.
 
     Raises:
-        Exception (Exception) : Connection with the Database could not be
-                                stablished.
+        Exception (Exception) : CSV file not found.
     """
     try:
         raw_shape = subprocess.Popen(
