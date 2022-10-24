@@ -39,8 +39,17 @@ from pathlib import Path
 
 import requests
 from loguru import logger
+from pathlib import Path
 
+<<<<<<< HEAD
 from epigraphhub.data._config import FOPH_CSV_PATH, FOPH_LOG_PATH, FOPH_URL
+=======
+from epigraphhub.data.config import (
+    FOPH_CSV_PATH,
+    FOPH_LOG_PATH,
+    FOPH_URL,
+)
+>>>>>>> a6bbfbc (chore(refactor): Refactor of Data Collection modules to match ETL workflow)
 
 logger.add(FOPH_LOG_PATH, retention="7 days")
 
@@ -93,7 +102,11 @@ def remove(filename: str = None, entire_dir: bool = False):
     if entire_dir:
         subprocess.run(["rm", "-rf", FOPH_CSV_PATH])
         logger.info(f"{FOPH_CSV_PATH} removed.")
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> a6bbfbc (chore(refactor): Refactor of Data Collection modules to match ETL workflow)
     elif filename:
         file_path = Path(FOPH_CSV_PATH) / filename
         if file_path.exists():
@@ -104,4 +117,8 @@ def remove(filename: str = None, entire_dir: bool = False):
 
     else:
         logger.error(f"Set `entire_dir=True` to remove CSV dir")
+<<<<<<< HEAD
         raise Exception("Nothing was selected to remove")
+=======
+        raise Exception('Nothing was selected to remove')
+>>>>>>> a6bbfbc (chore(refactor): Refactor of Data Collection modules to match ETL workflow)

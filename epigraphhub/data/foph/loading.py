@@ -1,9 +1,17 @@
 """
+<<<<<<< HEAD
 Last change on 2022/10/24
+=======
+Last change on 2022/09/22
+>>>>>>> a6bbfbc (chore(refactor): Refactor of Data Collection modules to match ETL workflow)
 This module will retrieve the data from a CSV file, create a connection
 with the SQL Database and update it with the new information. Pangres
 will generate chunks with total length of 1000 and insert them into the
 corresponding table as specified by the downloaded CSV file.
+<<<<<<< HEAD
+=======
+@see epigraphhub.data.data_collection.foph.download
+>>>>>>> a6bbfbc (chore(refactor): Refactor of Data Collection modules to match ETL workflow)
 @see epigraphhub.connection
 
 Methods
@@ -12,6 +20,7 @@ Methods
 load(table, filename):
     Connects to SQL DB and update a table with CSV information.
 """
+<<<<<<< HEAD
 from datetime import datetime
 
 import pandas as pd
@@ -20,6 +29,15 @@ from pangres import upsert
 
 from epigraphhub.connection import get_engine
 from epigraphhub.data._config import FOPH_CSV_PATH, FOPH_LOG_PATH
+=======
+import pandas as pd
+from loguru import logger
+from pangres import upsert
+from datetime import datetime
+
+from epigraphhub.connection import get_engine
+from epigraphhub.data.config import FOPH_CSV_PATH, FOPH_LOG_PATH
+>>>>>>> a6bbfbc (chore(refactor): Refactor of Data Collection modules to match ETL workflow)
 from epigraphhub.settings import env
 
 logger.add(FOPH_LOG_PATH, retention="7 days")
