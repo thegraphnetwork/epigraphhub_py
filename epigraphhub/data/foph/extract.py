@@ -35,16 +35,12 @@ remove_csvs():
 """
 import os
 import subprocess
+from pathlib import Path
 
 import requests
 from loguru import logger
-from pathlib import Path
 
-from epigraphhub.data._config import (
-    FOPH_CSV_PATH,
-    FOPH_LOG_PATH,
-    FOPH_URL,
-)
+from epigraphhub.data._config import FOPH_CSV_PATH, FOPH_LOG_PATH, FOPH_URL
 
 logger.add(FOPH_LOG_PATH, retention="7 days")
 

@@ -14,9 +14,9 @@ Methods
 gen_chunks_into_db():
     Generate chunks of data to insert into SQL Database using pangres.
 """
-import pandas as pd
-
 from datetime import datetime, timedelta
+
+import pandas as pd
 from loguru import logger
 from pangres import upsert
 
@@ -36,7 +36,6 @@ def upload():
     SQL DB using upsert method.
     @note Colombia sometimes has a post update in the data, so rows update
           in this case is required to retrieve the rows updated.
-    @see epigraphhub.data.data_collection.colombia.data_chunk
     """
     slice_date = datetime.date(datetime.today()) - timedelta(200)
     slice_date = slice_date.strftime("%Y-%m-%d")

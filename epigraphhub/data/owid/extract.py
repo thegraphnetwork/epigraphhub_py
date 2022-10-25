@@ -15,23 +15,24 @@ remove_csv():
     Removes the CSV file recursively.
 """
 import os
-import subprocess
 import shlex as sx
+import subprocess
 
 from loguru import logger
-from epigraphhub.settings import env
 
 from epigraphhub.connection import get_engine
 from epigraphhub.data._config import (
     OWID_CSV_PATH,
     OWID_CSV_URL,
     OWID_FILENAME,
-    OWID_LOG_PATH,
     OWID_HOST,
+    OWID_LOG_PATH,
 )
+from epigraphhub.settings import env
 
 logger.add(OWID_LOG_PATH, retention="7 days")
 engine = get_engine(env.db.default_credential)
+
 
 def download() -> None:
     """

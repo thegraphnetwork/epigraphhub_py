@@ -24,6 +24,7 @@ from epigraphhub.settings import env
 logger.add(COLOMBIA_LOG_PATH, retention="7 days")
 client = COLOMBIA_CLIENT
 
+
 def compare() -> bool:
     db_last_update = _table_last_update()
     data_last_update = _web_last_update()
