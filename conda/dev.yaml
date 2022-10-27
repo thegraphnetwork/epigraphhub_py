@@ -14,4 +14,4 @@ dependencies:
   - shellcheck
   - sqlalchemy
   - pip:
-    - pysus
+    - git+https://github.com/luabida/PySUS/@sinan-download
