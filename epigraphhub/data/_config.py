@@ -1,4 +1,3 @@
-
 """
 This module contains global variables used in data_collection for retrieving
 COVID data, such as API connections, URLs for requests and files location,

@@ -1,13 +1,14 @@
-import time
-from loguru import logger
-import shutil
+from typing import Optional, Union
 
+import shutil
+import time
 from collections import ChainMap, defaultdict
 from functools import lru_cache
-from typing import Optional, Union
 from pathlib import Path, PosixPath
 
+from loguru import logger
 from pysus.online_data import SINAN
+
 from epigraphhub.data._config import SINAN_LOG_PATH
 
 st = time.time()
@@ -22,9 +23,10 @@ def download(
 ):
     try:
         return _download_from_sinan(aggravate, year, data_dir)
-    
+
     except Exception as e:
         logger.error(e)
+
 
 def years(aggravate) -> list:
 
@@ -46,7 +48,7 @@ def aggravates(year) -> list:
         return aggravates_by_years[year]
 
     except:
-        raise Exception(f'Year {year} not found in SINAN database.')
+        raise Exception(f"Year {year} not found in SINAN database.")
 
 
 @lru_cache
@@ -63,8 +65,10 @@ def _fetch_years_by_aggravate() -> dict:
 
     return years_by_aggravate
 
+
 # Caching data
 i_data = _fetch_years_by_aggravate()
+
 
 @lru_cache
 def _fetch_aggravates_by_year() -> dict:
@@ -83,7 +87,7 @@ def _download_from_sinan(aggravate: str, year: int, data_dir: str) -> PosixPath:
 
     aggravate = aggravate.title()
     cod_aggr = SINAN.agravos.get(aggravate)
-    
+
     year = str(year)[-2:]
 
     data_dir = Path(data_dir)
