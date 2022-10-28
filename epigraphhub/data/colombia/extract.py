@@ -49,9 +49,14 @@ def _table_last_update() -> datetime:
             curr = conn.execute(
                 "SELECT MAX(fecha_reporte_web) FROM colombia.positive_cases_covid_d"
             )
+
+            if "nan" in curr:
+                return datetime.strptime("1975-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
+
             for date in curr:
                 date = dict(date)
                 return date["max"]
+
     except Exception as e:
         logger.error(f"Could not access positive_cases_covid_d table\n{e}")
         raise (e)
