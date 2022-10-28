@@ -13,7 +13,7 @@ from ngboost.scores import LogScore
 
 from epigraphhub.analysis.clustering import compute_clusters
 from epigraphhub.analysis.forecast_models.ngboost_models import NGBModel
-from epigraphhub.data.foph import get_cluster_data, get_data_by_location
+from epigraphhub.data.foph.viz import get_cluster_data, get_data_by_location
 
 params_model = {
     "Base": default_tree_learner,

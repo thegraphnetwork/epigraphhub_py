@@ -1,5 +1,5 @@
 """
-Last change on 2022/09/22
+Last change on 2022/10/24
 This module is responsible for including missing index in the OWID
 SQL table. Connects to the SQL server as defined in the connection.
 @see epigraphhub.connection
@@ -16,7 +16,7 @@ import subprocess
 from loguru import logger
 
 from epigraphhub.connection import get_engine
-from epigraphhub.data.data_collection.config import OWID_HOST, OWID_LOG_PATH
+from epigraphhub.data._config import OWID_HOST, OWID_LOG_PATH
 from epigraphhub.settings import env
 
 logger.add(OWID_LOG_PATH, retention="7 days")
