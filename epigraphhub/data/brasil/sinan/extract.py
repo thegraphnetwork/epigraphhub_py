@@ -83,12 +83,12 @@ def _fetch_aggravates_by_year() -> dict:
     return dict(aggravates_by_year)
 
 
-def _download_from_sinan(aggravate: str, year: int, data_dir: str) -> PosixPath:
+def _download_from_sinan(aggravate: str, year: int, data_dir: str):
 
     aggravate = aggravate.title()
     cod_aggr = SINAN.agravos.get(aggravate)
-
     year = str(year)[-2:]
+    tablename = f"{str(cod_aggr).lower()}{year}"
 
     data_dir = Path(data_dir)
     data_dir.mkdir(exist_ok=True, parents=True)
@@ -112,7 +112,7 @@ def _download_from_sinan(aggravate: str, year: int, data_dir: str) -> PosixPath:
                 # Move file to `data_dir`
                 shutil.move(fname, data_path)
 
-                return data_path.absolute()
+                return tablename, data_path.absolute()
 
             else:
                 logger.error(
@@ -127,4 +127,4 @@ def _download_from_sinan(aggravate: str, year: int, data_dir: str) -> PosixPath:
             )
 
     else:
-        return data_path.absolute()
+        return tablename, data_path.absolute()
