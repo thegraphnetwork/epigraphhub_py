@@ -88,6 +88,9 @@ myst-parser = "^0.17.0"
 sphinx-pyproject = "^0.1.0"
 nbsphinx = "^0.8.8"
 
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^2.20.0"
+
 [tool.black]
 # https://github.com/psf/black
 target-version = ["py39"]
