@@ -1,41 +1,46 @@
-import time
-
 import pandas as pd
-import pyarrow.parquet as pq
+
 from loguru import logger
 from pysus.online_data import SINAN
+from pysus.online_data import parquets_to_dataframe as to_df
 
+from epigraphhub.settings import env
+from epigraphhub.connection import get_engine
 from epigraphhub.data._config import SINAN_LOG_PATH
 
-st = time.time()
 logger.add(SINAN_LOG_PATH, retention="7 days")
-aggrs = SINAN.list_diseases()
+
+engine = get_engine(credential_name=env.db.default_credential)
+aggrs = SINAN.agravos
 
 
-def parquet_to_df(fname: str) -> pd.DataFrame:
+def parquet(ppath: str) -> pd.DataFrame:
     """
     Convert the parquet files into a pandas DataFrame.
 
     Parameters
     ----------
-        fname: Name of the parquet files.
+        fname: Path of the parquet dir.
     Returns
     -------
-        dataframe: pandas.
+        dataframe: pandas DataFrame.
     """
 
-    df = (
-        pq.ParquetDataset(
-            f"{fname}/",
-            use_legacy_dataset=False,
-        )
-        .read_pandas()  # columns=COL_NAMES
-        .to_pandas()
-    )
-
-    # Measure execution time ended
-    logger.info("Convert parquet files to dataFrame, decoding...")
+    df = to_df(ppath)
+    logger.info("Parquet files converted to dataFrame")
     df.columns = df.columns.str.lower()
-    df = df.apply(lambda x: x.str.decode("iso-8859-1"))
+
+    return df
+
+
+def table(disease: str, year: int) -> pd.DataFrame:
+
+    year = str(year)[-2:].zfill(2)
+    disease = SINAN.check_case(disease)
+    dis_code = aggrs[disease].lower()
+    tablename = f"{dis_code}{year}"
+
+    with engine.connect() as conn:
+        df = pd.read_sql(f"SELECT * FROM brasil.{tablename}", conn)
 
     return df

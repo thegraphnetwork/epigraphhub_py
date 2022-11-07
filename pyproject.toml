@@ -36,7 +36,7 @@ classifiers = [  #! Update me
 python = ">=3.9,<3.11"
 
 typer = {extras = ["all"], version = "^0.4.0"}
-rich = "^11.2.0"
+rich = ">=12.4.4,<13"
 numpy = "^1.20.3"
 pandas = "^1.2"
 scipy = "^1.8.0"
@@ -65,6 +65,7 @@ loguru = "^0.6.0"
 sodapy = "^2.2.0"
 pangres = "^4.1.2"
 ngboost = "^0.3.13"
+ibis-framework = "^3.2.0"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.2"

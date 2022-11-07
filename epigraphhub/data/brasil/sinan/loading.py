@@ -1,70 +1,49 @@
-import time
-from pathlib import Path
+import os
 
-import pandas as pd
-import psycopg2.extras as extras
 from loguru import logger
-from pandas.io.sql import get_schema
+from pangres import upsert
+from pathlib import PosixPath
+from pysus.online_data import parquets_to_dataframe as to_df
 
+from epigraphhub.settings import env
 from epigraphhub.connection import get_engine
 from epigraphhub.data._config import SINAN_LOG_PATH
-from epigraphhub.settings import env
 
-st = time.time()
 logger.add(SINAN_LOG_PATH, retention="7 days")
 
 engine = get_engine(credential_name=env.db.default_credential)
 
 
-def upload(tablename: str, df: pd.DataFrame):
-    """
-    Delete the table if it exists and create a new table
-    according to the disease name and year.
-    Adds dataframe data to table.
+def upload(parquets: list[PosixPath]):
 
-    Parameters
-    ----------
-        fname: Name of the parquet files.
-    Returns
-    -------
-        conn: Execute query with psycopg2.extras.
-    """
+    if any(parquets):
+        for parquet in parquets:
+            if any(os.listdir(parquet)):
 
-    schema = "brasil"
-    table_name = f'"{schema}"."{tablename}"'
+                df = to_df(str(parquet), clean_after_read=True)
+                df.columns = df.columns.str.lower()
+                df.index.name = "index"
 
-    query_sql = get_schema(df, tablename, schema=schema, con=engine)
+                table_i = str(parquet.split("/")[-1]).split(".parquet")[0]
+                st, yr = table_i[:-4].lower(), table_i[-2:]
+                table = "".join([st, yr])
+                schema = "brasil"
 
-    with engine.connect().cursor(cursor_factory=extras.DictCursor) as cursor:
-        logger.info(f"Creating columns and data types for {table_name} table")
+                with engine.connect() as conn:
+                    try:
 
-        sql = f"""
-            DROP TABLE IF EXISTS {table_name};
-            {query_sql};
-            """
-        cursor.execute(sql)
-        engine.connect().commit()
+                        upsert(
+                            con=conn,
+                            df=df,
+                            table_name=table,
+                            schema=schema,
+                            if_row_exists="update",
+                            chunksize=1000,
+                            add_new_columns=True,
+                            create_table=True,
+                        )
 
-    with engine.connect().cursor(cursor_factory=extras.DictCursor) as cursor:
-        logger.info(f"Inserting data into the {table_name} table...")
-        tuples = [tuple(x) for x in df.to_numpy()]
-        cols = ", ".join(list(df.columns))
-        insert_sql = f"INSERT INTO {table_name}({cols}) VALUES %s"
-        try:
-            extras.execute_values(cursor, insert_sql, tuples)
-            engine.connect().commit()
+                        logger.info(f"Table {table} updated")
 
-            # Measure execution time ended
-            elapsed_time = time.time() - st
-
-            logger.info(
-                "Pysus: {} rows in {} fields inserted in the database, "
-                "finished at: {}".format(
-                    df.shape[0],
-                    df.shape[1],
-                    time.strftime("%H:%M:%S", time.gmtime(elapsed_time)),
-                )
-            )
-
-        except Exception as e:
-            logger.error(e)
+                    except Exception as e:
+                        logger.error(f"Not able to upsert {table} \n{e}")
