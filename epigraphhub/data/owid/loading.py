@@ -24,7 +24,7 @@ import pandas as pd
 from loguru import logger
 
 from epigraphhub.connection import get_engine
-from epigraphhub.data.data_collection.config import (
+from epigraphhub.data._config import (
     OWID_CSV_PATH,
     OWID_FILENAME,
     OWID_HOST,
@@ -37,24 +37,7 @@ logger.add(OWID_LOG_PATH, retention="7 days")
 engine_public = get_engine(env.db.default_credential)
 
 
-def parse_types(df):
-    """
-    Method responsible for receive the OWID DataFrame and return
-    a DataFrame with the date parsed to datetime objects.
-
-    Args:
-        df (DataFrame) : OWID DataFrame.
-
-    Returns:
-        df (DataFrame) : OWID DataFrame with date column parsed to datetime.
-    """
-    df = df.convert_dtypes()
-    df["date"] = pd.to_datetime(df.date)
-    logger.info("OWID data types parsed.")
-    return df
-
-
-def load(remote=True):
+def upload(remote=True):
     """
     A generator responsible connecting and loading data
     retrieved from the OWID CSV file into owid_covid table in
@@ -70,7 +53,7 @@ def load(remote=True):
         )
     try:
         data = pd.read_csv(os.path.join(OWID_CSV_PATH, OWID_FILENAME))
-        data = parse_types(data)
+        data = _parse_date(data)
         engine = engine_public
         data.to_sql(
             "owid_covid",
@@ -87,3 +70,19 @@ def load(remote=True):
     finally:
         if remote:
             proc.kill()
+
+
+def _parse_date(df):
+    """
+    Method responsible for receive the OWID DataFrame and return
+    a DataFrame with the date parsed to datetime objects.
+
+    Args:
+        df (DataFrame) : OWID DataFrame.
+
+    Returns:
+        df (DataFrame) : OWID DataFrame with date column parsed to datetime.
+    """
+    df = df.convert_dtypes()
+    df["date"] = pd.to_datetime(df.date)
+    return df

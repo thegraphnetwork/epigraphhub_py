@@ -32,7 +32,7 @@ from tensorflow.keras.utils import plot_model
 from epigraphhub.analysis.clustering import compute_clusters
 from epigraphhub.analysis.preprocessing import lstm_split_data as split_data
 from epigraphhub.analysis.preprocessing import normalize_data
-from epigraphhub.data.foph import get_cluster_data
+from epigraphhub.data.foph.viz import get_cluster_data
 
 
 def build_model(hidden, features, predict_n, look_back=10, batch_size=1):

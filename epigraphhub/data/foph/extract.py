@@ -1,5 +1,5 @@
 """
-Last change on 2022/09/22
+Last change on 2022/10/24
 This module is used for fetching and downloading COVID
 data from Federal Office of Public Health. The data
 of interest consists in the following CSV tables:
@@ -35,20 +35,17 @@ remove_csvs():
 """
 import os
 import subprocess
+from pathlib import Path
 
 import requests
 from loguru import logger
 
-from epigraphhub.data.data_collection.config import (
-    FOPH_CSV_PATH,
-    FOPH_LOG_PATH,
-    FOPH_URL,
-)
+from epigraphhub.data._config import FOPH_CSV_PATH, FOPH_LOG_PATH, FOPH_URL
 
 logger.add(FOPH_LOG_PATH, retention="7 days")
 
 
-def get_csv_relation(source=FOPH_URL):
+def fetch(source=FOPH_URL):
     """
     A generator responsible for accessing FOPH and retrieve the CSV
     relation, such as its Table name and URL as a tuple.
@@ -66,7 +63,7 @@ def get_csv_relation(source=FOPH_URL):
         yield table, url
 
 
-def download_csv(url):
+def download(url):
     """
     This methods runs curl in a URL that corresponds to a CSV file
     and stores it as specified in the URL.
@@ -89,9 +86,22 @@ def download_csv(url):
     logger.info(f"{filename} downloaded at {FOPH_CSV_PATH}.")
 
 
-def remove_csvs():
+def remove(filename: str = None, entire_dir: bool = False):
     """
-    Removes recursively the FOPH CSV's folder.
+    Removes recursively the FOPH CSV's folder or filename.
     """
-    subprocess.run(["rm", "-rf", FOPH_CSV_PATH])
-    logger.info(f"{FOPH_CSV_PATH} removed.")
+    if entire_dir:
+        subprocess.run(["rm", "-rf", FOPH_CSV_PATH])
+        logger.info(f"{FOPH_CSV_PATH} removed.")
+
+    elif filename:
+        file_path = Path(FOPH_CSV_PATH) / filename
+        if file_path.exists():
+            file_path.unlink()
+            logger.info(f"{file_path} removed.")
+        else:
+            raise Exception(f"{file_path} not found.")
+
+    else:
+        logger.error(f"Set `entire_dir=True` to remove CSV dir")
+        raise Exception("Nothing was selected to remove")

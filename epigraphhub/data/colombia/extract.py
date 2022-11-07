@@ -18,14 +18,20 @@ from datetime import datetime
 from loguru import logger
 
 from epigraphhub.connection import get_engine
-from epigraphhub.data.data_collection.config import COLOMBIA_CLIENT, COLOMBIA_LOG_PATH
+from epigraphhub.data._config import COLOMBIA_CLIENT, COLOMBIA_LOG_PATH
 from epigraphhub.settings import env
 
 logger.add(COLOMBIA_LOG_PATH, retention="7 days")
 client = COLOMBIA_CLIENT
 
 
-def table_last_update() -> datetime:
+def compare() -> bool:
+    db_last_update = _table_last_update()
+    data_last_update = _web_last_update()
+    return db_last_update == data_last_update
+
+
+def _table_last_update() -> datetime:
     """
     This method will connect to the SQL Database and query the maximum date found in
     Colombia table.
@@ -51,7 +57,7 @@ def table_last_update() -> datetime:
         raise (e)
 
 
-def web_last_update() -> datetime:
+def _web_last_update() -> datetime:
     """
     This method will request the maximum date found in Colombia data through Socrata API
     and returns it as a datetime object for further evaluation.
