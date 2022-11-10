@@ -65,7 +65,12 @@ def upload(table, filename):
 
 def compare(filename, table) -> bool:
     csv_date = _csv_last_update(filename)
-    table_date = _table_last_update(table)
+    
+    try:
+        table_date = _table_last_update(table)
+    except ValueError: #empty table, returns 'NaN'
+        return False
+
     return csv_date == table_date
 
 
@@ -117,8 +122,6 @@ def _table_last_update(table) -> datetime:
             last_update = df.max()
         df = df.date.dropna()
         last_update = df.max()
-        if "nan" in last_update:
-            return datetime.strptime("1975-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
         return datetime.strptime(str(last_update), "%Y-%m-%d %H:%M:%S")
     except Exception as e:
         logger.error(f"Could not access {table} table\n{e}")
