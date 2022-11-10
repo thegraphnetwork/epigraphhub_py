@@ -6,6 +6,7 @@ from epigraphhub.data._config import SINAN_LOG_PATH
 
 logger.add(SINAN_LOG_PATH, retention="7 days")
 
+aggravates = SINAN.agravos
 
 def download(
     aggravate: str,
@@ -23,7 +24,7 @@ def download(
     Returns:
         parquets_paths_list list(PosixPath) : A list with all parquets dirs.
     """
-    data_dir = Path(data_dir) / "pysus" / SINAN.agravos[aggravate]
+    data_dir = Path(data_dir) / "pysus" / aggravates[aggravate]
     parquets_paths_list = SINAN.download_all_years_in_chunks(aggravate, data_dir)
 
     logger.info(f"All years for {aggravate} downloaded at {data_dir}")

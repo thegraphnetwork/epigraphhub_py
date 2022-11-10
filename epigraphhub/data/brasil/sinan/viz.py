@@ -14,7 +14,7 @@ engine = get_engine(credential_name=env.db.default_credential)
 aggrs = SINAN.agravos
 
 
-def parquet(ppath: str) -> pd.DataFrame:
+def parquet(ppath: str, clean_after_read=False) -> pd.DataFrame:
     """
     Convert the parquet files into a pandas DataFrame.
 
@@ -26,7 +26,7 @@ def parquet(ppath: str) -> pd.DataFrame:
         dataframe: pandas DataFrame.
     """
 
-    df = to_df(ppath)
+    df = to_df(str(ppath), clean_after_read)
     logger.info("Parquet files converted to dataFrame")
     df.columns = df.columns.str.lower()
 

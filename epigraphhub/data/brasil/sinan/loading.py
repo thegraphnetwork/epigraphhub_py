@@ -16,7 +16,7 @@ engine = get_engine(credential_name=env.db.default_credential)
 
 def upload(parquets: list[PosixPath]):
 
-    if any(parquets):
+    if any(parquets) and isinstance(parquets, list):
         for parquet in parquets:
             if any(os.listdir(parquet)):
 
@@ -47,3 +47,6 @@ def upload(parquets: list[PosixPath]):
 
                     except Exception as e:
                         logger.error(f"Not able to upsert {table} \n{e}")
+
+    else:
+        raise Exception(f'Bad format. Expected {type(list)}, received {type(parquets)}')

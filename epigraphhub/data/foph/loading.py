@@ -65,7 +65,12 @@ def upload(table, filename):
 
 def compare(filename, table) -> bool:
     csv_date = _csv_last_update(filename)
-    table_date = _table_last_update(table)
+    
+    try:
+        table_date = _table_last_update(table)
+    except ValueError: #empty table, returns 'NaN'
+        return False
+
     return csv_date == table_date
 
 
