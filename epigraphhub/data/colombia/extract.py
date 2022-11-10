@@ -16,7 +16,6 @@ table_last_update():
 from datetime import datetime
 
 import sqlalchemy
-
 from loguru import logger
 
 from epigraphhub.connection import get_engine
@@ -31,7 +30,7 @@ def compare() -> bool:
     try:
         db_last_update = _table_last_update()
 
-    except sqlalchemy.exc.ProgrammingError: #Table not found
+    except sqlalchemy.exc.ProgrammingError:  # Table not found
         return False
 
     data_last_update = _web_last_update()
