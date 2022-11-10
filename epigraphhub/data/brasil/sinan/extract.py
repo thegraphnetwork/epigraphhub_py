@@ -1,12 +1,14 @@
-from pysus.online_data import SINAN
 from pathlib import Path, PosixPath
+
 from loguru import logger
+from pysus.online_data import SINAN
 
 from epigraphhub.data._config import SINAN_LOG_PATH
 
 logger.add(SINAN_LOG_PATH, retention="7 days")
 
 aggravates = SINAN.agravos
+
 
 def download(
     aggravate: str,

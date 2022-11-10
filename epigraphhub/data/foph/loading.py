@@ -117,8 +117,6 @@ def _table_last_update(table) -> datetime:
             last_update = df.max()
         df = df.date.dropna()
         last_update = df.max()
-        if "nan" in last_update:
-            return datetime.strptime("1975-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
         return datetime.strptime(str(last_update), "%Y-%m-%d %H:%M:%S")
     except Exception as e:
         logger.error(f"Could not access {table} table\n{e}")

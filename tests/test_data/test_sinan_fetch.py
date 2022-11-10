@@ -1,17 +1,12 @@
 import os
 import unittest
-import pandas as pd
-
 from pathlib import Path
 
-from epigraphhub.settings import env
-from epigraphhub.connection import get_engine
+import pandas as pd
 
-from epigraphhub.data.brasil.sinan import (
-    extract,
-    loading,
-    viz,
-)
+from epigraphhub.connection import get_engine
+from epigraphhub.data.brasil.sinan import extract, loading, viz
+from epigraphhub.settings import env
 
 engine = get_engine(credential_name=env.db.default_credential)
 
@@ -25,7 +20,6 @@ class TestFethSinan(unittest.TestCase):
         self.table = "zika17"
         self.schema = "brasil"
 
-
     def test_download_data_zika(self):
 
         _fname = extract.download(self.disease)
@@ -35,27 +29,25 @@ class TestFethSinan(unittest.TestCase):
         self.assertEqual(
             _fname,
             [
-                '/tmp/pysus/ZIKA/ZIKABR16.parquet', 
-                '/tmp/pysus/ZIKA/ZIKABR17.parquet', 
-                '/tmp/pysus/ZIKA/ZIKABR18.parquet', 
-                '/tmp/pysus/ZIKA/ZIKABR19.parquet', 
-                '/tmp/pysus/ZIKA/ZIKABR20.parquet', 
-                '/tmp/pysus/ZIKA/ZIKABR21.parquet'
-            ])
-
+                "/tmp/pysus/ZIKA/ZIKABR16.parquet",
+                "/tmp/pysus/ZIKA/ZIKABR17.parquet",
+                "/tmp/pysus/ZIKA/ZIKABR18.parquet",
+                "/tmp/pysus/ZIKA/ZIKABR19.parquet",
+                "/tmp/pysus/ZIKA/ZIKABR20.parquet",
+                "/tmp/pysus/ZIKA/ZIKABR21.parquet",
+            ],
+        )
 
     def test_parquet_visualization(self):
-        
+
         df = viz.parquet(self.fpath[0], clean_after_read=False)
 
         self.assertIsInstance(df, pd.DataFrame)
         self.assertEqual(df.shape, (32684, 38))
 
-
     def test_save_to_pgsql(self):
 
         loading.upload(self.fpath)
-
 
     def test_table_visualization(self):
 

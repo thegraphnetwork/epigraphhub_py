@@ -1,12 +1,11 @@
 import pandas as pd
-
 from loguru import logger
 from pysus.online_data import SINAN
 from pysus.online_data import parquets_to_dataframe as to_df
 
-from epigraphhub.settings import env
 from epigraphhub.connection import get_engine
 from epigraphhub.data._config import SINAN_LOG_PATH
+from epigraphhub.settings import env
 
 logger.add(SINAN_LOG_PATH, retention="7 days")
 

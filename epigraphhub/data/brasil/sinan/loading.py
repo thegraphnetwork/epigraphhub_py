@@ -1,13 +1,13 @@
 import os
+from pathlib import PosixPath
 
 from loguru import logger
 from pangres import upsert
-from pathlib import PosixPath
 from pysus.online_data import parquets_to_dataframe as to_df
 
-from epigraphhub.settings import env
 from epigraphhub.connection import get_engine
 from epigraphhub.data._config import SINAN_LOG_PATH
+from epigraphhub.settings import env
 
 logger.add(SINAN_LOG_PATH, retention="7 days")
 
@@ -49,4 +49,4 @@ def upload(parquets: list[PosixPath]):
                         logger.error(f"Not able to upsert {table} \n{e}")
 
     else:
-        raise Exception(f'Bad format. Expected {type(list)}, received {type(parquets)}')
+        raise Exception(f"Bad format. Expected {type(list)}, received {type(parquets)}")
