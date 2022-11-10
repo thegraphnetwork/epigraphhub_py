@@ -15,6 +15,8 @@ table_last_update():
 """
 from datetime import datetime
 
+import sqlalchemy
+
 from loguru import logger
 
 from epigraphhub.connection import get_engine
@@ -26,8 +28,14 @@ client = COLOMBIA_CLIENT
 
 
 def compare() -> bool:
-    db_last_update = _table_last_update()
+    try:
+        db_last_update = _table_last_update()
+
+    except sqlalchemy.exc.ProgrammingError: #Table not found
+        return False
+
     data_last_update = _web_last_update()
+
     return db_last_update == data_last_update
 
 
@@ -50,16 +58,13 @@ def _table_last_update() -> datetime:
                 "SELECT MAX(fecha_reporte_web) FROM colombia.positive_cases_covid_d"
             )
 
-            if "nan" in curr:
-                return datetime.strptime("1975-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
-
             for date in curr:
                 date = dict(date)
                 return date["max"]
 
-    except Exception as e:
-        logger.error(f"Could not access positive_cases_covid_d table\n{e}")
-        raise (e)
+    except sqlalchemy.exc.ProgrammingError:
+        logger.error(f"Could not access positive_cases_covid_d table\n")
+        return False
 
 
 def _web_last_update() -> datetime:
