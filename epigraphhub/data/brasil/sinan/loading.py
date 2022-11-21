@@ -1,5 +1,5 @@
 import os
-from pathlib import PosixPath
+from pathlib import Path
 
 from loguru import logger
 from pangres import upsert
@@ -14,17 +14,29 @@ logger.add(SINAN_LOG_PATH, retention="7 days")
 engine = get_engine(credential_name=env.db.default_credential)
 
 
-def upload(parquets: list[PosixPath]):
+def upload():
+    """
+    Connects to the EGH SQL server and load all the chunks for all
+    diseases found at `/tmp/pysus` into database. This method cleans
+    the chunks left.
+    
+    """
+    diseases_dir = Path('/tmp/pysus').glob('*')
+    di_years_dir = [x for x in diseases_dir if x.is_dir()]
 
-    if any(parquets) and isinstance(parquets, list):
+    for dir in di_years_dir:
+
+        parquets_dir = Path(dir).glob('*.parquet')
+        parquets = [x for x in parquets_dir if x.is_dir()]
+
         for parquet in parquets:
-            if any(os.listdir(parquet)):
-
+            if 'parquet' in Path(parquet).suffix and any(os.listdir(parquet)):
+                
                 df = to_df(str(parquet), clean_after_read=True)
                 df.columns = df.columns.str.lower()
                 df.index.name = "index"
 
-                table_i = str(parquet.split("/")[-1]).split(".parquet")[0]
+                table_i = str(parquet).split("/")[-1].split(".parquet")[0]
                 st, yr = table_i[:-4].lower(), table_i[-2:]
                 table = "".join([st, yr])
                 schema = "brasil"
@@ -47,6 +59,3 @@ def upload(parquets: list[PosixPath]):
 
                     except Exception as e:
                         logger.error(f"Not able to upsert {table} \n{e}")
-
-    else:
-        raise Exception(f"Bad format. Expected {type(list)}, received {type(parquets)}")

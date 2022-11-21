@@ -19,10 +19,12 @@ def parquet(ppath: str, clean_after_read=False) -> pd.DataFrame:
 
     Parameters
     ----------
-        fname: Path of the parquet dir.
+        fname (str)            : Path of the parquet dir.
+        clean_after_read (bool): If set to True, will delete the data after
+                                 returning the DataFrame.
     Returns
     -------
-        dataframe: pandas DataFrame.
+        df (DataFrame)         : A Pandas DataFrame.
     """
 
     df = to_df(str(ppath), clean_after_read)
@@ -33,6 +35,18 @@ def parquet(ppath: str, clean_after_read=False) -> pd.DataFrame:
 
 
 def table(disease: str, year: int) -> pd.DataFrame:
+    """
+    Connect to EGH SQL server and retrieve the data by disease and year.
+
+    Parameters
+    ----------
+        disease (str) : The name of the disease according to SINAN.agravos
+        year (int)    : Year of the wanted data.
+    Returns
+    -------
+        df (DataFrame): The data requested in a Pandas DataFrame.
+    
+    """
 
     year = str(year)[-2:].zfill(2)
     disease = SINAN.check_case(disease)
