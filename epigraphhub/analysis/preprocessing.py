@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-The functions in this module transform the data in a format that is accepted by
-ML models (tabular data) and neural network models (3D array data and multiple-output).
+The functions in this module transform the data in a format that is accepted by ML models (tabular data) and neural network models (3D array data and multiple-output).
 """
 
 from typing import Tuple, Union
@@ -18,15 +17,16 @@ def build_lagged_features(
     dt: pd.DataFrame, maxlag: int = 2, dropna: bool = True
 ) -> pd.DataFrame:
     """
-    Builds a new DataFrame to facilitate regressing over all possible lagged features
+    Builds a new DataFrame to facilitate regressing over all possible lagged features.
+
     Parameters
     ----------
     dt : pd.DataFrame
-        Dataframe containing features
+        Dataframe containing features.
     maxlag : int, optional
-        maximum lags to compute, by default 2
+        Maximum lags to compute, by default 2.
     dropna : bool, optional
-        If true the initial rows containing NANs due to lagging will be dropped, by default True
+        If true the initial rows containing NANs due to lagging will be dropped, by default True.
 
     Returns
     -------
@@ -63,7 +63,7 @@ def preprocess_data(
     end_date: Union[str, None] = None,
 ) -> pd.DataFrame:
     """
-    This function creates a dataframe with lagged columns that allow the
+    This function creates a DataFrame with lagged columns that allow the
     application of ML regression model.
 
     Parameters
@@ -80,7 +80,7 @@ def preprocess_data(
     Returns
     -------
     pd.DataFrame
-        The data frame with the lagged columns.
+        The DataFrame with the lagged columns.
     """
 
     df_lag = build_lagged_features(copy.deepcopy(data), maxlag=maxlag)
@@ -99,19 +99,19 @@ def preprocess_data(
 def get_targets(target: pd.Series, predict_n: int) -> dict:
     """
     Function to create a dictionary with the targets that
-    it will be used to train the ngboost model
+    it will be used to train the ngboost model.
 
     Parameters
     ----------
     target : pd.Series
-        array with the values used as target
+        Array with the values used as target.
     predict_n : int
-        Number os days that it will be predicted.
+        Number of days that it will be predicted.
 
     Returns
     -------
     dictionary
-        A dictionary with the targets used to train the model
+        A dictionary with the targets used to train the model.
     """
 
     targets = {}
@@ -124,15 +124,14 @@ def get_targets(target: pd.Series, predict_n: int) -> dict:
 
 def get_next_n_days(ini_date: str, next_days: int) -> list:
     """
-    Return a list of dates with the {next_days} days after ini_date. This
-    function was designed to generate the dates of the forecast models.
+    Return a list of dates with the {next_days} days after ini_date. This function was designed to generate the dates of the forecast models.
 
     Parameters
     ----------
     ini_date : str
-        Initial date
+        Initial date.
     next_days : int
-        Number os days to be included in the list after the date in ini_date.
+        Number of days to be included in the list after the date in ini_date.
 
     Returns
     -------
@@ -160,30 +159,30 @@ def lstm_split_data(
     Y_column: int = 0,
 ) -> Tuple[np.array, np.array, np.array, np.array]:
     """
-    Split the data into training and test sets
-    Keras expects the input tensor to have a shape of (nb_samples, look_back, features),
-    and a output shape of (,predict_n)
+    Split the data into training and test sets. Keras expects the input
+    tensor to have a shape of (nb_samples, look_back, features), and a
+    output shape of (,predict_n).
 
     Parameters
     ----------
     df : pd.DataFrame
-        Pandas dataframe with the data.
+        DataFrame with the data.
     look_back : int, optional
-        Number of weeks to look back before predicting. By default 12
+        Number of weeks to look back before predicting. By default 12.
     ratio : float, optional
-        Fraction of total samples to use for training. By default 0.8
+        Fraction of total samples to use for training. By default 0.8.
     predict_n : int, optional
-        Number of weeks to predict. By default 5
+        Number of weeks to predict. By default 5.
     Y_column : int, optional
-        Column to predict. By default 0
+        Column to predict. By default 0.
 
     Returns
     -------
     Tuple[np.array,np.array,np.array,np.array]
-        X_train: array of features to train the model
-        y_train: array of targets to train the model
-        X_test: array of features to test the model
-        y_test: array of targets to test the model
+        X_train: array of features to train the model.
+        y_train: array of targets to train the model.
+        X_test: array of features to test the model.
+        y_test: array of targets to test the model.
     """
 
     df = np.nan_to_num(df.values).astype("float64")
@@ -212,20 +211,20 @@ def normalize_data(
     df: pd.DataFrame, log_transform: bool = False
 ) -> Tuple[pd.DataFrame, pd.Series]:
     """
-    Normalize features in the df table and return the normalized table and the values
-    used to compute the normalization.
+    Normalize features in the df table and return the normalized table and the values used to compute the normalization.
+
     Parameters
     ----------
     df : pd.DataFrame
-        DataFrame to be normalized by the maximum value
+        DataFrame to be normalized by the maximum value.
     log_transform : bool, optional
-        If true the log transformation is applied in the data, by default False
+        If true the log transformation is applied in the data, by default False.
 
     Returns
     -------
     Tuple[pd.DataFrame, pd.Series]
-        pd.DataFrame: normalized dataframe
-        pd.Series: series of the max values used in the normalization
+        pd.DataFrame: normalized DataFrame.
+        pd.Series: Series of the max values used in the normalization.
     """
 
     df.fillna(0, inplace=True)

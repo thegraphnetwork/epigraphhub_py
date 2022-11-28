@@ -9,8 +9,7 @@ from sklearn.metrics import mean_squared_log_error as msle
 # computing some metrics
 def compute_metrics(df_pred: pd.DataFrame) -> pd.DataFrame:
     """
-    This function evaluates the predictions obtained in the `train_eval` method
-    in the train and test sample. The predictions must be saved in a dataset with the following columns:
+    This function evaluates the predictions obtained in the `train_eval` method in the train and test sample. The predictions must be saved in a dataset with the following columns:
     'median', 'target' and 'train_size'.
     This function uses the following metrics:
     - explained variance score;
@@ -29,7 +28,7 @@ def compute_metrics(df_pred: pd.DataFrame) -> pd.DataFrame:
     Returns
     -------
     pd.DataFrame
-        Dataframe with two columns: out_sample and in_sample and with the metrics as index.
+        DataFrame with two columns: out_sample and in_sample and with the metrics as index.
     """
 
     metrics = [
