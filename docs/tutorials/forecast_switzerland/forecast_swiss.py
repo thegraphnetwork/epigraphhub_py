@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """
-The functions in this module allow the application of the
-ngboost regressor model for time series. There are separate functions to train and evaluate (separate the data in train and test datasets), train with all the data available, and make forecasts. Also, there are functions to apply these methods in just one canton or all
-the cantons of switzerland.
+The functions in this module allow the application of the ngboost
+regressor model for time series. There are separate functions to train
+and evaluate (separate the data in train and test datasets), train with
+all the data available, and make forecasts. Also, there are functions to
+apply these methods in just one canton or all the cantons of
+switzerland.
 
 """
 import pandas as pd
@@ -28,7 +31,8 @@ params_model = {
 
 def get_clusters_swiss(t=0.3, end_date=None):
     """
-    Params to get the list of clusters computed by the compute_cluster function.
+    Params to get the list of clusters computed by the compute_cluster
+    function.
  
     Parameters
     ----------
@@ -93,7 +97,8 @@ def get_cluster_by_canton(canton):
 
 def remove_zeros(tgt):
     """
-    Function to remove the zeros of the target curve. It needs to be done to us be able to use the LogNormal dist.
+    Function to remove the zeros of the target curve. It needs to be
+    done to us be able to use the LogNormal dist.
  
     Parameters
     ----------
@@ -125,39 +130,48 @@ def train_eval_single_canton(
     """
     Function to train and evaluate the model for one georegion.
  
-    Important:
-    * By default the function is using the clustering cantons and the data since 2020.
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients.
+    Important: * By default the function is using the clustering cantons
+    and the
+      data since 2020. 
+    * For the predictor hospCapacity is used as predictor the column
+      ICU_Covid19Patients.
 
     Parameters
     ----------
-    target_curve_name : str
-    canton : str
+    target_curve_name : str canton : str
         Canton of interest.
     predictors : list
         Variables that will be used in model.
     vaccine : bool
         It determines if the vaccine data from owid will be used or not.
     smooth : bool
-        It determines if data will be smoothed (7 day moving average) or not.
+        It determines if data will be smoothed (7 day moving average) or
+        not.
     ini_date : str
         Determines the beggining of the train dataset.
     end_train_date : str
-        Determines the beggining of end of train dataset. If is not None, then ratio isn't used.
+        Determines the beggining of end of train dataset. If is not
+        None, then ratio isn't used.
     end_date : str
         Determines the end of the dataset used in validation.
     ratio : float
-        Determines which percentage of the data will be used to train the model.
+        Determines which percentage of the data will be used to train
+        the model.
     ratio_val : float
-        Determines which percentage of the train data will be used as validation data.
+        Determines which percentage of the train data will be used as
+        validation data.
     early_stop : int
-        This parameter will finish the model's training after {early_stop} iterations without improving the model in the validation data.
+        This parameter will finish the model's training after
+        {early_stop} iterations without improving the model in the
+        validation data.
     parameters_model : dict
-        Dict with the params that will be used in the ngboost regressor model.
+        Dict with the params that will be used in the ngboost regressor
+        model.
     predict_n : int
         Number of days that will be predicted.
     look_back : int
-        Number of the last days that will be used to forecast the next days.
+        Number of the last days that will be used to forecast the next
+        days.
 
     Returns
     -------
@@ -230,8 +244,10 @@ def train_eval_all_cantons(
     Function to make prediction for all the cantons.
     
     Important:
-    * By default the function is using the clustering cantons and the data since 2020.
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients.
+    * By default the function is using the clustering cantons and the
+      data since 2020.
+    * For the predictor hospCapacity is used as predictor the column
+      ICU_Covid19Patients.
     
     Parameters
     ----------
@@ -246,17 +262,21 @@ def train_eval_all_cantons(
     ini_date : str
         Determines the beggining of the train dataset.
     end_train_date : str
-        Determines the beggining of end of train dataset. If is not None, then ratio isn't used.
+        Determines the beggining of end of train dataset. If is not
+        None, then ratio isn't used.
     end_date : str
         Determines the end of the dataset used in validation.
     ratio : float
-        Determines which percentage of the data will be used to train the model.
+        Determines which percentage of the data will be used to train
+        the model.
     parameters_model : dict
-        Dict with the params that will be used in the ngboost regressor model.
+        Dict with the params that will be used in the ngboost regressor
+        model.
     predict_n : int
         Number of days that will be predicted.
     look_back : int
-        Number of the last days that will be used to forecast the next days.
+        Number of the last days that will be used to forecast the next
+        days.
     
     Returns
     -------
@@ -338,9 +358,11 @@ def train_single_canton(
     """
     Function to train and evaluate the model for one georegion.
     
-    Important:
-    * By default the function is using the clustering cantons and the data since 2020.
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients.
+    Important: * By default the function is using the clustering cantons
+    and the
+      data since 2020.
+    * For the predictor hospCapacity is used as predictor the column
+      ICU_Covid19Patients.
     
     Parameters
     ----------
@@ -356,14 +378,18 @@ def train_single_canton(
         Determines the beggining of the train dataset
     path : str
         Determines where the model trained will be saved.
-    update_data : bool
-        Determines if the data from the Geneva hospital will be used. This params only is used when canton = GE and target_curve_name = hosp.
+    update_data : bool 
+        Determines if the data from the Geneva hospital will be used.
+        This params only is used when canton = GE and target_curve_name
+        = hosp.
     parameters_model : dict
-        Dict with the params that will be used in the ngboost regressor model.
+        Dict with the params that will be used in the ngboost regressor
+        model.
     predict_n : int
         Number of days that will be predicted.
     look_back : int
-        Number of the last days that will be used to forecast the next days.
+        Number of the last days that will be used to forecast the next
+        days.
     
     Returns
     -------
@@ -425,11 +451,14 @@ def train_all_cantons(
 ):
  
     """
-    Function to train and evaluate the model for all the cantons in switzerland.
+    Function to train and evaluate the model for all the cantons in
+    switzerland.
     
-    Important:
-    * By default the function is using the clustering cantons and the data since 2020.
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients.
+    Important: 
+    * By default the function is using the clustering cantons and the
+      data since 2020. 
+    * For the predictor hospCapacity is used as predictor the column
+      ICU_Covid19Patients.
     
     Parameters
     ----------
@@ -444,11 +473,13 @@ def train_all_cantons(
     ini_date : str
         Determines the beggining of the train dataset.
     parameters_model : dict
-        Dict with the params that will be used in the ngboost regressor model.
+        Dict with the params that will be used in the ngboost regressor
+        model.
     predict_n : int
         Number of days that will be predicted.
     look_back : int
-        Number of the last days that will be used to forecast the next days.
+        Number of the last days that will be used to forecast the next
+        days.
     
     Returns
     -------
@@ -512,8 +543,10 @@ def forecast_single_canton(
     Function to make the forecast for one canton.
     
     Important:
-    * By default the function is using the clustering cantons and the data since 2020.
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients.
+    * By default the function is using the clustering cantons and the
+      data since 2020.
+    * For the predictor hospCapacity is used as predictor the column
+      ICU_Covid19Patients.
     
     Parameters
     ----------
@@ -534,7 +567,8 @@ def forecast_single_canton(
     predict_n : int
         Number of days that will be predicted.
     look_back : int
-        Number of the last days that will be used to forecast the next days.
+        Number of the last days that will be used to forecast the next
+        days.
     
     Returns
     -------
@@ -577,8 +611,10 @@ def forecast_all_cantons(
     Function to make the forecast for all the cantons.
     
     Important:
-    * By default the function is using the clustering cantons and the data since 2020.
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients.
+    * By default the function is using the clustering cantons and the
+      data since 2020.
+    * For the predictor hospCapacity is used as predictor the column
+      ICU_Covid19Patients.
     
     Parameters
     ----------

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """
-The functions in this module transform the data in a format that is accepted by ML models (tabular data) and neural network models (3D array data and multiple-output).
+The functions in this module transform the data in a format that is
+accepted by ML models (tabular data) and neural network models (3D array
+data and multiple-output).
 """
 
 from typing import Tuple, Union
@@ -17,7 +19,8 @@ def build_lagged_features(
     dt: pd.DataFrame, maxlag: int = 2, dropna: bool = True
 ) -> pd.DataFrame:
     """
-    Builds a new DataFrame to facilitate regressing over all possible lagged features.
+    Builds a new DataFrame to facilitate regressing over all possible
+    lagged features.
 
     Parameters
     ----------
@@ -26,7 +29,8 @@ def build_lagged_features(
     maxlag : int, optional
         Maximum lags to compute, by default 2.
     dropna : bool, optional
-        If true the initial rows containing NANs due to lagging will be dropped, by default True.
+        If true the initial rows containing NANs due to lagging will be
+        dropped, by default True.
 
     Returns
     -------
@@ -69,7 +73,8 @@ def preprocess_data(
     Parameters
     ----------
     data : pd.DataFrame
-        Dataframe with datetime index and the target and features in the columns.
+        Dataframe with datetime index and the target and features in the
+        columns.
     maxlag : int
         The max number of days used to compute the lagged columns.
     ini_date : str, optional
@@ -98,8 +103,8 @@ def preprocess_data(
 
 def get_targets(target: pd.Series, predict_n: int) -> dict:
     """
-    Function to create a dictionary with the targets that
-    it will be used to train the ngboost model.
+    Function to create a dictionary with the targets that it will be
+    used to train the ngboost model.
 
     Parameters
     ----------
@@ -124,14 +129,17 @@ def get_targets(target: pd.Series, predict_n: int) -> dict:
 
 def get_next_n_days(ini_date: str, next_days: int) -> list:
     """
-    Return a list of dates with the {next_days} days after ini_date. This function was designed to generate the dates of the forecast models.
+    Return a list of dates with the {next_days} days after ini_date.
+    This function was designed to generate the dates of the forecast
+    models.
 
     Parameters
     ----------
     ini_date : str
         Initial date.
     next_days : int
-        Number of days to be included in the list after the date in ini_date.
+        Number of days to be included in the list after the date in
+        ini_date.
 
     Returns
     -------
@@ -179,9 +187,9 @@ def lstm_split_data(
     Returns
     -------
     Tuple[np.array,np.array,np.array,np.array]
-        X_train: array of features to train the model.
-        y_train: array of targets to train the model.
-        X_test: array of features to test the model.
+        X_train: array of features to train the model. 
+        y_train: array of targets to train the model. 
+        X_test: array of features to test the model. 
         y_test: array of targets to test the model.
     """
 
@@ -211,20 +219,23 @@ def normalize_data(
     df: pd.DataFrame, log_transform: bool = False
 ) -> Tuple[pd.DataFrame, pd.Series]:
     """
-    Normalize features in the df table and return the normalized table and the values used to compute the normalization.
+    Normalize features in the df table and return the normalized table
+    and the values used to compute the normalization.
 
     Parameters
     ----------
     df : pd.DataFrame
         DataFrame to be normalized by the maximum value.
     log_transform : bool, optional
-        If true the log transformation is applied in the data, by default False.
+        If true the log transformation is applied in the data, by
+        default False.
 
     Returns
     -------
     Tuple[pd.DataFrame, pd.Series]
-        pd.DataFrame: normalized DataFrame.
-        pd.Series: Series of the max values used in the normalization.
+        pd.DataFrame: normalized DataFrame. 
+        pd.Series: Series of the max
+        values used in the normalization.
     """
 
     df.fillna(0, inplace=True)

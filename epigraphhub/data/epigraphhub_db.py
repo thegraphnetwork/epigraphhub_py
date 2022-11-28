@@ -76,7 +76,8 @@ def get_data_by_location(
     loc_column: str,
 ) -> pd.DataFrame:
     """
-    This function provides a DataFrame for the table selected in the param table_name and the chosen regions in the param georegion.
+    This function provides a DataFrame for the table selected in the
+    param table_name and the chosen regions in the param georegion.
 
     Parameters
     ----------
@@ -85,9 +86,11 @@ def get_data_by_location(
     table_name : str
         Name of the table that you want to get the data.
     loc : Union[list[str], str]
-        This list contains all the locations of interest or the string 'All' to return all the regions.
+        This list contains all the locations of interest or the string
+        'All' to return all the regions.
     columns : list[str], None
-         Columns that you want to select from the table table_name. If None all the columns will be returned.
+         Columns that you want to select from the table table_name. If
+         None all the columns will be returned.
     loc_column : str
         Name of the column to filter by location name.
 
@@ -109,7 +112,8 @@ def get_data_by_location(
 
     if type(loc) != list and loc != "All":
         raise Exception(
-            """Error. The georegion param should be a list or the string 'All' to return all the georegions."""
+            """Error. The georegion param should be a list or the string
+            'All' to return all the georegions."""
         )
 
     if type(columns) != list and columns != None:

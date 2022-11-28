@@ -14,9 +14,15 @@ def get_pop_data(country, time="all", fx_et="5Y"):
         ISO-CODE of the country of interest.
     time : range, str
         Interval of years. If filled `time = 'all'`, the function will
-        return all the data available. You can also specify a range of years. For example, if you want to get the data for the period between the years 2010 and 2020, you can fill this parameter with `time = range(2010,2021)`.
+        return all the data available. You can also specify a range of
+        years. For example, if you want to get the data for the period
+        between the years 2010 and 2020, you can fill this parameter
+        with `time = range(2010,2021)`.
     fx_et : str
-        If fx_et == '5Y', it will be returned the population by 5-year age groups. If fx_et == 'IN', it will be return the population divided in 3 age groups. If fx_et == 'TOTL', it will be returned the total population without consider the age groups.
+        If fx_et == '5Y', it will be returned the population by 5-year
+        age groups. If fx_et == 'IN', it will be return the population
+        divided in 3 age groups. If fx_et == 'TOTL', it will be returned
+        the total population without consider the age groups.
 
     Returns
     -------
@@ -100,7 +106,8 @@ def search_in_database(keyword):
     Parameters
     ----------
     keyword : str
-        Full name or keyword to search in the database names. If the string 'all' is used, all the databases names are returned.
+        Full name or keyword to search in the database names. If the
+        string 'all' is used, all the databases names are returned.
 
     Returns
     -------
@@ -135,9 +142,13 @@ def search_in_indicators(keyword, db=2):
     Parameters
     ----------
     keyword : str
-        Keyword to search in the indicators name. If None, all the indicators available will be returned.
+        Keyword to search in the indicators name. If None, all the
+        indicators available will be returned.
     db : int
-        Number associated with the database whose you want to get the list of indicators. You can discover this number in the function 'search_in_database'. By default the indicators are search over the World Development Indicators database (db = 2).
+        Number associated with the database whose you want to get the
+        list of indicators. You can discover this number in the function
+        'search_in_database'. By default the indicators are search over
+        the World Development Indicators database (db = 2).
 
     Returns
     -------
@@ -156,18 +167,25 @@ def search_in_indicators(keyword, db=2):
 def get_worldbank_data(ind, country, db=2, time="all", columns=None):
     
     """
-    This function get a list of indicators according to some country from the world data bank and return this series in a DataFrame.
+    This function get a list of indicators according to some country
+    from the world data bank and return this series in a DataFrame.
 
     Parameters
     ----------
     ind : list
         List with the indicators whose data you want to get.
     country : list
-        List with the ISO-CODE for the countries whose data you want to get.
+        List with the ISO-CODE for the countries whose data you want to
+        get.
     time : range, str
-        Interval of years. If filled `time = 'all'`, the function will return all the data available. You can also specify a range of years. For example, if you want to get the data for the period between the years 2010 and 2020, you can fill this parameter with `time = range(2010,2021)`.
+        Interval of years. If filled `time = 'all'`, the function will
+        return all the data available. You can also specify a range of
+        years. For example, if you want to get the data for the period
+        between the years 2010 and 2020, you can fill this parameter
+        with `time = range(2010,2021)`.
     columns : list
-        List with names to rename the columns instead of use the names in the `ind` list.
+        List with names to rename the columns instead of use the names
+        in the `ind` list.
 
     Important
     ---------
