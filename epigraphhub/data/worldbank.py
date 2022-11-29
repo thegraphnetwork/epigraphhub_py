@@ -135,7 +135,6 @@ def search_in_database(keyword):
 
 
 def search_in_indicators(keyword, db=2):
-    
     """
     Returns a DataFrame with the indicators matched by partial name.
 
@@ -165,7 +164,6 @@ def search_in_indicators(keyword, db=2):
 
 
 def get_worldbank_data(ind, country, db=2, time="all", columns=None):
-    
     """
     This function get a list of indicators according to some country
     from the world data bank and return this series in a DataFrame.
