@@ -7,7 +7,7 @@ Created on Wed Nov  2 14:42:37 2022
 """
 import numpy as np
 from  scipy.stats import gamma, norm, poisson, hypergeom
-from  scipy.stats import binomtest
+from  scipy.stats import binomtest, fisher_exact, chi2_contingency
 from  scipy.optimize import brentq 
 from typing import Optional, Union
 from iteration_utilities import unique_everseen
@@ -16,7 +16,12 @@ import pandas as pd
 ###############################################################################
 ### UTILITIES
 ###############################################################################
-def array_as_integer(arr):
+def nan_arr(n: int):
+    arr = np.empty(n)
+    arr[:] = np.nan
+    return arr
+
+def array_as_integer(arr: np.array):
     if arr.dtype in ['int32', 'int64']:
         return arr
     if arr.dtype in ['float32', 'float64']:
@@ -269,6 +274,15 @@ def or_midp(x: Union[list, tuple, np.array], conf_level: float = 0.95,
          'method': 'median-unbiased estimate & mid-p exact CI'} # Such descriptive strings are not customary in Python. Should we mirror R's implementation or follow pythonicness?
     return d
 
+def ormidp_test(a1: int, a0: int, b1: int, b0: int, or_: float = 1):
+    x = np.array([[a1,a0], [b1, b0]])
+    lteqtoa1 = fisher_or_pval(x, or_=or_, alternative='less')
+    gteqtoa1 = fisher_or_pval(x, or_=or_, alternative='greater')
+    pval1 = 0.5*(lteqtoa1 - gteqtoa1 + 1)
+    one_sided = min(pval1, 1 - pval1)
+    two_sided = 2*one_sided
+    return {'one_sided': one_sided, 'two_sided': two_sided}
+
 def epitable(*args, count: bool = False, ncol: int = 2, byrow: bool = True, rev: str = ''):
     guessed = False
     if len(args) == 0:
@@ -352,5 +366,25 @@ def table_margins(x: Union[np.array, pd.DataFrame]):
     row_labels = df.index.tolist() if has_labels else [f'row{i}' for i in range(nrows)]
     row_labels.append('Total')
     return pd.DataFrame(tr, columns=col_labels, index=row_labels)
+
+def tab2by2_test(x: Union[list, tuple, np.array, pd.DataFrame], y=None, correction: bool = False, rev: str = ''):
+    if type(x) in [list, tuple]:
+        x = np.array(x)
+    else:
+        if len(x.shape) >= 1 and y is not None:
+            raise ValueError("y argument should be None if x is a 2d-array")
+    x = epitable(x, rev=rev) if y is None else epitable(x, y, rev=rev)  # Count?? 
+    # from now on x is guaranteed to be a DataFrame
+    nr, nc = x.shape
+    fish, chi2, midp = nan_arr(nr), nan_arr(nr), nan_arr(nr)
+    for i in range(1, nr):
+        xx = x.iloc[[0, i]]
+        a0, b0, a1, b1 = x.iloc[0, 1], x.iloc[0, 0], x.iloc[i, 1], x.iloc[i, 0]
+        fish[i] = fisher_exact(xx)[1]  # p-value from Fisher exact test
+        chi2[i] = chi2_contingency(xx, correction=correction)[1]  # p-value from Chi square test
+        midp[i] = ormidp_test(a1,a0,b1,b0)['two_sided']
+    pvals = pd.DataFrame({'midp_exact': midp, 'fisher_exact': fish, 'chi_square': chi2}, index=x.index)
+    return {'x': x, 'p_value': pvals, 'correction': correction}
+    
           
 
