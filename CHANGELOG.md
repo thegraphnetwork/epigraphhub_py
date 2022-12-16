@@ -1,6 +1,22 @@
 Release Notes
 ---
 
+## [2.0.0](https://github.com/thegraphnetwork/epigraphhub_py/compare/1.2.1...2.0.0) (2022-12-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **semantic-release:** add conventionalcommits in release step on ci (#205)
+
+### Features
+
+* **pr-linter:** remove branking change from pr linter ([#203](https://github.com/thegraphnetwork/epigraphhub_py/issues/203)) ([6eeed96](https://github.com/thegraphnetwork/epigraphhub_py/commit/6eeed96c27d6d8b497d1c890c30abbc9c9dcdd17))
+
+
+### Bug Fixes
+
+* **semantic-release:** add conventionalcommits in release step on ci ([#205](https://github.com/thegraphnetwork/epigraphhub_py/issues/205)) ([de62501](https://github.com/thegraphnetwork/epigraphhub_py/commit/de6250155355955f809559dcf9e1fe3a8eea9ff1))
+
 ## [1.2.1](https://github.com/thegraphnetwork/epigraphhub_py/compare/1.2.0...1.2.1) (2022-10-10)
 
 
