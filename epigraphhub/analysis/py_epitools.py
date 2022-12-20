@@ -29,11 +29,22 @@ def array_as_integer(arr: np.array):
         if is_int(arr).all():
             return arr.astype('int')
         raise ValueError('Not all values in the array are integer!')
+    if arr.dtype == 'bool':
+        raise ValueError('Array of booleans!')
+    if arr.dtype == 'O':
+        is_bool = np.vectorize(lambda x: type(x) == bool)
+        if (is_bool(arr)).any():
+            raise ValueError('At least a boolean value')
     try: 
         return arr.astype('int')
     except ValueError:
         raise ValueError('Not all values in the array are integer!')
 
+def to_1darray(x):
+    if type(x) != np.ndarray:
+        x = np.array(x).flatten()
+    return x
+        
 def fisher_or_pval(x: np.array, or_: float = 1, alternative: str = 'two-sided'):
     m = x[:,0].sum()
     n = x[:,1].sum()
@@ -82,7 +93,11 @@ def fisher_or_pval(x: np.array, or_: float = 1, alternative: str = 'two-sided'):
 ###############################################################################
 ### epitools functions
 ###############################################################################
-def ageadjust_direct(count: np.array, pop: np.array, stdpop: np.array, rate: Optional[np.array] = None, conf_level: float = 0.95) -> tuple:
+def ageadjust_direct(count: Union[np.array, list, tuple, pd.Series, pd.DataFrame],
+                     pop: Union[np.array, list, tuple, pd.Series, pd.DataFrame],
+                     stdpop:Union[np.array, list, tuple, pd.Series, pd.DataFrame],
+                     rate: Optional[np.array] = None, conf_level: float = 0.95) -> tuple:
+    count, pop, stdpop = [to_1darray(i) for i in [count, pop, stdpop]]
     if rate is None:
         rate  = count/pop
     alpha = 1 - conf_level
@@ -95,12 +110,19 @@ def ageadjust_direct(count: np.array, pop: np.array, stdpop: np.array, rate: Opt
     uci = gamma.ppf(1 - alpha/2, ((dsr+wm)**2)/(dsr_var+wm**2), scale=(dsr_var+wm**2)/(dsr+wm))
     return pd.Series({'crude_rate': crude_rate, 'adj_rate': dsr, 'lci': lci, 'uci': uci})
 
-def ageadjust_indirect(count: np.array, pop: np.array, stdcount: np.array, stdpop: np.array, 
-                       stdrate: Optional[np.array] = None, conf_level: float = 0.95):
+def ageadjust_indirect(count: Union[np.array, list, tuple, pd.Series, pd.DataFrame],
+                       pop: Union[np.array, list, tuple, pd.Series, pd.DataFrame],
+                       stdcount: Union[np.array, list, tuple, pd.Series, pd.DataFrame],
+                       stdpop: Union[np.array, list, tuple, pd.Series, pd.DataFrame], 
+                       stdrate: Optional[Union[np.array, list, tuple, pd.Series, pd.DataFrame]] = None,
+                       conf_level: float = 0.95):
+    count, pop, stdcount, stdpop = [to_1darray(i) for i in [count, pop, stdcount, stdpop]]
     zv = norm.ppf(0.5*(1+conf_level))
     countsum = count.sum()
     if stdrate == None and len(stdcount) > 1 and len(stdpop) > 1:
         stdrate = stdcount/stdpop
+    else:
+        stdrate = to_1darray(stdrate)
     ##indirect age standardization
     ##a. sir calculation
     expected = (stdrate * pop).sum()
@@ -117,15 +139,12 @@ def ageadjust_indirect(count: np.array, pop: np.array, stdcount: np.array, stdpo
     isr_lci = sir_lci * stdcrate
     isr_uci = sir_uci * stdcrate
     rate_series = pd.Series({'crude_rate': crude_rate, 'adj_rate': isr, 'lci': isr_lci, 'uci': isr_uci})
-    return sir_series, rate_series  # NB. R returns a "list". It can be indexed by both labels and numbers. Should we reproduce that? It is far from standard Python behaviour
+    return sir_series, rate_series
 
 def binom_general(x: Union[list, tuple, np.array], n: Union[list, tuple, np.array],
                 conf_level: float = 0.95, p: float = 0.5, method: str = 'exact'):  # Do we envision the case where conf_level is an array of different values?
     len_ = len(x)
-    if type(x) != np.ndarray:
-        x = np.array(x)
-    if type(n) != np.ndarray:
-        n = np.array(n)
+    x, n = to_1darray(x), to_1darray(n)
     cis = np.array([list(binomtest(x[i], n[i], p=p).proportion_ci(confidence_level=conf_level, method=method)) for i in range(len_)])
     df_data = np.stack([x, n, x/n, cis[:, 0], cis[:,1], conf_level*np.ones(len_)], axis=1)
     return pd.DataFrame(data=df_data, columns=['x', 'n', 'proportion', 'lower', 'upper', 'conf_level'])
@@ -152,10 +171,8 @@ def binom_approx(x: Union[list, tuple, np.array], n: Union[list, tuple, np.array
     return pd.DataFrame(data=df_data, columns=['x', 'n', 'proportion', 'lower', 'upper', 'conf_level'])
 
 def kapmeier(time: Union[list, tuple, np.array], status: Union[list, tuple, np.array]):
-    if type(time) != np.ndarray:
-        time = np.array(time)
-    if type(status) != np.ndarray:
-        status = np.array(status)
+    time = to_1darray(time)
+    status = to_1darray(status)
     stime = sorted(time)
     status = status[np.argsort(time)]
     nj = np.arange(len(time), 0, -1)
