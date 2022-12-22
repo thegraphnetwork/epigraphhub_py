@@ -191,8 +191,7 @@ def kapmeier(time: Union[list, tuple, np.array], status: Union[list, tuple, np.a
 def pois_exact(x: Union[list, tuple, np.array], pt: Union[int, float, list, tuple, np.array] = 1,
                conf_level: float = 0.95):  # Do we envision the case where conf_level is an array of different values?
     len_ = len(x)
-    if type(x) != np.ndarray:
-        x = np.array(x)
+    x = to_1darray(x)
     if type(pt) in [list, tuple]:
         pt = np.array(pt)   
     elif type(pt) in [float, int]:
@@ -214,8 +213,7 @@ def pois_exact(x: Union[list, tuple, np.array], pt: Union[int, float, list, tupl
 def pois_approx(x: Union[list, tuple, np.array], pt: Union[int, float, list, tuple, np.array] = 1,
                conf_level: float = 0.95):  # Do we envision the case where conf_level is an array of different values?
     len_ = len(x)    
-    if type(x) != np.ndarray:
-        x = np.array(x)
+    x = to_1darray(x)
     if type(pt) in [list, tuple]:
         pt = np.array(pt)   
     elif type(pt) in [float, int]:
@@ -232,8 +230,7 @@ def pois_approx(x: Union[list, tuple, np.array], pt: Union[int, float, list, tup
 def pois_daly(x: Union[list, tuple, np.array], pt: Union[int, float, list, tuple, np.array] = 1,
                conf_level: float = 0.95):  # Do we envision the case where conf_level is an array of different values?
     len_ = len(x)    
-    if type(x) != np.ndarray:
-        x = np.array(x)
+    x = to_1darray(x)
     if type(pt) in [list, tuple]:
         pt = np.array(pt)   
     elif type(pt) in [float, int]:
@@ -249,8 +246,7 @@ def pois_daly(x: Union[list, tuple, np.array], pt: Union[int, float, list, tuple
 def pois_byar(x: Union[list, tuple, np.array], pt: Union[int, float, list, tuple, np.array] = 1,
                conf_level: float = 0.95):  # Do we envision the case where conf_level is an array of different values?
     len_ = len(x)    
-    if type(x) != np.ndarray:
-        x = np.array(x)
+    x = to_1darray(x)
     if type(pt) in [list, tuple]:
         pt = np.array(pt)   
     elif type(pt) in [float, int]:
@@ -266,8 +262,7 @@ def pois_byar(x: Union[list, tuple, np.array], pt: Union[int, float, list, tuple
 
 def or_midp(x: Union[list, tuple, np.array], conf_level: float = 0.95,
             byrow: bool = True, interval: Union[list, tuple, np.array] = [0, 1000]):
-    if type(x) != np.ndarray:
-        x = np.array(x)
+    x = to_1darray(x)
     x = array_as_integer(x)
     if x.shape == (4,):
         x = x.reshape(2,2) if byrow else x.reshape(2,2).T

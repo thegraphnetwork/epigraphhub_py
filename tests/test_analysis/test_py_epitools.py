@@ -21,7 +21,13 @@ from epigraphhub.analysis.py_epitools import (
     binom_exact,
     binom_wilson,
     binom_approx,
-    kapmeier
+    kapmeier,
+    pois_exact,
+    pois_daly,
+    pois_byar,
+    pois_approx,
+    or_midp,
+    ormidp_test
     )
 
 def test_nan_arr(): 
@@ -244,3 +250,125 @@ def test_kapmeier():
              0.5                ,  0.17999999999999997,  0.8200000000000001 ]])
     assert res.columns.tolist() == ['time', 'n_risk', 'n_events', 'condsurv', 'survival', 'risk']
     assert np.allclose(res.values, refvals, rtol=1e-17, atol=1e-3)
+
+def test_pois_exact():  
+    # NB. I noticed differences of e-06/e-05 between R and Python. I think they stem from the uncertainty in the root finding algortihm.
+    # Are we ok with such accuracy or should we aim for higher accuracy? We might want to add a kwarg for the threshold in the root finding.
+    res = pois_exact(np.arange(1,11))
+    refvals = np.array([[ 1.        ,  1.        ,  1.        ,  0.02531781,  5.57164339,
+             0.95      ],
+           [ 2.        ,  1.        ,  2.        ,  0.24220928,  7.22468767,
+             0.95      ],
+           [ 3.        ,  1.        ,  3.        ,  0.61867212,  8.76727307,
+             0.95      ],
+           [ 4.        ,  1.        ,  4.        ,  1.08986537, 10.24158868,
+             0.95      ],
+           [ 5.        ,  1.        ,  5.        ,  1.62348639, 11.66833208,
+             0.95      ],
+           [ 6.        ,  1.        ,  6.        ,  2.20189425, 13.05947402,
+             0.95      ],
+           [ 7.        ,  1.        ,  7.        ,  2.81436305, 14.42267536,
+             0.95      ],
+           [ 8.        ,  1.        ,  8.        ,  3.45383218, 15.76318922,
+             0.95      ],
+           [ 9.        ,  1.        ,  9.        ,  4.1153731 , 17.08480345,
+             0.95      ],
+           [10.        ,  1.        , 10.        ,  4.7953887 , 18.39035604,
+             0.95      ]])
+    assert res.columns.tolist() == ['x', 'pt', 'rate', 'lower', 'upper', 'conf_level']
+    assert np.allclose(res.values, refvals, rtol=1e-10, atol=1e-3)
+    
+def test_pois_daly():  
+    res = pois_daly(np.arange(1,11))
+    refvals = np.array([[ 1.        ,  1.        ,  1.        ,  0.02531781,  5.57164339,
+             0.95      ],
+           [ 2.        ,  1.        ,  2.        ,  0.24220928,  7.22468767,
+             0.95      ],
+           [ 3.        ,  1.        ,  3.        ,  0.61867212,  8.76727307,
+             0.95      ],
+           [ 4.        ,  1.        ,  4.        ,  1.08986537, 10.24158868,
+             0.95      ],
+           [ 5.        ,  1.        ,  5.        ,  1.62348639, 11.66833208,
+             0.95      ],
+           [ 6.        ,  1.        ,  6.        ,  2.20189425, 13.05947402,
+             0.95      ],
+           [ 7.        ,  1.        ,  7.        ,  2.81436305, 14.42267536,
+             0.95      ],
+           [ 8.        ,  1.        ,  8.        ,  3.45383218, 15.76318922,
+             0.95      ],
+           [ 9.        ,  1.        ,  9.        ,  4.1153731 , 17.08480345,
+             0.95      ],
+           [10.        ,  1.        , 10.        ,  4.7953887 , 18.39035604,
+             0.95      ]])
+    assert res.columns.tolist() == ['x', 'pt', 'rate', 'lower', 'upper', 'conf_level']
+    assert np.allclose(res.values, refvals, rtol=1e-10, atol=1e-3)
+    
+def test_pois_byar():  
+    res = pois_byar(np.arange(1,11))
+    refvals = np.array([[ 1.        ,  1.        ,  1.        ,  0.09069458,  4.66207302,
+             0.95      ],
+           [ 2.        ,  1.        ,  2.        ,  0.39884141,  6.41083414,
+             0.95      ],
+           [ 3.        ,  1.        ,  3.        ,  0.83027534,  8.00366989,
+             0.95      ],
+           [ 4.        ,  1.        ,  4.        ,  1.33731738,  9.51008003,
+             0.95      ],
+           [ 5.        ,  1.        ,  5.        ,  1.89638763, 10.95955875,
+             0.95      ],
+           [ 6.        ,  1.        ,  6.        ,  2.49398174, 12.36787791,
+             0.95      ],
+           [ 7.        ,  1.        ,  7.        ,  3.1215517 , 13.74464162,
+             0.95      ],
+           [ 8.        ,  1.        ,  8.        ,  3.77329325, 15.09621249,
+             0.95      ],
+           [ 9.        ,  1.        ,  9.        ,  4.44505618, 16.42706368,
+             0.95      ],
+           [10.        ,  1.        , 10.        ,  5.13375332, 17.74048212,
+             0.95      ]])
+    assert res.columns.tolist() == ['x', 'pt', 'rate', 'lower', 'upper', 'conf_level']
+    assert np.allclose(res.values, refvals, rtol=1e-10, atol=1e-3)
+    
+def test_pois_approx():  
+    res = pois_approx(np.arange(1,11))
+    refvals = np.array([[ 1.        ,  1.        ,  1.        , -0.95996398,  2.95996398,
+             0.95      ],
+           [ 2.        ,  1.        ,  2.        , -0.77180765,  4.77180765,
+             0.95      ],
+           [ 3.        ,  1.        ,  3.        , -0.3947572 ,  6.3947572 ,
+             0.95      ],
+           [ 4.        ,  1.        ,  4.        ,  0.08007203,  7.91992797,
+             0.95      ],
+           [ 5.        ,  1.        ,  5.        ,  0.6173873 ,  9.3826127 ,
+             0.95      ],
+           [ 6.        ,  1.        ,  6.        ,  1.19908832, 10.80091168,
+             0.95      ],
+           [ 7.        ,  1.        ,  7.        ,  1.81442272, 12.18557728,
+             0.95      ],
+           [ 8.        ,  1.        ,  8.        ,  2.4563847 , 13.5436153 ,
+             0.95      ],
+           [ 9.        ,  1.        ,  9.        ,  3.12010805, 14.87989195,
+             0.95      ],
+           [10.        ,  1.        , 10.        ,  3.80204968, 16.19795032,
+             0.95      ]])
+    assert res.columns.tolist() == ['x', 'pt', 'rate', 'lower', 'upper', 'conf_level']
+    assert np.allclose(res.values, refvals, rtol=1e-10, atol=1e-3)
+
+@pytest.mark.parametrize('x, byrow', [(np.array([[12,2],[7,9]]), True), (np.array([12,2,7,9]), True), (np.array([12,7,2,9]), False)])
+def test_or_midp(x, byrow):
+    res = or_midp(x, byrow=byrow)
+    ref = {'x': np.array([[12,  2],
+            [ 7,  9]]),
+      'estimate': 6.88070083979995,
+     'conf_int': (1.276249402536501, 60.72108876785116),
+     'conf_level': 0.95,
+     'method': 'median-unbiased estimate & mid-p exact CI'}
+    for k, v in ref.items():
+        assert res[k] == approx(ref[k])
+
+def test_ormidp_test():
+    res = ormidp_test(12,2,7,9)
+    ref = {'one_sided': 0.011660836248542417, 'two_sided': 0.023321672497084833}
+    for k, v in ref.items():
+        assert res[k] == approx(ref[k])
+    
+
