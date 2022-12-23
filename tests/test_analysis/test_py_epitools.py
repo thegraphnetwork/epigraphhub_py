@@ -27,8 +27,77 @@ from epigraphhub.analysis.py_epitools import (
     pois_byar,
     pois_approx,
     or_midp,
-    ormidp_test
+    ormidp_test,
+    table_margins,
+    tab2by2_test
     )
+from typing import Union
+
+def assert_pd(o1: Union[pd.Series, pd.DataFrame], o2: Union[pd.Series, pd.DataFrame], **kwargs):
+    """
+    Asserts wheter the two objects are close, if values are all numerical or nan, or equal, for object type.
+
+    Parameters
+    ----------
+    o1 : Union[pd.Series, pd.DataFrame]
+        first object to compare
+    o2 : Union[pd.Series, pd.DataFrame]
+        second object to compare.
+    kwargs: **kwargs
+    Returns
+    -------
+    None.
+
+    """
+    if o1.equals(o2):
+        return None
+    assert o1.index.tolist() == o2.index.tolist(), 'Different index!'
+    assert o1.index.name == o2.index.name,  'Different index name!'
+    if type(o1) == pd.DataFrame:
+        assert o1.columns.tolist() == o2.columns.tolist(), 'Different columns'
+        assert o1.columns.name == o2.columns.name, 'Different columns name'
+    try:
+        equal_values = np.allclose(o1.values, o2.values, **kwargs)
+    except TypeError:
+        raise AssertionError('values datatype is object and they are not (exactly) equal!')
+    assert equal_values
+    
+def assert_dict(d1: dict, d2: dict, atol: float = 1e-17, rtol: float = 1e-06,
+                equal_nan: bool = True):
+    """
+    Asserts whether dictionaries are (approximately) equal.
+    It checks for equal number of keys, then compares values.
+    Pandas DataFrames and Series are compared with .equals,
+    strings with "==", anything else with == pytest.approx.
+    
+    Parameters
+    ----------
+    d1 : dict
+        first dictionary.
+    d2 : TYPE
+        second dictionary.
+    atol : float, optional
+        tolerance for absolute difference. The default is 1e-08.
+    rtol : float, optional
+        tolerance for relative difference. The default is 1e-05.
+    equal_nan : bool, optional
+        Whether to use True for Nan == Nan. The default is True.
+
+    Returns
+    -------
+    None.
+
+    """
+    kw_approx = {'abs': atol, 'rel': rtol, 'nan_ok': equal_nan}
+    kw_allclose = {'atol': atol, 'rtol': rtol, 'equal_nan': equal_nan}
+    assert len(d1.keys()) == len(d2.keys())
+    for k,v in d1.items():
+        if type(v) in [pd.DataFrame, pd.Series]:
+            assert_pd(v, d2[k], **kw_allclose)
+        elif type(v) == str:
+            assert v == d2[k]
+        else:
+            assert v == approx(d2[k], **kw_approx)
 
 def test_nan_arr(): 
     n = 3  # arbitrary size value
@@ -88,10 +157,9 @@ def test_age_adjust_direct():
     pop = np.array([230061., 329449., 114920.,  39487.,  14208.,   3052.])
     stdpop = np.array([ 63986.6, 186263.6, 157302.2,  97647. ,  47572.6,  12262.6])
     res = ageadjust_direct(count, pop, stdpop)
-    refvals = np.array([0.000563475054603742, 0.000923045255331994, 0.000804417498507042,
-           0.001057633457492612])
-    assert res.index.tolist() == ['crude_rate', 'adj_rate', 'lci', 'uci']
-    assert np.allclose(res.values, refvals, atol=1e-16)
+    ref = pd.Series([0.000563475054603742, 0.000923045255331994, 0.000804417498507042,
+           0.001057633457492612], index=['crude_rate', 'adj_rate', 'lci', 'uci'])
+    assert_pd(res, ref)
 
 def test_age_adjust_indirect():
     count = np.array([   45.,   201.,   320.,   670.,  1126.,  3160.,  9723., 17935.,
@@ -102,19 +170,16 @@ def test_age_adjust_indirect():
        41725., 26501.,  5928.])
     stdpop = np.array([ 1784033.,  7065148., 15658730., 10482916.,  9939972., 10563872.,
             9114202.,  6850263.,  4702482.,  1874619.,   330915.])
-    sir_series, rate_series = ageadjust_indirect(count, pop, stdcount, stdpop)
-    assert sir_series.index.tolist() == ['observed', 'exp', 'sir', 'lci', 'uci']
-    sir_vals = np.array([7.105800000000000e+04, 8.555688884452569e+04,
+    sir_res, rate_res = ageadjust_indirect(count, pop, stdcount, stdpop)
+    sir_ref = pd.Series([7.105800000000000e+04, 8.555688884452569e+04,
            8.305351089744144e-01, 8.244509020475589e-01,
-           8.366642155718712e-01])
-    assert np.allclose(sir_series.values, sir_vals, atol=1e-16, rtol=1e-3)  
-    # can be done with np.testing.assert_allclose but I think this is more immediate and easy to notice (e.g. assert is highlighted)
-    assert rate_series.index.tolist() == ['crude_rate', 'adj_rate', 'lci', 'uci']
-    rate_vals = np.array([0.001195286415322112, 0.001379414537278219, 0.001369309433481852,
-           0.001389594213790028])
-    assert np.allclose(rate_series.values, rate_vals, atol=1e-16, rtol=1e-3)  
+           8.366642155718712e-01], index=['observed', 'exp', 'sir', 'lci', 'uci'])
+    assert_pd(sir_res, sir_ref)
+    rate_ref = pd.Series([0.001195286415322112, 0.001379414537278219, 0.001369309433481852,
+           0.001389594213790028], index=['crude_rate', 'adj_rate', 'lci', 'uci'])
+    assert_pd(rate_res, rate_ref)
 
-refvals_exact = np.array([[1.0000000000000000e+00, 1.0000000000000000e+01,
+ref_exact = pd.DataFrame(data=np.array([[1.0000000000000000e+00, 1.0000000000000000e+01,
         1.0000000000000001e-01, 2.5285785444625728e-03,
         4.4501611702819543e-01, 9.4999999999999996e-01],
        [2.0000000000000000e+00, 2.0000000000000000e+01,
@@ -143,8 +208,10 @@ refvals_exact = np.array([[1.0000000000000000e+00, 1.0000000000000000e+01,
         1.8135997288393194e-01, 9.4999999999999996e-01],
        [1.0000000000000000e+01, 1.0000000000000000e+02,
         1.0000000000000001e-01, 4.9004689221485952e-02,
-        1.7622259774017532e-01, 9.4999999999999996e-01]])
-refvals_wilson = np.array([[1.0000000000000000e+00, 1.0000000000000000e+01,
+        1.7622259774017532e-01, 9.4999999999999996e-01]]),
+                         columns=['x', 'n', 'proportion', 'lower', 'upper', 'conf_level'])
+                         
+ref_wilson = pd.DataFrame(data=np.array([[1.0000000000000000e+00, 1.0000000000000000e+01,
         1.0000000000000001e-01, 1.7876213095072896e-02,
         4.0415002679523848e-01, 9.4999999999999996e-01],
        [2.0000000000000000e+00, 2.0000000000000000e+01,
@@ -173,8 +240,9 @@ refvals_wilson = np.array([[1.0000000000000000e+00, 1.0000000000000000e+01,
         1.7924174875433652e-01, 9.4999999999999996e-01],
        [1.0000000000000000e+01, 1.0000000000000000e+02,
         1.0000000000000001e-01, 5.5229137060675081e-02,
-        1.7436566150491345e-01, 9.4999999999999996e-01]])
-refvals_approx = np.array([[ 1.0000000000000000e+00,  1.0000000000000000e+01,
+        1.7436566150491345e-01, 9.4999999999999996e-01]]),
+                         columns=['x', 'n', 'proportion', 'lower', 'upper', 'conf_level'])
+ref_approx = pd.DataFrame(data=np.array([[ 1.0000000000000000e+00,  1.0000000000000000e+01,
          1.0000000000000001e-01, -8.5938509691368459e-02,
          2.8593850969136847e-01,  9.4999999999999996e-01],
        [ 2.0000000000000000e+00,  2.0000000000000000e+01,
@@ -203,40 +271,38 @@ refvals_approx = np.array([[ 1.0000000000000000e+00,  1.0000000000000000e+01,
          1.6197950323045615e-01,  9.4999999999999996e-01],
        [ 1.0000000000000000e+01,  1.0000000000000000e+02,
          1.0000000000000001e-01,  4.1201080463798390e-02,
-         1.5879891953620162e-01,  9.4999999999999996e-01]])
+         1.5879891953620162e-01,  9.4999999999999996e-01]]),
+                          columns=['x', 'n', 'proportion', 'lower', 'upper', 'conf_level'])
 x = np.arange(1,11)
 n = 10*x
 conf_level, p = 0.95, 0.5
-@pytest.mark.parametrize("x, n, conf_level, p, method, refvals", 
-                         [(x, n, conf_level, p, "exact", refvals_exact),
-                          (x, n, conf_level, p, "wilson", refvals_wilson)])
-def test_binom_general(x, n, conf_level, p, method, refvals):
+@pytest.mark.parametrize("x, n, conf_level, p, method, ref", 
+                         [(x, n, conf_level, p, "exact", ref_exact),
+                          (x, n, conf_level, p, "wilson", ref_wilson)])
+def test_binom_general(x, n, conf_level, p, method, ref):
     res = binom_general(x, n, conf_level, p, method)
-    assert res.columns.tolist() == ['x', 'n', 'proportion', 'lower', 'upper', 'conf_level']
-    assert np.allclose(res.values, refvals, atol=1e-17, rtol=1e-3)    
+    assert_pd(res, ref)    
 
-@pytest.mark.parametrize("x, n, conf_level, p, refvals", [(x, n, conf_level, p, refvals_exact)])
-def test_binom_exact(x, n, conf_level, p, refvals):
+@pytest.mark.parametrize("x, n, conf_level, p, ref", [(x, n, conf_level, p, ref_exact)])
+def test_binom_exact(x, n, conf_level, p, ref):
     res = binom_exact(x, n, conf_level, p)
-    assert res.columns.tolist() == ['x', 'n', 'proportion', 'lower', 'upper', 'conf_level']
-    assert np.allclose(res.values, refvals, atol=1e-17, rtol=1e-3) 
+    assert_pd(res, ref)   
 
-@pytest.mark.parametrize("x, n, conf_level, p, refvals", [(x, n, conf_level, p, refvals_wilson)])
-def test_binom_wilson(x, n, conf_level, p, refvals):
+@pytest.mark.parametrize("x, n, conf_level, p, ref", [(x, n, conf_level, p, ref_wilson)])
+def test_binom_wilson(x, n, conf_level, p, ref):
     res = binom_wilson(x, n, conf_level, p)
-    assert res.columns.tolist() == ['x', 'n', 'proportion', 'lower', 'upper', 'conf_level']
-    assert np.allclose(res.values, refvals, atol=1e-17, rtol=1e-3) 
+    assert_pd(res, ref)   
     
-@pytest.mark.parametrize("x, n, conf_level, refvals", [(x, n, conf_level, refvals_approx)])                         
-def test_binom_approx(x, n, conf_level, refvals):
+@pytest.mark.parametrize("x, n, conf_level, ref", [(x, n, conf_level, ref_approx)])                         
+def test_binom_approx(x, n, conf_level, ref):
     res = binom_approx(x, n, conf_level)
-    assert res.columns.tolist() == ['x', 'n', 'proportion', 'lower', 'upper', 'conf_level']
+    assert_pd(res, ref)   
 
 def test_kapmeier():
     time = np.array([ 1., 17., 20.,  9., 24., 16.,  2., 13., 10.,  3.])
     status = np.array([1., 1., 1., 1., 0., 0., 0., 1., 0., 1.])
     res = kapmeier(time, status)
-    refvals = np.array([[ 1.                 , 10.                 ,  1.                 ,
+    ref = pd.DataFrame(data=np.array([[ 1.                 , 10.                 ,  1.                 ,
              0.9                ,  0.9                ,  0.09999999999999998],
            [ 3.                 ,  8.                 ,  1.                 ,
              0.875              ,  0.7875             ,  0.21250000000000002],
@@ -247,15 +313,15 @@ def test_kapmeier():
            [17.                 ,  3.                 ,  1.                 ,
              0.6666666666666666 ,  0.35999999999999993,  0.6400000000000001 ],
            [20.                 ,  2.                 ,  1.                 ,
-             0.5                ,  0.17999999999999997,  0.8200000000000001 ]])
-    assert res.columns.tolist() == ['time', 'n_risk', 'n_events', 'condsurv', 'survival', 'risk']
-    assert np.allclose(res.values, refvals, rtol=1e-17, atol=1e-3)
+             0.5                ,  0.17999999999999997,  0.8200000000000001 ]]),
+                       columns=['time', 'n_risk', 'n_events', 'condsurv', 'survival', 'risk'])
+    assert_pd(res, ref)
 
 def test_pois_exact():  
     # NB. I noticed differences of e-06/e-05 between R and Python. I think they stem from the uncertainty in the root finding algortihm.
     # Are we ok with such accuracy or should we aim for higher accuracy? We might want to add a kwarg for the threshold in the root finding.
     res = pois_exact(np.arange(1,11))
-    refvals = np.array([[ 1.        ,  1.        ,  1.        ,  0.02531781,  5.57164339,
+    ref = pd.DataFrame(data=np.array([[ 1.        ,  1.        ,  1.        ,  0.02531781,  5.57164339,
              0.95      ],
            [ 2.        ,  1.        ,  2.        ,  0.24220928,  7.22468767,
              0.95      ],
@@ -274,13 +340,13 @@ def test_pois_exact():
            [ 9.        ,  1.        ,  9.        ,  4.1153731 , 17.08480345,
              0.95      ],
            [10.        ,  1.        , 10.        ,  4.7953887 , 18.39035604,
-             0.95      ]])
-    assert res.columns.tolist() == ['x', 'pt', 'rate', 'lower', 'upper', 'conf_level']
-    assert np.allclose(res.values, refvals, rtol=1e-10, atol=1e-3)
+             0.95      ]]),
+                       columns=['x', 'pt', 'rate', 'lower', 'upper', 'conf_level'])
+    assert_pd(res, ref)
     
 def test_pois_daly():  
     res = pois_daly(np.arange(1,11))
-    refvals = np.array([[ 1.        ,  1.        ,  1.        ,  0.02531781,  5.57164339,
+    ref = pd.DataFrame(data=np.array([[ 1.        ,  1.        ,  1.        ,  0.02531781,  5.57164339,
              0.95      ],
            [ 2.        ,  1.        ,  2.        ,  0.24220928,  7.22468767,
              0.95      ],
@@ -299,13 +365,13 @@ def test_pois_daly():
            [ 9.        ,  1.        ,  9.        ,  4.1153731 , 17.08480345,
              0.95      ],
            [10.        ,  1.        , 10.        ,  4.7953887 , 18.39035604,
-             0.95      ]])
-    assert res.columns.tolist() == ['x', 'pt', 'rate', 'lower', 'upper', 'conf_level']
-    assert np.allclose(res.values, refvals, rtol=1e-10, atol=1e-3)
+             0.95      ]]),
+                       columns=['x', 'pt', 'rate', 'lower', 'upper', 'conf_level'])
+    assert_pd(res, ref)
     
 def test_pois_byar():  
     res = pois_byar(np.arange(1,11))
-    refvals = np.array([[ 1.        ,  1.        ,  1.        ,  0.09069458,  4.66207302,
+    ref = pd.DataFrame(data=np.array([[ 1.        ,  1.        ,  1.        ,  0.09069458,  4.66207302,
              0.95      ],
            [ 2.        ,  1.        ,  2.        ,  0.39884141,  6.41083414,
              0.95      ],
@@ -324,13 +390,12 @@ def test_pois_byar():
            [ 9.        ,  1.        ,  9.        ,  4.44505618, 16.42706368,
              0.95      ],
            [10.        ,  1.        , 10.        ,  5.13375332, 17.74048212,
-             0.95      ]])
-    assert res.columns.tolist() == ['x', 'pt', 'rate', 'lower', 'upper', 'conf_level']
-    assert np.allclose(res.values, refvals, rtol=1e-10, atol=1e-3)
+             0.95      ]]), columns=['x', 'pt', 'rate', 'lower', 'upper', 'conf_level'])
+    assert_pd(res, ref)
     
 def test_pois_approx():  
     res = pois_approx(np.arange(1,11))
-    refvals = np.array([[ 1.        ,  1.        ,  1.        , -0.95996398,  2.95996398,
+    ref = pd.DataFrame(data=np.array([[ 1.        ,  1.        ,  1.        , -0.95996398,  2.95996398,
              0.95      ],
            [ 2.        ,  1.        ,  2.        , -0.77180765,  4.77180765,
              0.95      ],
@@ -349,9 +414,8 @@ def test_pois_approx():
            [ 9.        ,  1.        ,  9.        ,  3.12010805, 14.87989195,
              0.95      ],
            [10.        ,  1.        , 10.        ,  3.80204968, 16.19795032,
-             0.95      ]])
-    assert res.columns.tolist() == ['x', 'pt', 'rate', 'lower', 'upper', 'conf_level']
-    assert np.allclose(res.values, refvals, rtol=1e-10, atol=1e-3)
+             0.95      ]]), columns=['x', 'pt', 'rate', 'lower', 'upper', 'conf_level'])
+    assert_pd(res, ref)
 
 @pytest.mark.parametrize('x, byrow', [(np.array([[12,2],[7,9]]), True), (np.array([12,2,7,9]), True), (np.array([12,7,2,9]), False)])
 def test_or_midp(x, byrow):
@@ -362,13 +426,43 @@ def test_or_midp(x, byrow):
      'conf_int': (1.276249402536501, 60.72108876785116),
      'conf_level': 0.95,
      'method': 'median-unbiased estimate & mid-p exact CI'}
-    for k, v in ref.items():
-        assert res[k] == approx(ref[k])
+    assert_dict(ref, res)
 
 def test_ormidp_test():
     res = ormidp_test(12,2,7,9)
     ref = {'one_sided': 0.011660836248542417, 'two_sided': 0.023321672497084833}
-    for k, v in ref.items():
-        assert res[k] == approx(ref[k])
+    assert_dict(res, ref)
+
+arr = np.array([[1,3],[2,4]])
+df = pd.DataFrame(data=arr, index=['ROW1', 'ROW2'], columns=['COL1', 'COL2'])
+vals = np.array([[ 1.,  3.,  4.],
+       [ 2.,  4.,  6.],
+       [ 3.,  7., 10.]])
+ref_arr = pd.DataFrame(data=vals, index=['row0', 'row1', 'Total'], columns=['col0', 'col1', 'Total'])
+ref_df = pd.DataFrame(data=vals, index=['ROW1', 'ROW2', 'Total'], columns=['COL1', 'COL2', 'Total'])
+@pytest.mark.parametrize('x, ref', [(arr, ref_arr), (df, ref_df)])
+def test_table_margins(x, ref):
+    res = table_margins(x)
+    assert res.equals(ref)
+
+def test_tab2by2_test():
+    inp = pd.DataFrame(data=np.array([[2,29],[35,64],[12,6]]),
+                       index=['Lowest','Intermediate','highest'],
+                       columns=['Case', 'Control'])
+    inp.index.name = 'Tap water exposure'
+    inp.columns.name = 'Outcome'
+    res = tab2by2_test(inp)
+    pval_df = pd.DataFrame(data=np.array([[np.nan, np.nan, np.nan],
+           [1.01865796e-03, 1.26117842e-03, 1.85757180e-03],
+           [1.35795799e-05, 1.31816999e-05, 6.85865882e-06]]),
+                           index=['Lowest', 'Intermediate', 'highest'],
+                           columns=['midp_exact', 'fisher_exact', 'chi_square'])
+    pval_df.index.name = 'Tap water exposure'
+    ref = {'x': inp,
+     'p_value': pval_df,
+     'correction': False}
+    assert_dict(res, ref, equal_nan=True)
+        
+    
     
 
