@@ -29,7 +29,8 @@ from epigraphhub.analysis.py_epitools import (
     or_midp,
     ormidp_test,
     table_margins,
-    tab2by2_test
+    tab2by2_test,
+    epitable
     )
 from typing import Union
 
@@ -104,24 +105,24 @@ def test_nan_arr():
     eq = np.isnan(nan_arr(n))
     assert eq.all()
 
-vals_list = [1,2,3]
-@pytest.mark.parametrize('arr, ref', [(np.array(vals_list, dtype='float32'), np.array(vals_list, dtype='int')),
-                                      (np.array(vals_list, dtype='float64'), np.array(vals_list, dtype='int')),
-                                      (np.array(vals_list, dtype='int32'), np.array(vals_list, dtype='int')),
-                                      (np.array(vals_list, dtype='int64'), np.array(vals_list, dtype='int'))])
-def test_array_as_integer_working_cases(arr, ref):
-    res = array_as_integer(arr)
-    assert (res == ref).all()
-    assert res.dtype in ['int32', 'int64']
-
 @pytest.mark.parametrize('arr', [np.array([0.1, 0.0, 0.0]), 
                                  np.array(["a", 0, 1]),
                                  np.array(["a", 0, 1], dtype='object'),
                                  np.array([True, False, True]),
                                  np.array([0, 1, True], dtype='object')])
-def test_array_as_integer_failing_cases(arr):
+def test_array_as_integer_raise(arr):
     with pytest.raises(ValueError):
         array_as_integer(arr)
+
+vals_list = [1,2,3]
+@pytest.mark.parametrize('arr, ref', [(np.array(vals_list, dtype='float32'), np.array(vals_list, dtype='int')),
+                                      (np.array(vals_list, dtype='float64'), np.array(vals_list, dtype='int')),
+                                      (np.array(vals_list, dtype='int32'), np.array(vals_list, dtype='int')),
+                                      (np.array(vals_list, dtype='int64'), np.array(vals_list, dtype='int'))])
+def test_array_as_integer(arr, ref):
+    res = array_as_integer(arr)
+    assert (res == ref).all()
+    assert res.dtype in ['int32', 'int64']
         
 vals_arr = np.array([1,2,3])
 @pytest.mark.parametrize('x, ref', [(vals_list, vals_arr), 
@@ -417,6 +418,10 @@ def test_pois_approx():
              0.95      ]]), columns=['x', 'pt', 'rate', 'lower', 'upper', 'conf_level'])
     assert_pd(res, ref)
 
+def test_or_midp_raise():
+    with pytest.raises(ValueError):
+        or_midp(np.arange(16).reshape(4,4))
+        
 @pytest.mark.parametrize('x, byrow', [(np.array([[12,2],[7,9]]), True), (np.array([12,2,7,9]), True), (np.array([12,7,2,9]), False)])
 def test_or_midp(x, byrow):
     res = or_midp(x, byrow=byrow)
@@ -462,7 +467,62 @@ def test_tab2by2_test():
      'p_value': pval_df,
      'correction': False}
     assert_dict(res, ref, equal_nan=True)
+
+ref1 = pd.DataFrame(data=np.array([[88,20],[555,347]]),
+                    index=['Exposed1', 'Exposed2'],
+                    columns=['Disease1', 'Disease2'])
+ref1.index.name, ref1.columns.name = 'Predictor', 'Outcome'
+s1, s2 = ref1['Disease1'], ref1['Disease2']
+s2_2 = ref1.reset_index()['Disease2']
+ref2 = pd.DataFrame(data=np.array([[1, 2], [3, 4], [5, 6]]),
+                    index=['Exposed1', 'Exposed2', 'Exposed3'],
+                    columns=['Disease1', 'Disease2'])
+ref3 = pd.DataFrame(data=np.array([[1, 2, 3], [4, 5, 6]]),
+                    index=['Exposed1', 'Exposed2'],
+                    columns=['Disease1', 'Disease2', 'Disease3'])
+v1 = np.array(['H', 'L', 'M', 'M', 'L', 'H', 'H', 'L', 'L'])
+v2 = np.array(['Y', 'N', 'Y', 'Y', 'N', 'N', 'Y', 'Y', 'N'])
+ref4 = pd.DataFrame(data=np.array([[1., 2.], [3., 1.], [0., 2.]]),
+                    columns=['N', 'Y'],
+                    index=['H', 'L', 'M'])
+ref5 = pd.DataFrame(data=np.array([[0., 2.], [3., 1.], [1., 2.]]),
+                    columns=['N', 'Y'],
+                    index=['M', 'L', 'H'])
+ref6 = pd.DataFrame(data=np.array([[2., 1.], [1., 3.], [2., 0.]]),
+                    columns=['Y', 'N'],
+                    index=['H', 'L', 'M'])
+ref7 = pd.DataFrame(data=np.array([[2., 0.], [1., 3.], [2., 1.]]),
+                    columns=['Y', 'N'],
+                    index=['M', 'L', 'H'])
+@pytest.mark.parametrize('args, kwargs', [
+    ([], {}),
+    ([s1, s2_2], {}),
+    ([1, 2, 3, 4, 5, 6, 7], {}),
+    ([v1,v2], {'rev': 'bobafett'}),
+    ([np.array([[[1,2],[3,4],[5,6], [1,2],[3,4],[5,6]]])], {})
+    ])
+def test_epitable_raise(args, kwargs):
+    with pytest.raises(ValueError):
+        epitable()
         
+@pytest.mark.parametrize('args, kwargs, ref', [
+    ([[88, 20, 555, 347]], {}, ref1),
+    ([ref1], {}, ref1),
+    ([s1, s2], {}, ref1),
+    ([s1, s2.tolist()], {}, ref1),
+    ([1, 2, 3, 4, 5, 6], {}, ref2),
+    ([[1, 2, 3, 4, 5, 6]], {}, ref2),
+    ([1, 2, 3, 4, 5, 6], {'ncol': 3}, ref3),
+    ([[1, 2, 3, 4, 5, 6]], {'ncol': 3}, ref3),
+    ([v1,v2], {'count': True}, ref4),
+    ([v1,v2], {'count': True, 'rev': 'rows'}, ref5),
+    ([v1,v2], {'count': True, 'rev': 'columns'}, ref6),
+    ([v1,v2], {'count': True, 'rev': 'both'}, ref7)
+    ])
+def test_epitable(args, kwargs, ref):
+    res = epitable(*args, **kwargs)
+    assert_pd(res, ref)
+
     
     
 

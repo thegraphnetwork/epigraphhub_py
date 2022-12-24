@@ -318,15 +318,15 @@ def epitable(*args, count: bool = False, ncol: int = 2, byrow: bool = True, rev:
         elif pd.Series in [type_x, type_y]:  # a Series and something else
             (ser, nser, ser_first) = (x, y, True) if type_x == pd.Series else (y, x, False)
             if ser.name:
-                (bname, num) = (ser.name[:-1], ser.name[-1] + 1 if ser_first else ser.name[-1] - 1)  if ser.name[-1].isnumeric() else (ser.name, 2 if ser_first else 1)
+                (bname, num) = (ser.name[:-1], str(int(ser.name[-1]) + 1) if ser_first else str(int(ser.name[-1]) - 1))  if ser.name[-1].isnumeric() else (ser.name, 2 if ser_first else 1)
             else:
                 ser.name = 'Disease1'
                 (bname, num) = ('Disease', 2 if ser_first else 1)
                 guessed = True
             nser = pd.Series(nser, index=ser.index, name=f'{bname}{num}')
             df = pd.concat([ser, nser] if ser_first else [nser, ser], axis=1)
-        elif [x in [tuple,list] for x in [type_x, type_y]] == [True, True]:
-            x, y = np.array(x), np.array(y)
+        elif [x in [tuple,list, np.ndarray] for x in [type_x, type_y]] == [True, True]:
+            x, y = to_1darray(x), to_1darray(y)
             arr = np.stack([x,y], axis=1)
             df = pd.DataFrame(data=arr, index=[f'Exposed{i+1}' for i in range(len(x))], columns=['Disease1', 'Disease2'])
             guessed = True
@@ -348,7 +348,7 @@ def epitable(*args, count: bool = False, ncol: int = 2, byrow: bool = True, rev:
         else:
             raise ValueError('Cannot interpret array with 3 or more axes')
     if count:
-        df = df.groupby(df.columns.tolist()).size().unstack()
+        df = df.groupby(df.columns.tolist()).size().unstack().fillna(0)
         if guessed:
             df.columns.name, df.index.name = None, None
     df.index.name = 'Predictor' if df.index.name is None else df.index.name
