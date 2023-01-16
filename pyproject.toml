@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "epigraphhub"
-version = "2.0.0"  # changed by semantic-release
+version = "2.0.1"  # changed by semantic-release
 description = "Epigraphhub Python package"
 readme = "README.md"
 authors = ["thegraphnetwork <fccoelho@gmail.com>"]
