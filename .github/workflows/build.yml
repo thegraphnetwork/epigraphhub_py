@@ -33,11 +33,6 @@ jobs:
         cd docker
         envsubst < .env.tpl > .env
 
-    - name: Create log folder
-      run: |
-        mkdir -p /var/log/
-        sudo chmod -R 777 /var/log/
-
     - uses: conda-incubator/setup-miniconda@v2
       with:
         miniconda-version: "latest"
