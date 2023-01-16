@@ -1,6 +1,13 @@
 Release Notes
 ---
 
+## [2.0.1](https://github.com/thegraphnetwork/epigraphhub_py/compare/2.0.0...2.0.1) (2023-01-16)
+
+
+### Bug Fixes
+
+* **pypath:** add init to brasil.sinan data collection ([#207](https://github.com/thegraphnetwork/epigraphhub_py/issues/207)) ([e90588c](https://github.com/thegraphnetwork/epigraphhub_py/commit/e90588c720115edfd85b514923cbcb558b1533e7))
+
 ## [2.0.0](https://github.com/thegraphnetwork/epigraphhub_py/compare/1.2.1...2.0.0) (2022-12-16)
 
 
