@@ -19,13 +19,13 @@ def upload():
     Connects to the EGH SQL server and load all the chunks for all
     diseases found at `/tmp/pysus` into database. This method cleans
     the chunks left.
-    
+
     """
-    diseases_dir = Path('/tmp/pysus').glob('*')
+    diseases_dir = Path("/tmp/pysus").glob("*")
     di_years_dir = [x for x in diseases_dir if x.is_dir()]
 
     for dir in di_years_dir:
-        if 'parquet' in Path(dir).suffix:
+        if "parquet" in Path(dir).suffix:
             df = to_df(str(dir), clean_after_read=True)
             df.columns = df.columns.str.lower()
             df.index.name = "index"

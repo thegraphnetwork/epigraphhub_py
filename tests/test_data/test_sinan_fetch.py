@@ -22,22 +22,22 @@ class TestFethSinan(unittest.TestCase):
 
     def test_download_data_zika(self):
         extract.download(self.disease)
-        self.assertTrue(any(os.listdir('/tmp/pysus/')))
-        self.assertTrue(self.fpath[0].split('/')[-1] in os.listdir('/tmp/pysus/'))
-            
+        self.assertTrue(any(os.listdir("/tmp/pysus/")))
+        self.assertTrue(self.fpath[0].split("/")[-1] in os.listdir("/tmp/pysus/"))
+
     def test_parquet_visualization(self):
 
         df = viz.parquet(self.fpath[0], clean_after_read=False)
 
         self.assertIsInstance(df, pd.DataFrame)
         self.assertEqual(df.shape, (32684, 38))
-    
-    @unittest.skip('Need table to test') #TODO: need table to test
+
+    @unittest.skip("Need table to test")  # TODO: need table to test
     def test_save_to_pgsql(self):
 
         loading.upload(self.fpath)
 
-    @unittest.skip('Need table to test') #TODO: need table to test
+    @unittest.skip("Need table to test")  # TODO: need table to test
     def test_table_visualization(self):
 
         df = viz.table(self.disease, self.year)

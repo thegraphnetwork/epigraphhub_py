@@ -39,6 +39,7 @@ def test_related_topics():
     d = ggtrends.related_topics(keywords)
     # assert len(d) > 0
 
+
 @pytest.mark.skip(reason="Google returned a response with code 429.")
 def test_related_queries():
     keywords = ["coronavirus", "covid"]

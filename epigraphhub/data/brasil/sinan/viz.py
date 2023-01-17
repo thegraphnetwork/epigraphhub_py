@@ -45,7 +45,7 @@ def table(disease: str, year: int) -> pd.DataFrame:
     Returns
     -------
         df (DataFrame): The data requested in a Pandas DataFrame.
-    
+
     """
 
     year = str(year)[-2:].zfill(2)
