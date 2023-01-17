@@ -21,6 +21,7 @@ class TestFethSinan(unittest.TestCase):
         self.schema = "brasil"
 
     def test_download_data_zika(self):
+        extract.download(self.disease)
         self.assertTrue(any(os.listdir('/tmp/pysus/')))
         self.assertTrue(self.fpath[0].split('/')[-1] in os.listdir('/tmp/pysus/'))
             
