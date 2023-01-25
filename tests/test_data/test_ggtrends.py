@@ -13,6 +13,7 @@ def test_payload():
     trends = ggtrends._build_payload(keywords)
 
 
+@pytest.mark.skip(reason="Google returned a response with code 500.")
 def test_historical_interest():
     keywords = ["coronavirus", "covid"]
     df = ggtrends.historical_interest(keywords)
@@ -26,6 +27,7 @@ def test_interest_over_time():
         assert k in iot_df.columns
 
 
+@pytest.mark.skip(reason="Google returned a response with code 429.")
 def test_interest_region():
     keywords = ["coronavirus", "covid"]
     df = ggtrends.interest_by_region(keywords, resolution="country", geo="CH")
@@ -38,6 +40,7 @@ def test_related_topics():
     # assert len(d) > 0
 
 
+@pytest.mark.skip(reason="Google returned a response with code 429.")
 def test_related_queries():
     keywords = ["coronavirus", "covid"]
     d = ggtrends.related_queries(keywords)
