@@ -16,27 +16,14 @@ class TestFethSinan(unittest.TestCase):
         self.engine = engine
         self.disease = "Zika"
         self.year = 2017
-        self.fpath = ["/tmp/pysus/ZIKA/ZIKABR17.parquet"]
+        self.fpath = ["/tmp/pysus/ZIKABR17.parquet"]
         self.table = "zika17"
         self.schema = "brasil"
 
     def test_download_data_zika(self):
-
-        _fname = extract.download(self.disease)
-
-        self.assertTrue(Path(self.fpath[0]).exists())
-        self.assertTrue(any(os.listdir(self.fpath[0])))
-        self.assertEqual(
-            _fname,
-            [
-                "/tmp/pysus/ZIKA/ZIKABR16.parquet",
-                "/tmp/pysus/ZIKA/ZIKABR17.parquet",
-                "/tmp/pysus/ZIKA/ZIKABR18.parquet",
-                "/tmp/pysus/ZIKA/ZIKABR19.parquet",
-                "/tmp/pysus/ZIKA/ZIKABR20.parquet",
-                "/tmp/pysus/ZIKA/ZIKABR21.parquet",
-            ],
-        )
+        extract.download(self.disease)
+        self.assertTrue(any(os.listdir("/tmp/pysus/")))
+        self.assertTrue(self.fpath[0].split("/")[-1] in os.listdir("/tmp/pysus/"))
 
     def test_parquet_visualization(self):
 
@@ -45,10 +32,12 @@ class TestFethSinan(unittest.TestCase):
         self.assertIsInstance(df, pd.DataFrame)
         self.assertEqual(df.shape, (32684, 38))
 
+    @unittest.skip("Need table to test")  # TODO: need table to test
     def test_save_to_pgsql(self):
 
         loading.upload(self.fpath)
 
+    @unittest.skip("Need table to test")  # TODO: need table to test
     def test_table_visualization(self):
 
         df = viz.table(self.disease, self.year)

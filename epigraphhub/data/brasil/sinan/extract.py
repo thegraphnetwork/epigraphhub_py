@@ -23,7 +23,7 @@ def download(disease: str):
     Returns:
         parquets_paths_list list(PosixPath) : A list with all parquets dirs.
     """
-    
+
     SINAN.download_all_years_in_chunks(disease)
-    
+
     logger.info(f"All years for {disease} downloaded at /tmp/pysus")
