@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-The functions in this module allow the application of the
-ngboost regressor model. There are separate methods to train and evaluate (separate
-the data in train and test datasets), train with all the data available, and make
-forecasts.
+The functions in this module allow the application of the ngboost
+regressor model. There are separate methods to train and evaluate
+(separate the data in train and test datasets), train with all the data
+available, and make forecasts.
 """
 
 from typing import Union
@@ -40,9 +40,9 @@ params_model = {
 
 class NGBModel:
     """
-    This class allows the user to create a ngboost model. The methods in this
-    class allows the user to train and evaluate the model, to train and save the model
-    and make the forecast using saved  models.
+    This class allows the user to create a ngboost model. The methods
+    allows to train and evaluate the model, to train and save the model
+    and make the forecast using saved models.
     """
 
     def __init__(
@@ -57,19 +57,21 @@ class NGBModel:
         Parameters
         ----------
         look_back : int
-            Number of the last days that will be used to forecast the next days.
+            Number of the last days that will be used to forecast the
+            next days.
         predict_n : int
             Number of days that will be predicted.
         validation_split : float
-            Proportion of training data to set aside as validation data for early stopping.
+            Proportion of training data to set aside as validation data
+            for early stopping.
         early_stop : int
-            The number of consecutive boosting iterations during which the
-            loss has to increase before the algorithm stops early.
-            Set to None to disable early stopping and validation.
-            None enables running over the full data set.
-        params_model : dictionary
+            The number of consecutive boosting iterations during which
+            the loss has to increase before the algorithm stops early.
+            Set to None to disable early stopping and validation. None
+            enables running over the full data set.
+        params_model : dict
             The dict with the params that will be used in the ngboost
-                                regressor model.
+            regressor model.
         """
 
         # This will remove the validation_fraction and early_stopping_rounds parameters since it shouldn't.
@@ -98,44 +100,51 @@ class NGBModel:
         save: bool = False,
     ) -> pd.DataFrame:
         """
-        Function to apply a ngboost regressor model given a dataset and a target column.
-        This function will train multiple models, each one specilist in predict the X + n
-        days, of the target column, where n is in the range (1, number of days that you
-                                                            want predict).
-        This function split the data in train and test dataset and returns the predictions
-        made using the test dataset.
+        Function to apply a ngboost regressor model given a dataset and
+        a target column. This function will train multiple models, each
+        one specilist in predict the X + n days, of the target column,
+        where n is in the range (1, number of days that you want
+        predict). This function split the data in train and test dataset
+        and returns the predictions made using the test dataset.
 
         Parameters
         ----------
         target_name : str
-             Name of the target column.
+            Name of the target column.
         data : pd.DataFrame
-            Dataframe with features and target column.
+            DataFrame with features and target column.
         ini_date : str, optional
-            Determines the beggining of the train dataset, by default None
+            Determines the beggining of the train dataset, by default
+            None.
         end_train_date : str, optional
-            Determines the beggining of end of train dataset. If end_train_date
-            is not None, then ratio isn't used, by default None
+            Determines the beggining of end of train dataset. If is not
+            None, then ratio isn't used, by default None.
         end_date : str, optional
-            Determines the end of the dataset used in validation, by default None
+            Determines the end of the dataset used in validation, by
+            default None.
         ratio : float
-            Determines which percentage of the data will be used to train the model, by default 0.75
+            Determines which percentage of the data will be used to
+            train the model, by default 0.75.
         path : str, optional
-            It indicates where save the models trained, by default None
+            It indicates where save the models trained, by default None.
         name : str, optional
-            It indicates which name use to save the models trained, by default None
+            It indicates which name use to save the models trained, by
+            default None.
         save : bool
-            If True the models trained are saved, by default False
+            If True the models trained are saved, by default False.
 
         Returns
         -------
         pd.DataFrame
-            A dataframe with four columns (and a date index):
-            - target: The target values
-            - lower: The lower value of the confidence interval of 95%
-            - median: The median value of the confidence interval of 95%
-            - upper: The upper value of the confidence interval of 95%
-            - train_size: The number of rows of data using as training data.
+            A DataFrame with four columns (and a date index): 
+
+            - target: The target values. 
+            - lower: The lower value of the confidence interval of 95%.
+            - median: The median value of the confidence interval of
+              95%. 
+            - upper: The upper value of the confidence interval of 95%.
+            - train_size: The number of rows of data using as training
+              data.
         """
 
         df_lag = preprocess_data(data, self.look_back, ini_date, end_date)
@@ -251,32 +260,35 @@ class NGBModel:
         name: str = "train_ngb",
     ) -> list:
         """
-        Function to train multiple ngboost regressor models given a dataset and a target column.
-        This function will train multiple models, each one specilist in predict the X + n
-        days, of the target column, where n is in the range (1, number of days that you
-                                                            want predict).
-        This function will train the model with all the data available and will save the model
-        that will be used to make forecasts.
+        Function to train multiple ngboost regressor models given a
+        dataset and a target column. This function will train multiple
+        models, each one specilist in predict the X + n days, of the
+        target column, where n is in the range (1, number of days that
+        you want predict). This function will train the model with all
+        the data available and will save the model that will be used to
+        make forecasts.
 
         Parameters
         ----------
         target_name : str
             Name of the target column.
         data : pd.DataFrame
-            Dataframe with features and target column
+            DataFrame with features and target column.
         ini_date : str, optional
-            Determines the beggining of the train dataset, by default None
+            Determines the beggining of the train dataset, by default
+            None.
         end_date : str, optional
-            Determines the end of the train dataset, by default None
+            Determines the end of the train dataset, by default None.
         save : bool
-            If True the models is saved, by default True
+            If True the models is saved, by default True.
         path : str, optional
-            Indicates where the models will be saved, by default "../opt/models/saved_models/ml"
+            Indicates where the models will be saved, by default
+            "../opt/models/saved_models/ml".
 
         Returns
         -------
         list
-            A list with the trained models
+            A list with the trained models.
         """
 
         predict_n = self.predict_n
@@ -320,34 +332,37 @@ class NGBModel:
     ) -> pd.DataFrame:
 
         """
-        Function to load multiple ngboost regressor model trained with the function
-        `training_model` and make the forecast.
+        Function to load multiple ngboost regressor model trained with
+        the function `training_model` and make the forecast.
 
-        Important:
-        predict_n and max_lag need have the same value used in training_model
-        Only the last that of the dataset will be used to forecast the next
-        predict_n days.
+        Important: predict_n and max_lag need have the same value used
+        in training_model. Only the last that of the dataset will be
+        used to forecast the next predict_n days.
 
         Parameters
         ----------
         target_name : str
             Name of the target column.
         data : pd.DataFrame
-            Dataframe with features and target column
+            DataFrame with features and target column.
         ini_date : str, optional
-            Determines the beggining of the train dataset, by default None
+            Determines the beggining of the train dataset, by default
+            None.
         end_date : str, optional
-            Determines the end of the train dataset, by default None
+            Determines the end of the train dataset, by default None.
         path : str, optional
-            Indicates where the models will be saved, by default "../opt/models/saved_models/ml"
+            Indicates where the models will be saved, by default
+            "../opt/models/saved_models/ml".
 
         Returns
         -------
         pd.DataFrame
-            A dataframe with three columns regarding(and a date index):
-            - lower: The lower value of the confidence interval of 95%
-            - median: The median value of the confidence interval of 95%
-            - upper: The upper value of the confidence interval of 95%
+            A DataFrame with three columns regarding(and a date index):
+
+            - lower: The lower value of the confidence interval of 95%.
+            - median: The median value of the confidence interval of
+              95%. 
+            - upper: The upper value of the confidence interval of 95%.
         """
 
         df_lag = preprocess_data(data, self.look_back, None, end_date)
