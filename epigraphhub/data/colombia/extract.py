@@ -1,8 +1,9 @@
 """
 Last change on 2022/09/22
-Comparing Colombia Governmental COVID data consists in a step before pushing it to
-the SQL Database. Is responsible for retrieving the last date in both CSV and SQL table.
-Connects to the Colombia data through Socrata API and returns the maximum date found.
+Comparing Colombia Governmental COVID data consists in a step before
+pushing it to the SQL Database. Is responsible for retrieving the last
+date in both CSV and SQL table. Connects to the Colombia data through
+Socrata API and returns the maximum date found.
 
 Methods
 -------
@@ -33,15 +34,18 @@ def compare() -> bool:
 
 def _table_last_update() -> datetime:
     """
-    This method will connect to the SQL Database and query the maximum date found in
-    Colombia table.
+    This method will connect to the SQL Database and query the maximum
+    date found in Colombia table.
 
-    Returns:
-        date (datetime)       : Max date found in Colombia table.
+    Returns
+    -------
+    date : datetime
+        Max date found in Colombia table.
 
-    Raises:
-        Exception (Exception) : Unable to access Colombia table.
-                                @see epigraphhub.connection
+    Raises
+    ------
+    Exception : Exception
+        Unable to access Colombia table. @see epigraphhub.connection
     """
     engine = get_engine(credential_name=env.db.default_credential)
     try:
@@ -59,14 +63,19 @@ def _table_last_update() -> datetime:
 
 def _web_last_update() -> datetime:
     """
-    This method will request the maximum date found in Colombia data through Socrata API
-    and returns it as a datetime object for further evaluation.
+    This method will request the maximum date found in Colombia data
+    through Socrata API and returns it as a datetime object for further
+    evaluation.
 
-    Returns:
-        date (datetime)       : Max date found in Colombia data through Socrata.
+    Returns
+    -------
+    date : datetime
+        Max date found in Colombia data through Socrata.
 
-    Raises:
-        Exception (Exception) : Unable to create Socrata request.
+    Raises
+    ------
+    Exception : Exception
+        Unable to create Socrata request.
     """
     try:
         report_date = [

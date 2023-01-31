@@ -1,6 +1,6 @@
 """
-The functions in this module allow the user to get the datasets stored in the
-epigraphhub database.
+The functions in this module allow the user to get the datasets stored
+in the epigraphhub database.
 """
 from typing import Union
 
@@ -21,11 +21,12 @@ def get_agg_data(
     schema: str, table_name: str, columns: list, method: str, ini_date: str
 ) -> pd.DataFrame:
     """
-    This function provides an aggregate data frame for the table selected in the param
-    table_name. The columns should be a list with three values. The first should be
-    a date column, the second a column that will be used for the aggregation
-    (e.g. regions name), and the third the column that will be used to compute the
-    result of the aggregation.
+    This function provides an aggregate DataFrame for the table selected
+    in the param table_name. The columns should be a list with three
+    values. The first should be a date column, the second a column that
+    will be used for the aggregation (e.g. regions name), and the third
+    the column that will be used to compute the result of the
+    aggregation.
 
     Parameters
     ----------
@@ -34,21 +35,21 @@ def get_agg_data(
     table_name : str
         The name of the table.
     columns : list
-        The list of Columns from the table that will be used in the
-        aggregation. The first column should be a date column,
-        the second should be a column with the regions name that we want
-        to aggregate (e.g. regions name), and the third will be used
-        to compute the result of aggregation.
+        The list of columns from the table that will be used in the
+        aggregation. The first column should be a date column, the
+        second should be a column with the regions name that we want to
+        aggregate (e.g. regions name), and the third will be used to
+        compute the result of aggregation.
     method : str
-        The method name to be applied in the aggregation the
-        possible options are: 'COUNT', 'SUM',  and 'AVG'.
+        The method name to be applied in the aggregation, the possible
+        options are: 'COUNT', 'SUM',  and 'AVG'.
     ini_date : str
         Initial data to start the aggregation.
 
     Returns
     -------
     pd.DataFrame
-        The return is a pandas dataframe
+        The return is a pandas DataFrame.
     """
 
     table_name = table_name.lower()
@@ -75,8 +76,8 @@ def get_data_by_location(
     loc_column: str,
 ) -> pd.DataFrame:
     """
-    This function provides a data frame for the table selected in the param table_name and
-    the chosen regions in the param georegion.
+    This function provides a DataFrame for the table selected in the
+    param table_name and the chosen regions in the param georegion.
 
     Parameters
     ----------
@@ -85,10 +86,11 @@ def get_data_by_location(
     table_name : str
         Name of the table that you want to get the data.
     loc : Union[list[str], str]
-        This list contains all the locations of interest or the string 'All'
-         to return all the regions.
+        This list contains all the locations of interest or the string
+        'All' to return all the regions.
     columns : list[str], None
-         Columns that you want to select from the table table_name. If None all the columns will be returned.
+         Columns that you want to select from the table table_name. If
+         None all the columns will be returned.
     loc_column : str
         Name of the column to filter by location name.
 
@@ -110,8 +112,8 @@ def get_data_by_location(
 
     if type(loc) != list and loc != "All":
         raise Exception(
-            """Error. The georegion param should be a list or the string All to
-        return all the georegions."""
+            """Error. The georegion param should be a list or the string
+            'All' to return all the georegions."""
         )
 
     if type(columns) != list and columns != None:
