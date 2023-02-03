@@ -3,7 +3,7 @@ from pathlib import PosixPath
 from loguru import logger
 from pysus.online_data import SINAN
 
-from epigraphhub.data._config import SINAN_LOG_PATH
+from epigraphhub.data._config import SINAN_LOG_PATH, SINAN_DATA_PATH
 
 logger.add(SINAN_LOG_PATH, retention="7 days")
 
@@ -24,6 +24,6 @@ def download(disease: str):
         parquets_paths_list list(PosixPath) : A list with all parquets dirs.
     """
 
-    SINAN.download_all_years_in_chunks(disease)
+    SINAN.download_all_years_in_chunks(disease, data_dir=SINAN_DATA_PATH)
 
-    logger.info(f"All years for {disease} downloaded at /tmp/pysus")
+    logger.info(f"All years for {disease} downloaded at {SINAN_DATA_PATH}")
