@@ -25,15 +25,15 @@ def upload():
     di_years_dir = [x for x in diseases_dir if x.is_dir()]
 
     for dir in di_years_dir:
-        if "parquet" in Path(dir).suffix:
+        if "parquet" in Path(dir).suffix and any(os.listdir(dir)):
             df = to_df(str(dir), clean_after_read=False)
             df.columns = df.columns.str.lower()
             df.index.name = "index"
 
             table_i = str(dir).split("/")[-1].split(".parquet")[0]
-            st, yr = table_i[:-4].lower(), table_i[-2:]
-            table = "".join([st, yr])
+            table = table_i[:-4].lower()
             schema = "brasil"
+
             with engine.connect() as conn:
                 try:
 
