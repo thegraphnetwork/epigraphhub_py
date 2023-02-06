@@ -33,14 +33,14 @@ def get_clusters_swiss(t=0.3, end_date=None):
     """
     Params to get the list of clusters computed by the compute_cluster
     function.
- 
+
     Parameters
     ----------
     t : float
         Thereshold used in the clusterization.
     end_date : str
         Indicates the last day used to compute the cluster.
-    
+
     Returns
     -------
     Array
@@ -76,12 +76,12 @@ def get_clusters_swiss(t=0.3, end_date=None):
 def get_cluster_by_canton(canton):
     """
     Function to return the cluster that contains a specific canton.
- 
+
     Parameters
     ----------
     canton : str
         Name (two letters code) of the canton.
-    
+
     Returns
     -------
     List
@@ -99,11 +99,11 @@ def remove_zeros(tgt):
     """
     Function to remove the zeros of the target curve. It needs to be
     done to us be able to use the LogNormal dist.
- 
+
     Parameters
     ----------
     tgt : array
- 
+
     """
 
     tgt[tgt == 0] = 0.01
@@ -129,10 +129,10 @@ def train_eval_single_canton(
 ):
     """
     Function to train and evaluate the model for one georegion.
- 
+
     Important: * By default the function is using the clustering cantons
     and the
-      data since 2020. 
+      data since 2020.
     * For the predictor hospCapacity is used as predictor the column
       ICU_Covid19Patients.
 
@@ -177,9 +177,9 @@ def train_eval_single_canton(
     -------
     pd.DataFrame
         The return is a pandas DataFrame.
-    
+
     """
- 
+
     cluster_canton = [canton]  # get_cluster_by_canton(canton)
 
     target_name = f"{target_curve_name}_{canton}"
@@ -242,13 +242,13 @@ def train_eval_all_cantons(
 
     """
     Function to make prediction for all the cantons.
-    
+
     Important:
     * By default the function is using the clustering cantons and the
       data since 2020.
     * For the predictor hospCapacity is used as predictor the column
       ICU_Covid19Patients.
-    
+
     Parameters
     ----------
     target_curve_name : str
@@ -277,7 +277,7 @@ def train_eval_all_cantons(
     look_back : int
         Number of the last days that will be used to forecast the next
         days.
-    
+
     Returns
     -------
     pd.DataFrame
@@ -357,13 +357,13 @@ def train_single_canton(
 
     """
     Function to train and evaluate the model for one georegion.
-    
+
     Important: * By default the function is using the clustering cantons
     and the
       data since 2020.
     * For the predictor hospCapacity is used as predictor the column
       ICU_Covid19Patients.
-    
+
     Parameters
     ----------
     canton : str
@@ -378,7 +378,7 @@ def train_single_canton(
         Determines the beggining of the train dataset
     path : str
         Determines where the model trained will be saved.
-    update_data : bool 
+    update_data : bool
         Determines if the data from the Geneva hospital will be used.
         This params only is used when canton = GE and target_curve_name
         = hosp.
@@ -390,7 +390,7 @@ def train_single_canton(
     look_back : int
         Number of the last days that will be used to forecast the next
         days.
-    
+
     Returns
     -------
     None
@@ -449,17 +449,17 @@ def train_all_cantons(
     look_back=14,
     path=None,
 ):
- 
+
     """
     Function to train and evaluate the model for all the cantons in
     switzerland.
-    
-    Important: 
+
+    Important:
     * By default the function is using the clustering cantons and the
-      data since 2020. 
+      data since 2020.
     * For the predictor hospCapacity is used as predictor the column
       ICU_Covid19Patients.
-    
+
     Parameters
     ----------
     target_curve_name : str
@@ -480,13 +480,12 @@ def train_all_cantons(
     look_back : int
         Number of the last days that will be used to forecast the next
         days.
-    
+
     Returns
     -------
     pd.DataFrame
         Dataframe with the forecast for all the cantons.
     """
-
 
     clusters = get_clusters_swiss(t=0.6)
 
@@ -541,13 +540,13 @@ def forecast_single_canton(
 ):
     """
     Function to make the forecast for one canton.
-    
+
     Important:
     * By default the function is using the clustering cantons and the
       data since 2020.
     * For the predictor hospCapacity is used as predictor the column
       ICU_Covid19Patients.
-    
+
     Parameters
     ----------
     target_curve_name : str
@@ -569,13 +568,12 @@ def forecast_single_canton(
     look_back : int
         Number of the last days that will be used to forecast the next
         days.
-    
+
     Returns
     -------
     pd.DataFrame
         Dataframe with the forecast for one canton.
     """
-
 
     cluster_canton = [canton]  # get_cluster_by_canton(canton)
 
@@ -609,13 +607,13 @@ def forecast_all_cantons(
 ):
     """
     Function to make the forecast for all the cantons.
-    
+
     Important:
     * By default the function is using the clustering cantons and the
       data since 2020.
     * For the predictor hospCapacity is used as predictor the column
       ICU_Covid19Patients.
-    
+
     Parameters
     ----------
     target_curve_name : str
@@ -630,7 +628,7 @@ def forecast_all_cantons(
         Determines from what day the forecast will be computed.
     path : str
         Indicates where the models trained are saved.
-    
+
     Returns
     -------
     pd.DataFrame

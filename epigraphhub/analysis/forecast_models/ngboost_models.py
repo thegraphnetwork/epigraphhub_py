@@ -136,12 +136,12 @@ class NGBModel:
         Returns
         -------
         pd.DataFrame
-            A DataFrame with four columns (and a date index): 
+            A DataFrame with four columns (and a date index):
 
-            - target: The target values. 
+            - target: The target values.
             - lower: The lower value of the confidence interval of 95%.
             - median: The median value of the confidence interval of
-              95%. 
+              95%.
             - upper: The upper value of the confidence interval of 95%.
             - train_size: The number of rows of data using as training
               data.
@@ -361,7 +361,7 @@ class NGBModel:
 
             - lower: The lower value of the confidence interval of 95%.
             - median: The median value of the confidence interval of
-              95%. 
+              95%.
             - upper: The upper value of the confidence interval of 95%.
         """
 
