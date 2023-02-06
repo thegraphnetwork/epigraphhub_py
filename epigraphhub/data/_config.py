@@ -4,9 +4,10 @@ COVID data, such as API connections, URLs for requests and files location,
 commonly used in data collection modules
 """
 
+from pathlib import Path
+
 # Colombia COVID data config:
 from sodapy import Socrata
-from pathlib import Path
 
 COLOMBIA_LOG_PATH = "/tmp/colombia_fetch.log"
 COLOMBIA_CLIENT = Socrata("www.datos.gov.co", "078u4PCGpnDfH157kAkVFoWea")
@@ -28,6 +29,6 @@ OWID_HOST = "135.181.41.20"
 
 # SINAN data config:
 SINAN_LOG_PATH = "/tmp/sinan_fetch.log"
-_sinan_data = Path().home() / 'pysus'
+_sinan_data = Path().home() / "pysus"
 _sinan_data.mkdir(exist_ok=True)
 SINAN_DATA_PATH = str(_sinan_data)

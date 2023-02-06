@@ -6,7 +6,7 @@ from pangres import upsert
 from pysus.online_data import parquets_to_dataframe as to_df
 
 from epigraphhub.connection import get_engine
-from epigraphhub.data._config import SINAN_LOG_PATH, SINAN_DATA_PATH
+from epigraphhub.data._config import SINAN_DATA_PATH, SINAN_LOG_PATH
 from epigraphhub.settings import env
 
 logger.add(SINAN_LOG_PATH, retention="7 days")

@@ -3,7 +3,7 @@ from pathlib import PosixPath
 from loguru import logger
 from pysus.online_data import SINAN
 
-from epigraphhub.data._config import SINAN_LOG_PATH, SINAN_DATA_PATH
+from epigraphhub.data._config import SINAN_DATA_PATH, SINAN_LOG_PATH
 
 logger.add(SINAN_LOG_PATH, retention="7 days")
 
