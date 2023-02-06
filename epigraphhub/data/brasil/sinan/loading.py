@@ -52,3 +52,4 @@ def upload():
 
                 except Exception as e:
                     logger.error(f"Not able to upsert {table} \n{e}")
+                    raise e
