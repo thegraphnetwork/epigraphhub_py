@@ -16,31 +16,28 @@ class TestFethSinan(unittest.TestCase):
         self.engine = engine
         self.disease = "Zika"
         self.year = 2017
-        self.fpath = ["/tmp/pysus/ZIKABR17.parquet"]
-        self.table = "zika17"
+        self.data_dir = Path.home() / 'pysus'
+        self.file = ["ZIKABR17.parquet"]
+        self.table = "zika"
         self.schema = "brasil"
 
     def test_download_data_zika(self):
         extract.download(self.disease)
-        self.assertTrue(any(os.listdir("/tmp/pysus/")))
-        self.assertTrue(self.fpath[0].split("/")[-1] in os.listdir("/tmp/pysus/"))
+        self.assertTrue(any(os.listdir(self.data_dir)))
+        self.assertTrue(self.file[0] in os.listdir(self.data_dir))
 
     def test_parquet_visualization(self):
-
-        df = viz.parquet(self.fpath[0], clean_after_read=False)
-
+        fpath = Path(self.data_dir) / self.file[0]
+        df = viz.parquet(fpath, clean_after_read=False)
         self.assertIsInstance(df, pd.DataFrame)
         self.assertEqual(df.shape, (32684, 38))
 
     @unittest.skip("Need table to test")  # TODO: need table to test
     def test_save_to_pgsql(self):
-
-        loading.upload(self.fpath)
+        loading.upload(self.file[0])
 
     @unittest.skip("Need table to test")  # TODO: need table to test
     def test_table_visualization(self):
-
         df = viz.table(self.disease, self.year)
-
         self.assertIsInstance(df, pd.DataFrame)
         self.assertFalse(df.empty)
