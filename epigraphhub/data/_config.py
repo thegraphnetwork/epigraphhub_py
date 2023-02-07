@@ -31,4 +31,4 @@ OWID_HOST = "135.181.41.20"
 SINAN_LOG_PATH = "/tmp/sinan_fetch.log"
 _sinan_data = Path().home() / "pysus"
 _sinan_data.mkdir(exist_ok=True)
-SINAN_DATA_PATH = str(_sinan_data)
+PYSUS_DATA_PATH = str(_sinan_data)
