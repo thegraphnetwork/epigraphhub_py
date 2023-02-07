@@ -1,6 +1,14 @@
 Release Notes
 ---
 
+## [2.0.2](https://github.com/thegraphnetwork/epigraphhub_py/compare/2.0.1...2.0.2) (2023-02-07)
+
+
+### Bug Fixes
+
+* **sinan-collection:** bugfix on loading sinan data paths ([#208](https://github.com/thegraphnetwork/epigraphhub_py/issues/208)) ([ee3fce1](https://github.com/thegraphnetwork/epigraphhub_py/commit/ee3fce14cfe9c04cbfa5f4acff476f43ca8a10f4))
+* **sinan:** use home dir to download sinan data ([#209](https://github.com/thegraphnetwork/epigraphhub_py/issues/209)) ([70fd64b](https://github.com/thegraphnetwork/epigraphhub_py/commit/70fd64ba3d1410aa5ef58194fe4d1829e4e46d5d))
+
 ## [2.0.1](https://github.com/thegraphnetwork/epigraphhub_py/compare/2.0.0...2.0.1) (2023-01-16)
 
 
