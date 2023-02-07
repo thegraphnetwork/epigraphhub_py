@@ -13,15 +13,15 @@ def compute_metrics(df_pred: pd.DataFrame) -> pd.DataFrame:
     method in the train and test sample. The predictions must be saved
     in a dataset with the following columns: 'median', 'target' and
     'train_size'.
-    
-    This function uses the following metrics: 
 
-    - explained variance score; 
-    - mean absolute error; 
-    - mean squared error; 
-    - root mean squared error; 
-    - mean squared log error; 
-    - mean absolute percentage error. 
+    This function uses the following metrics:
+
+    - explained variance score;
+    - mean absolute error;
+    - mean squared error;
+    - root mean squared error;
+    - mean squared log error;
+    - mean absolute percentage error.
     To compute this metrics we use the implementations of the
     sklearn.metrics package.
 
