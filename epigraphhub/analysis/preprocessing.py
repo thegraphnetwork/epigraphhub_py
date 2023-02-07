@@ -187,9 +187,9 @@ def lstm_split_data(
     Returns
     -------
     Tuple[np.array,np.array,np.array,np.array]
-        X_train: array of features to train the model. 
-        y_train: array of targets to train the model. 
-        X_test: array of features to test the model. 
+        X_train: array of features to train the model.
+        y_train: array of targets to train the model.
+        X_test: array of features to test the model.
         y_test: array of targets to test the model.
     """
 
@@ -233,7 +233,7 @@ def normalize_data(
     Returns
     -------
     Tuple[pd.DataFrame, pd.Series]
-        pd.DataFrame: normalized DataFrame. 
+        pd.DataFrame: normalized DataFrame.
         pd.Series: Series of the max
         values used in the normalization.
     """
