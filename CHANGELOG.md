@@ -1,6 +1,13 @@
 Release Notes
 ---
 
+## [2.0.3](https://github.com/thegraphnetwork/epigraphhub_py/compare/2.0.2...2.0.3) (2023-02-08)
+
+
+### Bug Fixes
+
+* **sinan:** rollback sinan data path to /tmp ([#210](https://github.com/thegraphnetwork/epigraphhub_py/issues/210)) ([bf0f2ec](https://github.com/thegraphnetwork/epigraphhub_py/commit/bf0f2eccd26f9cb5cb808e7914b5b487f64e981f))
+
 ## [2.0.2](https://github.com/thegraphnetwork/epigraphhub_py/compare/2.0.1...2.0.2) (2023-02-07)
 
 
