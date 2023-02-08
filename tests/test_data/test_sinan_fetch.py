@@ -16,7 +16,7 @@ class TestFethSinan(unittest.TestCase):
         self.engine = engine
         self.disease = "Zika"
         self.year = 2017
-        self.data_dir = Path.home() / "pysus"
+        self.data_dir = Path("/tmp") / "pysus"
         self.file = ["ZIKABR17.parquet"]
         self.table = "zika"
         self.schema = "brasil"
