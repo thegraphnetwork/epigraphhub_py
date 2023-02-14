@@ -6,7 +6,7 @@ from pangres import upsert
 from pysus.online_data import parquets_to_dataframe as to_df
 
 from epigraphhub.connection import get_engine
-from epigraphhub.data._config import PYSUS_DATA_PATH, SINAN_LOG_PATH
+from epigraphhub.data._config import SINAN_LOG_PATH
 from epigraphhub.settings import env
 
 logger.add(SINAN_LOG_PATH, retention="7 days")
@@ -14,17 +14,13 @@ logger.add(SINAN_LOG_PATH, retention="7 days")
 engine = get_engine(credential_name=env.db.default_credential)
 
 
-def upload():
+def upload(parquet_dirs: list):
     """
-    Connects to the EGH SQL server and load all the chunks for all
-    diseases found at `$PYSUS_DATA_PATH` into database. This method cleans
-    the chunks left.
-
+    Connects to the EGH SQL server and load all the chunks for all parquet
+    directories extracted with `extract.download` into database.
     """
-    diseases_dir = Path(PYSUS_DATA_PATH).glob("*")
-    di_years_dir = [x for x in diseases_dir if x.is_dir()]
 
-    for dir in di_years_dir:
+    for dir in parquet_dirs:
         if "parquet" in Path(dir).suffix and any(os.listdir(dir)):
             df = to_df(str(dir), clean_after_read=False)
             df.columns = df.columns.str.lower()
