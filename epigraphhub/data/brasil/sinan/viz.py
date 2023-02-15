@@ -49,7 +49,7 @@ def table(disease: str) -> pd.DataFrame:
     """
 
     tablename = "sinan_" + normalize_str(disease) + "_m"
-    schema = "brazil"
+    schema = "brasil"
 
     with engine.connect() as conn:
         df = pd.read_sql(f"SELECT * FROM {schema}.{tablename}", conn)

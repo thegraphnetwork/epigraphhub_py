@@ -44,7 +44,7 @@ def upload(parquet_dirs: list):
             df.index.name = "index"
             disease_code = str(dir).split("/")[-1].split(".parquet")[0][:-4]
             tablename = "sinan_" + normalize_str(di_codes[disease_code]) + "_m"
-            schema = "brazil"
+            schema = "brasil"
 
             with engine.connect() as conn:
                 try:

@@ -22,7 +22,7 @@ SET row_security = off;
 -- Name: brasil; Type: SCHEMA; Schema: -; Owner: dev_admin
 --
 
-CREATE SCHEMA brazil;
+CREATE SCHEMA brasil;
 
 
 ALTER SCHEMA brasil OWNER TO dev_admin;

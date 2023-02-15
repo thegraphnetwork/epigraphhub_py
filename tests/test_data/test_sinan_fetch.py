@@ -19,7 +19,7 @@ class TestFethSinan(unittest.TestCase):
         self.data_dir = Path("/tmp") / "pysus"
         self.file = ["ZIKABR17.parquet"]
         self.table = "sinan_zika_m"
-        self.schema = "brazil"
+        self.schema = "brasil"
 
     def test_download_data_zika(self):
         extract.download(self.disease)
