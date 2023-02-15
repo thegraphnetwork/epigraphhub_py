@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 
 from epigraphhub.connection import get_engine
-from epigraphhub.data.brasil.sinan import extract, loading, viz
+from epigraphhub.data.brasil.sinan import DISEASES, extract, loading, normalize_str, viz
 from epigraphhub.settings import env
 
 engine = get_engine(credential_name=env.db.default_credential)
@@ -18,8 +18,8 @@ class TestFethSinan(unittest.TestCase):
         self.year = 2017
         self.data_dir = Path("/tmp") / "pysus"
         self.file = ["ZIKABR17.parquet"]
-        self.table = "zika"
-        self.schema = "brasil"
+        self.table = "sinan_zika_m"
+        self.schema = "brazil"
 
     def test_download_data_zika(self):
         extract.download(self.disease)
@@ -41,3 +41,20 @@ class TestFethSinan(unittest.TestCase):
         df = viz.table(self.disease, self.year)
         self.assertIsInstance(df, pd.DataFrame)
         self.assertFalse(df.empty)
+
+
+class TestSINANUtilities(unittest.TestCase):
+    def test_diseases_dictionary(self):
+        self.assertTrue("Animais Peçonhentos" in DISEASES.keys())
+        self.assertTrue("DENG" in DISEASES.values())
+        self.assertEqual("ZIKA", DISEASES["Zika"])
+
+    def test_normalizing_disease_name(self):
+        d1 = "Sífilis Adquirida"
+        d2 = "Animais Peçonhentos"
+        d3 = "Contact Communicable Disease"
+
+        norm = lambda d: normalize_str(d)
+        self.assertEqual(norm(d1), "sifilis_adquirida")
+        self.assertEqual(norm(d2), "animais_peconhentos")
+        self.assertEqual(norm(d3), "contact_communicable_disease")

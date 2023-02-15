@@ -1,16 +1,16 @@
 import pandas as pd
 from loguru import logger
-from pysus.online_data import SINAN
 from pysus.online_data import parquets_to_dataframe as to_df
 
 from epigraphhub.connection import get_engine
 from epigraphhub.data._config import SINAN_LOG_PATH
 from epigraphhub.settings import env
 
+from . import DISEASES, normalize_str
+
 logger.add(SINAN_LOG_PATH, retention="7 days")
 
 engine = get_engine(credential_name=env.db.default_credential)
-aggrs = SINAN.agravos
 
 
 def parquet(ppath: str, clean_after_read=False) -> pd.DataFrame:
@@ -34,7 +34,7 @@ def parquet(ppath: str, clean_after_read=False) -> pd.DataFrame:
     return df
 
 
-def table(disease: str, year: int) -> pd.DataFrame:
+def table(disease: str) -> pd.DataFrame:
     """
     Connect to EGH SQL server and retrieve the data by disease and year.
 
@@ -48,12 +48,10 @@ def table(disease: str, year: int) -> pd.DataFrame:
 
     """
 
-    year = str(year)[-2:].zfill(2)
-    disease = SINAN.check_case(disease)
-    dis_code = aggrs[disease].lower()
-    tablename = f"{dis_code}{year}"
+    tablename = "sinan_" + normalize_str(disease) + "_m"
+    schema = "brazil"
 
     with engine.connect() as conn:
-        df = pd.read_sql(f"SELECT * FROM brasil.{tablename}", conn)
+        df = pd.read_sql(f"SELECT * FROM {schema}.{tablename}", conn)
 
     return df
