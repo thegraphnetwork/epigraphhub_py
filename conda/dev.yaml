@@ -8,7 +8,7 @@ dependencies:
   - nodejs
   - pandas
   - pip
-  - poetry
+  - poetry >=1.3.2
   - psycopg2
   - python 3.9.*
   - shellcheck
