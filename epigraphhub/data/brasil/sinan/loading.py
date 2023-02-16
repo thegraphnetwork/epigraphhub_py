@@ -1,16 +1,15 @@
 import os
-import pandas as pd
-
 from pathlib import Path
+
+import pandas as pd
 from loguru import logger
 from pangres import upsert
 
-from epigraphhub.settings import env
 from epigraphhub.connection import get_engine
 from epigraphhub.data._config import SINAN_LOG_PATH
+from epigraphhub.settings import env
 
 from . import DISEASES, normalize_str
-
 
 logger.add(SINAN_LOG_PATH, retention="7 days")
 engine = get_engine(credential_name=env.db.default_credential)
@@ -43,7 +42,7 @@ def upload(parquet_dirs: list):
             tablename = "sinan_" + normalize_str(di_codes[disease_code]) + "_m"
             schema = "brasil"
 
-            print(f'Inserting {dir} on {schema}.{tablename}')
+            print(f"Inserting {dir} on {schema}.{tablename}")
 
             with engine.connect() as conn:
                 try:
@@ -63,22 +62,17 @@ def upload(parquet_dirs: list):
                 except Exception as e:
                     logger.error(f"Not able to upsert {tablename} \n{e}")
                     raise e
-                        
+
 
 def _read_parquets_dir(path: str) -> pd.DataFrame:
-    chunks = Path(path).glob('*.parquet')
+    chunks = Path(path).glob("*.parquet")
     chunks_dfs = list()
 
     try:
         for parquet in chunks:
-            df = pd.read_parquet(
-                str(parquet),
-                engine='fastparquet'
-            )
+            df = pd.read_parquet(str(parquet), engine="fastparquet")
             objs = df.select_dtypes(object)
-            df[objs.columns] = objs.apply(
-                lambda x: x.str.replace('\x00', '')
-            )
+            df[objs.columns] = objs.apply(lambda x: x.str.replace("\x00", ""))
             chunks_dfs.append(df)
 
         final_df = pd.concat(chunks_dfs, ignore_index=True)
@@ -86,7 +80,7 @@ def _read_parquets_dir(path: str) -> pd.DataFrame:
         final_df.index.name = "index"
 
         return final_df
-        
+
     except Exception as e:
         logger.error(e)
         raise e
