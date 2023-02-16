@@ -17,14 +17,13 @@ engine = get_engine(credential_name=env.db.default_credential)
 
 def upload(parquet_dirs: list):
     """
-    Connects to the EpiGraphHub SQL server and load all the chunks for all parquet
-    directories extracted with `extract.download` into database. Receives
+    Connects to the EpiGraphHub SQL server and load parquet chunks within
+    directories, extracted using `extract.download`, into database. Receives
     a list of parquets directories with their full path, extract theirs
-    DataFrames with `pysus.online_data.parquets_to_dataframe()` and upsert
-    rows to Postgres connection following EGH table convention, see more:
+    DataFrames and upsert rows to Postgres connection following EGH table
+    convention, see more in EGH's documentation:
     https://epigraphhub.readthedocs.io/en/latest/instruction_name_tables.html#about-metadata-tables
-
-    Usage
+    Usage:
     ```
     upload([
         '/tmp/pysus/ZIKABR17.parquet',

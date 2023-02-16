@@ -8,16 +8,11 @@ logger.add(SINAN_LOG_PATH, retention="7 days")
 
 def download(disease: str):
     """
-    Download all parquets available for an disease,
+    Download all parquets available for a disease,
     according to `SINAN.agravos`.
 
     Attrs:
         disease (str): The disease to be downloaded.
-        data_dir (str) : The output directory were files will be downloaded.
-                         A directory with the disease code will be created.
-
-    Returns:
-        parquets_paths_list list(PosixPath) : A list with all parquets dirs.
     """
 
     SINAN.download_all_years_in_chunks(disease, data_dir=PYSUS_DATA_PATH)
