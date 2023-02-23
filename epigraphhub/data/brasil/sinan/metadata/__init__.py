@@ -1,18 +1,19 @@
-import pyarrow.parquet as pq
-
 from pathlib import Path, PosixPath
+
+import pyarrow.parquet as pq
 
 from epigraphhub.data._config import PYSUS_DATA_PATH
 from epigraphhub.data.brasil.sinan import DISEASES
 
+
 def local_parquerts_metadata(disease: str) -> dict:
-    """ 
+    """
     Extracts columns and its types from a disease. It will search into
     `PYSUS_DATA_PATH` for parquets corresponding to the disease, extract
     columns from all years and return them as a dict.
     """
     code = DISEASES[disease]
-    parquets_dirs = Path(PYSUS_DATA_PATH).glob(f'{code}BR*')
+    parquets_dirs = Path(PYSUS_DATA_PATH).glob(f"{code}BR*")
     columns_types = dict()
     for dir in parquets_dirs:
         year_metadata = _merge_chunks_dicts(dir)
@@ -27,7 +28,7 @@ def _columns_types_from_chunk(parquet_chunk: PosixPath) -> dict:
 
 
 def _merge_chunks_dicts(parquet_dir: PosixPath) -> dict:
-    parquets = list(Path(parquet_dir).glob('*'))
+    parquets = list(Path(parquet_dir).glob("*"))
     final_dict = dict()
     if any(parquets):
         for parquet in parquets:
@@ -35,6 +36,7 @@ def _merge_chunks_dicts(parquet_dir: PosixPath) -> dict:
             if pq_d != final_dict:
                 final_dict.update(pq_d)
     return final_dict
+
 
 # Variables extracted from .xlsx files with a few changes
 COLUMNS_TYPES = {
@@ -158,7 +160,7 @@ COLUMNS_TYPES = {
     "COPAISINF": "varchar(4)",
     "COMUNINF": "varchar2(6)",
     "CODISINF": "varchar2(4)",
-    "CO_BAINFC": "number(8)", 
+    "CO_BAINFC": "number(8)",
     "NOBAIINF": "vachar2(60)",
     "DOENCA_TRA": "varchar2(1)",
     "DT_ENCERRA": "date",
@@ -795,7 +797,7 @@ COLUMNS_TYPES = {
     "MUN_EMP": "varchar(6)",
     "DIS_EMP": "varchar(9)",
     "COBAIEMP": "varchar(8)",
-    "NOBAIEMP":  "varchar(60)",
+    "NOBAIEMP": "varchar(60)",
     "END_EMP": "varchar2(60)",
     "NU_EMP": "varchar(6)",
     "COMP_EMP": "varchar2(60)",
@@ -1085,7 +1087,7 @@ COLUMNS_TYPES = {
     "EPI_PESTE": "varchar2(1)",
     "COM_PEST": "varchar2(1)",
     "SIN_GANG": "varchar2(1)",
-    "SIN_PULM": "varchar2(1)", 
+    "SIN_PULM": "varchar2(1)",
     "TB_INVESTIGA_PESTE": "varchar2(1)",
     "LAB_HEMO": "varchar(1)",
     "LAB_ESFR": "varchar(1)",

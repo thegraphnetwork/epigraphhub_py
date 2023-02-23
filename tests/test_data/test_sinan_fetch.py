@@ -33,22 +33,21 @@ class TestFethSinan(unittest.TestCase):
         self.assertEqual(df.shape, (32684, 38))
 
     def test_metadata_extraction(self):
-        anim_metadata = extract.metadata_df('Animais Peçonhentos')
+        anim_metadata = extract.metadata_df("Animais Peçonhentos")
         self.assertTrue(isinstance(anim_metadata, pd.DataFrame))
         self.assertEqual(anim_metadata.shape, (58, 7))
         self.assertEqual(
             list(anim_metadata.columns),
             [
-                'Nome do campo',
-                'Campo',
-                'Tipo',
-                'Categoria',
-                'Descrição',
-                'Características',
-                'DBF'
-            ]
+                "Nome do campo",
+                "Campo",
+                "Tipo",
+                "Categoria",
+                "Descrição",
+                "Características",
+                "DBF",
+            ],
         )
-
 
     @unittest.skip("Need table to test")  # TODO: need table to test
     def test_save_to_pgsql(self):
