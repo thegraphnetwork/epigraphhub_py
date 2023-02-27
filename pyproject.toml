@@ -66,8 +66,6 @@ sodapy = "^2.2.0"
 pangres = "^4.1.2"
 ngboost = "^0.3.13"
 ibis-framework = "^3.2.0"
-openpyxl = "^3.1.1"
-pyarrow = "^11.0.0"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.2"

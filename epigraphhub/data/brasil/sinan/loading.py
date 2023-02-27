@@ -2,84 +2,57 @@ import os
 from pathlib import Path
 
 import pandas as pd
+from pysus import SINAN
 from loguru import logger
 from pangres import upsert
+from pysus.classes.sinan import Disease
 
 from epigraphhub.connection import get_engine
-from epigraphhub.data._config import SINAN_LOG_PATH
+from epigraphhub.data._config import SINAN_LOG_PATH, PYSUS_DATA_PATH
 from epigraphhub.settings import env
 
-from . import DISEASES, normalize_str
+from . import normalize_str
 
 logger.add(SINAN_LOG_PATH, retention="7 days")
 engine = get_engine(credential_name=env.db.default_credential)
 
 
-def upload(parquet_dirs: list):
+def upload(disease: str, data_path: str = PYSUS_DATA_PATH):
     """
     Connects to the EpiGraphHub SQL server and load parquet chunks within
     directories, extracted using `extract.download`, into database. Receives
-    a list of parquets directories with their full path, extract theirs
+    a disease and look for local parquets paths in PYSUS_DATA_PATH, extract theirs
     DataFrames and upsert rows to Postgres connection following EGH table
     convention, see more in EGH's documentation:
     https://epigraphhub.readthedocs.io/en/latest/instruction_name_tables.html#about-metadata-tables
-    Usage:
-    ```
-    upload([
-        '/tmp/pysus/ZIKABR17.parquet',
-        '/tmp/pysus/ZIKABR18.parquet',
-        '/tmp/pysus/ZIKABR19.parquet',
-    ])
     """
-    di_codes = {code: name for name, code in DISEASES.items()}
+    disease_years = Disease(disease).get_years(stage='all')
 
-    for dir in parquet_dirs:
-        if "parquet" in Path(dir).suffix and any(os.listdir(dir)):
+    for year in disease_years:
+        df = SINAN.parquets_do_df(disease, year, data_path)
+        df.columns = df.columns.str.lower()
+        df.index.name = "index"
 
-            df = _read_parquets_dir(dir)
-            disease_code = str(dir).split("/")[-1].split(".parquet")[0][:-4]
-            tablename = "sinan_" + normalize_str(di_codes[disease_code]) + "_m"
-            schema = "brasil"
+        tablename = "sinan_" + normalize_str(disease) + "_m"
+        schema = "brasil"
 
-            print(f"Inserting {dir} on {schema}.{tablename}")
+        print(f"Inserting {disease}-{year} on {schema}.{tablename}")
 
-            with engine.connect() as conn:
-                try:
-                    upsert(
-                        con=conn,
-                        df=df,
-                        table_name=tablename,
-                        schema=schema,
-                        if_row_exists="update",
-                        chunksize=1000,
-                        add_new_columns=True,
-                        create_table=True,
-                    )
+        with engine.connect() as conn:
+            try:
+                upsert(
+                    con=conn,
+                    df=df,
+                    table_name=tablename,
+                    schema=schema,
+                    if_row_exists="update",
+                    chunksize=1000,
+                    add_new_columns=True,
+                    create_table=True,
+                )
 
-                    print(f"Table {tablename} updated")
+                print(f"Table {tablename} updated")
 
-                except Exception as e:
-                    logger.error(f"Not able to upsert {tablename} \n{e}")
-                    raise e
-
-
-def _read_parquets_dir(path: str) -> pd.DataFrame:
-    chunks = Path(path).glob("*.parquet")
-    chunks_dfs = list()
-
-    try:
-        for parquet in chunks:
-            df = pd.read_parquet(str(parquet), engine="fastparquet")
-            objs = df.select_dtypes(object)
-            df[objs.columns] = objs.apply(lambda x: x.str.replace("\x00", ""))
-            chunks_dfs.append(df)
-
-        final_df = pd.concat(chunks_dfs, ignore_index=True)
-        final_df.columns = df.columns.str.lower()
-        final_df.index.name = "index"
-
-        return final_df
-
-    except Exception as e:
-        logger.error(e)
-        raise e
+            except Exception as e:
+                logger.error(f"Not able to upsert {tablename} \n{e}")
+                raise e
