@@ -19,7 +19,7 @@ def download(disease: str, years: list = None) -> None:
         disease (str): The disease to be downloaded.
     """
 
-    SINAN.download_parquets(disease, years, data_dir=PYSUS_DATA_PATH)
+    SINAN.download_parquets(disease, years, data_path=PYSUS_DATA_PATH)
 
     logger.info(f"All years for {disease} downloaded at {PYSUS_DATA_PATH}")
 

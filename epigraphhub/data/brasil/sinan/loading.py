@@ -29,30 +29,34 @@ def upload(disease: str, data_path: str = PYSUS_DATA_PATH):
     disease_years = Disease(disease).get_years(stage='all')
 
     for year in disease_years:
-        df = SINAN.parquets_do_df(disease, year, data_path)
-        df.columns = df.columns.str.lower()
-        df.index.name = "index"
+        df = SINAN.parquets_to_df(disease, year, data_path)
+        if not df.empty:
+            df.columns = df.columns.str.lower()
+            df.index.name = "index"
 
-        tablename = "sinan_" + normalize_str(disease) + "_m"
-        schema = "brasil"
+            tablename = "sinan_" + normalize_str(disease) + "_m"
+            schema = "brasil"
 
-        print(f"Inserting {disease}-{year} on {schema}.{tablename}")
+            print(f"Inserting {disease}-{year} on {schema}.{tablename}")
 
-        with engine.connect() as conn:
-            try:
-                upsert(
-                    con=conn,
-                    df=df,
-                    table_name=tablename,
-                    schema=schema,
-                    if_row_exists="update",
-                    chunksize=1000,
-                    add_new_columns=True,
-                    create_table=True,
-                )
+            with engine.connect() as conn:
+                try:
+                    upsert(
+                        con=conn,
+                        df=df,
+                        table_name=tablename,
+                        schema=schema,
+                        if_row_exists="update",
+                        chunksize=1000,
+                        add_new_columns=True,
+                        create_table=True,
+                    )
 
-                print(f"Table {tablename} updated")
+                    print(f"Table {tablename} updated")
 
-            except Exception as e:
-                logger.error(f"Not able to upsert {tablename} \n{e}")
-                raise e
+                except Exception as e:
+                    logger.error(f"Not able to upsert {tablename} \n{e}")
+                    raise e
+        else:
+            print(f'[WARNING] No data for {disease} and year {year}. Skipping')
+            continue
