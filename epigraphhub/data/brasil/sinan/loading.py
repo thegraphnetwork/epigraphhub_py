@@ -1,46 +1,50 @@
 import os
 from pathlib import Path
 
+import pandas as pd
+from pysus import SINAN
 from loguru import logger
 from pangres import upsert
-from pysus.online_data import parquets_to_dataframe as to_df
+from pysus.classes.sinan import Disease
 
 from epigraphhub.connection import get_engine
-from epigraphhub.data._config import PYSUS_DATA_PATH, SINAN_LOG_PATH
+from epigraphhub.data._config import SINAN_LOG_PATH, PYSUS_DATA_PATH
 from epigraphhub.settings import env
 
-logger.add(SINAN_LOG_PATH, retention="7 days")
+from . import normalize_str
 
+logger.add(SINAN_LOG_PATH, retention="7 days")
 engine = get_engine(credential_name=env.db.default_credential)
 
 
-def upload():
+def upload(disease: str, data_path: str = PYSUS_DATA_PATH):
     """
-    Connects to the EGH SQL server and load all the chunks for all
-    diseases found at `$PYSUS_DATA_PATH` into database. This method cleans
-    the chunks left.
-
+    Connects to the EpiGraphHub SQL server and load parquet chunks within
+    directories, extracted using `extract.download`, into database. Receives
+    a disease and look for local parquets paths in PYSUS_DATA_PATH, extract theirs
+    DataFrames and upsert rows to Postgres connection following EGH table
+    convention, see more in EGH's documentation:
+    https://epigraphhub.readthedocs.io/en/latest/instruction_name_tables.html#about-metadata-tables
     """
-    diseases_dir = Path(PYSUS_DATA_PATH).glob("*")
-    di_years_dir = [x for x in diseases_dir if x.is_dir()]
+    disease_years = Disease(disease).get_years(stage='all')
 
-    for dir in di_years_dir:
-        if "parquet" in Path(dir).suffix and any(os.listdir(dir)):
-            df = to_df(str(dir), clean_after_read=False)
+    for year in disease_years:
+        df = SINAN.parquets_to_df(disease, year, data_path)
+        if not df.empty:
             df.columns = df.columns.str.lower()
             df.index.name = "index"
 
-            table_i = str(dir).split("/")[-1].split(".parquet")[0]
-            table = table_i[:-4].lower()
+            tablename = "sinan_" + normalize_str(disease) + "_m"
             schema = "brasil"
+
+            print(f"Inserting {disease}-{year} on {schema}.{tablename}")
 
             with engine.connect() as conn:
                 try:
-
                     upsert(
                         con=conn,
                         df=df,
-                        table_name=table,
+                        table_name=tablename,
                         schema=schema,
                         if_row_exists="update",
                         chunksize=1000,
@@ -48,8 +52,11 @@ def upload():
                         create_table=True,
                     )
 
-                    logger.info(f"Table {table} updated")
+                    print(f"Table {tablename} updated")
 
                 except Exception as e:
-                    logger.error(f"Not able to upsert {table} \n{e}")
+                    logger.error(f"Not able to upsert {tablename} \n{e}")
                     raise e
+        else:
+            print(f'[WARNING] No data for {disease} and year {year}. Skipping')
+            continue

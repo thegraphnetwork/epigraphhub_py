@@ -1,29 +1,34 @@
-from pathlib import PosixPath
+import os
+from pathlib import Path
 
+import pandas as pd
 from loguru import logger
-from pysus.online_data import SINAN
+from pysus import SINAN
 
 from epigraphhub.data._config import PYSUS_DATA_PATH, SINAN_LOG_PATH
 
 logger.add(SINAN_LOG_PATH, retention="7 days")
 
-diseases = SINAN.agravos
 
-
-def download(disease: str):
+def download(disease: str, years: list = None) -> None:
     """
-    Download all parquets available for an disease,
+    Download all parquets available for a disease,
     according to `SINAN.agravos`.
 
     Attrs:
         disease (str): The disease to be downloaded.
-        data_dir (str) : The output directory were files will be downloaded.
-                         A directory with the disease code will be created.
-
-    Returns:
-        parquets_paths_list list(PosixPath) : A list with all parquets dirs.
     """
 
-    SINAN.download_all_years_in_chunks(disease, data_dir=PYSUS_DATA_PATH)
+    SINAN.download_parquets(disease, years, data_path=PYSUS_DATA_PATH)
 
     logger.info(f"All years for {disease} downloaded at {PYSUS_DATA_PATH}")
+
+
+def metadata_df(disease: str) -> pd.DataFrame:
+    """
+    Returns a DataFrame containing metadata for a SINAN disease.
+    """
+    try:
+        return SINAN.metadata_df(disease)
+    except Exception:
+        logger.error(f"Metadata not available for {disease}")
