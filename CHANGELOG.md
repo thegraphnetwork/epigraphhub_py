@@ -1,6 +1,13 @@
 Release Notes
 ---
 
+## [2.0.4](https://github.com/thegraphnetwork/epigraphhub_py/compare/2.0.3...2.0.4) (2023-03-14)
+
+
+### Bug Fixes
+
+* **sinan:** split sinan continue ([#213](https://github.com/thegraphnetwork/epigraphhub_py/issues/213)) ([534c38e](https://github.com/thegraphnetwork/epigraphhub_py/commit/534c38eb53cb4006a49d9010b7353af5634d0216))
+
 ## [2.0.3](https://github.com/thegraphnetwork/epigraphhub_py/compare/2.0.2...2.0.3) (2023-02-08)
 
 
