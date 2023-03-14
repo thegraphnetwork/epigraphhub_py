@@ -20,6 +20,7 @@ def test_historical_interest():
     assert not df.empty
 
 
+@pytest.mark.skip(reason="Google returned a response with code 429.")
 def test_interest_over_time():
     keywords = ["coronavirus", "covid"]
     iot_df = ggtrends.interest_over_time(keywords)
@@ -34,6 +35,7 @@ def test_interest_region():
     assert df.index.name == "geoName"
 
 
+@pytest.mark.skip(reason="Google returned a response with code 429.")
 def test_related_topics():
     keywords = ["coronavirus", "covid"]
     d = ggtrends.related_topics(keywords)
