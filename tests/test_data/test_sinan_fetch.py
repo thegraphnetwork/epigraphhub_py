@@ -22,20 +22,20 @@ class TestFethSinan(unittest.TestCase):
         self.schema = "brasil"
 
     def test_download_data_zika(self):
-        extract.download(self.disease)
+        extract.download(disease=self.disease, years=self.year)
         self.assertTrue(any(os.listdir(self.data_dir)))
         self.assertTrue(self.file[0] in os.listdir(self.data_dir))
 
     def test_parquet_visualization(self):
         fpath = Path(self.data_dir) / self.file[0]
-        df = viz.parquet(fpath, clean_after_read=False)
+        df = viz.parquet(fpath)
         self.assertIsInstance(df, pd.DataFrame)
         self.assertEqual(df.shape, (32684, 38))
 
     def test_metadata_extraction(self):
         anim_metadata = extract.metadata_df("Animais Peçonhentos")
         self.assertTrue(isinstance(anim_metadata, pd.DataFrame))
-        self.assertEqual(anim_metadata.shape, (58, 7))
+        self.assertEqual(anim_metadata.shape, (59, 7))
         self.assertEqual(
             list(anim_metadata.columns),
             [
