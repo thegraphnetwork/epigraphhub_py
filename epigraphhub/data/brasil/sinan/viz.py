@@ -1,6 +1,6 @@
 import pandas as pd
 from loguru import logger
-from pysus import SINAN
+from pysus.online_data import parquets_to_dataframe
 
 from epigraphhub.connection import get_engine
 from epigraphhub.data._config import SINAN_LOG_PATH
@@ -13,7 +13,7 @@ logger.add(SINAN_LOG_PATH, retention="7 days")
 engine = get_engine(credential_name=env.db.default_credential)
 
 
-def parquet(disease: str, year: str|int) -> pd.DataFrame:
+def parquet(parquets_dir: str) -> pd.DataFrame:
     """
     Convert the parquet files into a pandas DataFrame.
 
@@ -27,7 +27,7 @@ def parquet(disease: str, year: str|int) -> pd.DataFrame:
         df (DataFrame)         : A Pandas DataFrame.
     """
 
-    df = SINAN.parquet_to_df(disease, year)
+    df = parquets_to_dataframe(parquet_dir=parquets_dir)
     df.columns = df.columns.str.lower()
 
     return df
