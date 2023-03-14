@@ -1,8 +1,8 @@
 import unicodedata
 
-from pysus.online_data import SINAN
+from pysus.online_data import FTP_SINAN
 
-DISEASES = SINAN.agravos
+DISEASES = FTP_SINAN.diseases
 
 
 def normalize_str(disease: str) -> str:

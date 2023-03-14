@@ -1,7 +1,4 @@
 import os
-from pathlib import Path
-
-import pandas as pd
 from loguru import logger
 from pangres import upsert
 from pysus.online_data import parquets_to_dataframe
@@ -25,14 +22,13 @@ def upload(disease: str, parquet_dir: str) -> None:
     see more in EGH's documentation:
     https://epigraphhub.readthedocs.io/en/latest/instruction_name_tables.html#about-metadata-tables
     """
-    df = parquets_to_dataframe(parquet_dir=parquet_dir)
-    if not df.empty:
+    if any(os.listdir(parquet_dir)):
+        df = parquets_to_dataframe(parquet_dir=parquet_dir)
         df.columns = df.columns.str.lower()
         df.index.name = "index"
 
         tablename = "sinan_" + normalize_str(disease) + "_m"
         schema = "brasil"
-
         print(f"Inserting {parquet_dir} on {schema}.{tablename}")
 
         with engine.connect() as conn:
@@ -53,4 +49,3 @@ def upload(disease: str, parquet_dir: str) -> None:
             except Exception as e:
                 logger.error(f"Not able to upsert {tablename} \n{e}")
                 raise e
- 
