@@ -19,7 +19,9 @@ def download(disease: str, years: list) -> list:
         A list with full paths of parquet dirs to upload into db
     """
 
-    parquets_dirs = SINAN.download(disease=disease, years=years, data_path=PYSUS_DATA_PATH)
+    parquets_dirs = SINAN.download(
+        disease=disease, years=years, data_path=PYSUS_DATA_PATH
+    )
 
     logger.info(f"Disease {disease} for years {years} downloaded at {PYSUS_DATA_PATH}")
 

@@ -1,4 +1,5 @@
 import os
+
 from loguru import logger
 from pangres import upsert
 from pysus.online_data import parquets_to_dataframe
@@ -17,8 +18,8 @@ def upload(disease: str, parquet_dir: str) -> None:
     """
     Connects to the EpiGraphHub SQL server and load parquet chunks within
     directories, extracted using `extract.download`, into database. a local
-    parquet dir (eg. ~/pysus/ZIKABR19.parquet), extract theirs DataFrames 
-    and upsert rows to Postgres connection following EGH table convention, 
+    parquet dir (eg. ~/pysus/ZIKABR19.parquet), extract theirs DataFrames
+    and upsert rows to Postgres connection following EGH table convention,
     see more in EGH's documentation:
     https://epigraphhub.readthedocs.io/en/latest/instruction_name_tables.html#about-metadata-tables
     """
