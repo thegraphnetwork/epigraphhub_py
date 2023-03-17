@@ -47,26 +47,25 @@ jobs:
       run: poetry install
 
     - name: Create config file
-      run: make config-file
+      run: makim config.file
 
-    - name: start up docker container
+    - name: start up containers-sugar
       run: |
-        make docker-compose-build
-        make docker-compose-start
-        make docker-compose-wait SERVICE=postgres
-
+        containers-sugar build
+        containers-sugar start
+        #make docker-compose-wait SERVICE=postgres
     - name: Run tests
-      run: make test ARGS="--disable-warnings"
+      run: makim tests.unittest --extra="--disable-warnings"
 
     - name: Linter
-      run: make linter
+      run: makim tests.linter
 
     - name: Run safety checks
       # https://github.com/numpy/numpy/issues/19038
-      run: make check-safety || true
+      run: makim tests.check-safety || true # Dudas con el true
 
-    - name: teardown docker container
-      run: make docker-compose-stop
+    - name: teardown containers-sugar
+      run: containers-sugar stop
 
     - name: Check if PR Title contains semantic-release tag
       if: ${{ github.event_name == 'pull_request' && always() }}

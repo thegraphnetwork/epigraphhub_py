@@ -1,0 +1,45 @@
+version: 1.0.0
+groups:
+  - name: tests
+    env-file: .env
+    targets:
+      linter:
+        help: Use this target to review linter
+        run: |
+          pre-commit run --all-files --verbose
+          poetry run darglint --verbosity 2 epigraphhub_py tests
+      unittest:
+        help: Use this target to test code
+        args:
+          extra:
+            help: Extra argument for pytest
+            type: string
+
+        run: |
+          poetry run pytest --cov-report=html -vv --cov tests/ {{ args.extra }}
+          poetry run coverage-badge -o assets/images/coverage.svg -f
+      check-safety:
+        help: Review the checking safety of the code
+        run: |
+          poetry check
+          poetry run safety check --full-report
+          poetry run bandit -ll --recursive epigraphhub_py tests
+
+  - name: config
+    targets:
+      create-file:
+        help: Configuration file
+        run: |
+          bash scripts/dev/create-config-file.sh
+
+  - name: clean
+    targets:
+      cleanup:
+        help: Cleaning cache
+        run: |
+          find . | grep -E "(__pycache__|\.pyc|\.pyo$$)" | xargs rm -rf
+          find . | grep -E ".DS_Store" | xargs rm -rf
+          find . | grep -E ".mypy_cache" | xargs rm -rf
+          find . | grep -E ".ipynb_checkpoints" | xargs rm -rf
+          find . | grep -E ".pytest_cache" | xargs rm -rf
+          rm -rf build/
