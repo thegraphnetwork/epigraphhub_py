@@ -8,16 +8,17 @@ groups:
         run: |
           pre-commit run --all-files --verbose
           poetry run darglint --verbosity 2 epigraphhub_py tests
+
       unittest:
         help: Use this target to test code
         args:
           extra:
             help: Extra argument for pytest
             type: string
-
         run: |
           poetry run pytest --cov-report=html -vv --cov tests/ {{ args.extra }}
           poetry run coverage-badge -o assets/images/coverage.svg -f
+
       check-safety:
         help: Review the checking safety of the code
         run: |
@@ -32,6 +33,23 @@ groups:
         run: |
           bash scripts/dev/create-config-file.sh
 
+  - name: containers
+    targets:
+      wait:
+        help: Wait for a service
+        args:
+          timeout:
+            help: Define the timeout for the healthcheck
+            type: integer
+            default: 30
+          service:
+            help: Service name that would be awaited
+            type: string
+            required: True
+
+        run: |
+          timeout {{ args.timeout }} ./docker/healthcheck.sh {{ args.service }}
+
   - name: clean
     targets:
       cleanup:
@@ -44,7 +62,7 @@ groups:
           find . | grep -E ".pytest_cache" | xargs rm -rf
           rm -rf build/
 
-    - name: release
+  - name: release
     vars:
       app: |
         npx --yes \
@@ -61,4 +79,5 @@ groups:
     targets:
       ci:
         help: Run semantic-release on CI
-        run: {{ app }} --ci        
+        run: |
+          {{ app }} --ci
