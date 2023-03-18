@@ -62,7 +62,7 @@ jobs:
 
     - name: Run safety checks
       # https://github.com/numpy/numpy/issues/19038
-      run: makim tests.check-safety || true # Dudas con el true
+      run: makim tests.check-safety || true
 
     - name: teardown containers-sugar
       run: containers-sugar stop
