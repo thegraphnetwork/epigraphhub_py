@@ -48,7 +48,7 @@ groups:
             required: True
 
         run: |
-          timeout {{ args.timeout }} /docker/healthcheck.sh {{ args.service }}
+          timeout {{ args.timeout }} ./docker/healthcheck.sh {{ args.service }}
 
   - name: clean
     targets:
