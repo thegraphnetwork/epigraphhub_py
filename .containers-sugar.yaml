@@ -5,7 +5,7 @@ service-groups:
     project-name: epigraphhubpy
     compose-path: docker/compose.yaml
     env-file: docker/.env
-    services:
+    service:
       default: postgres
       list:
         - name: postgres

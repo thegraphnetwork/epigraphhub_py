@@ -54,6 +54,7 @@ jobs:
         containers-sugar build
         containers-sugar start
         makim containers.wait --service=postgres
+
     - name: Run tests
       run: makim tests.unittest --extra="--disable-warnings"
 
