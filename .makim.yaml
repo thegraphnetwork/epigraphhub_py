@@ -1,7 +1,6 @@
 version: 1.0.0
 groups:
   - name: tests
-    env-file: docker/.env
     targets:
       linter:
         help: Use this target to review linter
@@ -15,6 +14,7 @@ groups:
           extra:
             help: Extra argument for pytest
             type: string
+            default: ''
         run: |
           poetry run pytest --cov-report=html -vv --cov tests/ {{ args.extra }}
           poetry run coverage-badge -o assets/images/coverage.svg -f
