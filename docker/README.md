@@ -5,7 +5,7 @@
 To create Docker you need to run:
 
 ```bash
-make docker-build
+containers-sugar build
 ```
 
 which is equivalent to:

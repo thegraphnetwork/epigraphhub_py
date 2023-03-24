@@ -61,7 +61,7 @@ For development, if you are using the postgres container that we have
 prepared here, you can run this, instead:
 
 ```bash
-make create-config
+makim config.create-file
 ```
 
 This depends on a environment variables file (`.env`) at `docker` folder.
@@ -82,26 +82,18 @@ This is the default environment variables used by development.
 ## Database for development
 
 If you don't have the databases for development yet,
-you can create one locally using docker:
+you can create one locally using containers-sugar:
 
 ```bash
-make docker-compose build
-make docker-compose start
-```
-
-## Code Style
-
-After installation you may execute code formatting.
-
-```bash
-make linter
+containers-sugar build
+containers-sugar start
 ```
 
 ### Checks
 
-The `make check-safety` command will look at the security of your code.
+The `makim tests.check-safety` command will look at the security of your code.
 
-Comand `make lint` applies all checks.
+Command `makim tests.linter` applies all checks.
 
 ### Before submitting
 
@@ -112,7 +104,6 @@ Before submitting your code please do the following steps:
 1. Add tests for the new changes
 1. Edit documentation if you have changed something significant
 1. Now, any new commit will run some tools to check and format the code.
-
 
 ## Other help
 

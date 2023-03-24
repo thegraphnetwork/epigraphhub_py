@@ -59,7 +59,7 @@ wget = "^3.2"
 requests = "^2.27.1"
 tabulate = "^0.8.9"
 click = "^8.1.0"
-PyYAML = "^6.0"
+PyYAML = "^5.0"
 pymc = "^4.2.0"
 loguru = "^0.6.0"
 sodapy = "^2.2.0"
@@ -88,6 +88,11 @@ Sphinx = "^4.4.0"
 myst-parser = "^0.17.0"
 sphinx-pyproject = "^0.1.0"
 nbsphinx = "^0.8.8"
+
+[tool.poetry.group.dev.dependencies]
+makim = "1.6.4"
+containers-sugar = "1.4.2"
+pysus = "^0.8.0"
 
 [tool.black]
 # https://github.com/psf/black

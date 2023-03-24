@@ -1,0 +1,83 @@
+version: 1.0.0
+groups:
+  tests:
+    targets:
+      linter:
+        help: Use this target to review linter
+        run: |
+          pre-commit run --all-files --verbose
+          poetry run darglint --verbosity 2 epigraphhub_py tests
+
+      unittest:
+        help: Use this target to test code
+        args:
+          extra:
+            help: Extra argument for pytest
+            type: string
+            default: ''
+        run: |
+          poetry run pytest --cov-report=html -vv --cov tests/ {{ args.extra }}
+          poetry run coverage-badge -o assets/images/coverage.svg -f
+
+      check-safety:
+        help: Review the checking safety of the code
+        run: |
+          poetry check
+          poetry run safety check --full-report
+          poetry run bandit -ll --recursive epigraphhub_py tests
+
+  config:
+    targets:
+      create-file:
+        help: Configuration file
+        run: |
+          bash scripts/dev/create-config-file.sh
+
+  containers:
+    targets:
+      wait:
+        help: Wait for a service
+        args:
+          timeout:
+            help: Define the timeout for the healthcheck
+            type: integer
+            default: 30
+          service:
+            help: Service name that would be awaited
+            type: string
+            required: True
+
+        run: |
+          timeout {{ args.timeout }} ./docker/healthcheck.sh {{ args.service }}
+
+  clean:
+    targets:
+      cleanup:
+        help: Cleaning cache
+        run: |
+          find . | grep -E "(__pycache__|\.pyc|\.pyo$$)" | xargs rm -rf
+          find . | grep -E ".DS_Store" | xargs rm -rf
+          find . | grep -E ".mypy_cache" | xargs rm -rf
+          find . | grep -E ".ipynb_checkpoints" | xargs rm -rf
+          find . | grep -E ".pytest_cache" | xargs rm -rf
+          rm -rf build/
+
+  release:
+    vars:
+      app: |
+        npx --yes \
+        -p semantic-release \
+        -p conventional-changelog-conventionalcommits \
+        -p "@semantic-release/commit-analyzer" \
+        -p "@semantic-release/release-notes-generator" \
+        -p "@semantic-release/changelog" \
+        -p "@semantic-release/exec" \
+        -p "@semantic-release/github" \
+        -p "@semantic-release/git" \
+        -p "@google/semantic-release-replace-plugin" \
+        semantic-release
+    targets:
+      ci:
+        help: Run semantic-release on CI
+        run: |
+          {{ app }} --ci
