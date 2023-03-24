@@ -62,7 +62,7 @@ groups:
           find . | grep -E ".pytest_cache" | xargs rm -rf
           rm -rf build/
 
-  - name: release
+  release:
     vars:
       app: |
         npx --yes \
