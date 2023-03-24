@@ -50,7 +50,7 @@ groups:
         run: |
           timeout {{ args.timeout }} ./docker/healthcheck.sh {{ args.service }}
 
-  - name: clean
+  clean:
     targets:
       cleanup:
         help: Cleaning cache
