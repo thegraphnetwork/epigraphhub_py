@@ -26,7 +26,7 @@ groups:
           poetry run safety check --full-report
           poetry run bandit -ll --recursive epigraphhub_py tests
 
-  - name: config
+  config:
     targets:
       create-file:
         help: Configuration file
