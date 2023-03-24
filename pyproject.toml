@@ -90,8 +90,8 @@ sphinx-pyproject = "^0.1.0"
 nbsphinx = "^0.8.8"
 
 [tool.poetry.group.dev.dependencies]
-makim = "1.5.0"
-containers-sugar = "1.4.1"
+makim = "1.6.4"
+containers-sugar = "1.4.2"
 pysus = "^0.8.0"
 
 [tool.black]
