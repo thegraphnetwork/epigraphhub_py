@@ -33,7 +33,7 @@ groups:
         run: |
           bash scripts/dev/create-config-file.sh
 
-  - name: containers
+  containers:
     targets:
       wait:
         help: Wait for a service
