@@ -1,6 +1,6 @@
 version: 1.0.0
 groups:
-  - name: tests
+  tests:
     targets:
       linter:
         help: Use this target to review linter
