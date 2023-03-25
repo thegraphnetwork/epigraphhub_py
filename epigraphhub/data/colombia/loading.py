@@ -89,7 +89,7 @@ def _chunked_fetch(maxrecords, start=0, chunk_size=10000):
         chunk_size (int)   : Size of the chunk to be inserted into SQL DB.
 
     Yields:
-        df_new (DataFrame) : Dataframe with updated rows of fixed size.
+        df_new (DataFrame) : DataFrame with updated rows of fixed size.
     """
     slice_date = datetime.date(datetime.today()) - timedelta(200)
 
