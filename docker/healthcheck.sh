@@ -9,7 +9,7 @@ if [ -f ${PROJECT_DIR}/.env ]; then
 fi
 
 export CONTAINER_NAME=${1:-"superset"}
-export CONTAINER_NAME="docker_${CONTAINER_NAME}_1"
+export CONTAINER_NAME="epigraphhubpy_${CONTAINER_NAME}_1"
 
 echo "[II] Checking ${CONTAINER_NAME} ..."
 

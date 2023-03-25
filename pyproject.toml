@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "epigraphhub"
-version = "2.0.3"  # changed by semantic-release
+version = "2.0.4"  # changed by semantic-release
 description = "Epigraphhub Python package"
 readme = "README.md"
 authors = ["thegraphnetwork <fccoelho@gmail.com>"]
@@ -45,7 +45,7 @@ matplotlib = "^3.5.1"
 plotly = "^5"
 geopandas = "^0.10.2"
 sshtunnel = "^0.4.0"
-SQLAlchemy = "^1.4.29"
+SQLAlchemy = ">= 1.4.29,<2.0.0"
 psycopg2-binary = "^2.9.3"
 GeoAlchemy2 = "^0.10.0"
 pytrends = "^4.7.3"
@@ -59,7 +59,7 @@ wget = "^3.2"
 requests = "^2.27.1"
 tabulate = "^0.8.9"
 click = "^8.1.0"
-PyYAML = "^6.0"
+PyYAML = "^5.0"
 pymc = "^4.2.0"
 loguru = "^0.6.0"
 sodapy = "^2.2.0"
@@ -90,7 +90,9 @@ sphinx-pyproject = "^0.1.0"
 nbsphinx = "^0.8.8"
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^2.20.0"
+makim = "1.6.4"
+containers-sugar = "1.4.2"
+pysus = "^0.8.0"
 
 [tool.black]
 # https://github.com/psf/black
