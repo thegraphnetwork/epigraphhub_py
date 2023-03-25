@@ -93,7 +93,7 @@ def risk_ratio(
     exposed_total: int
         Size of the exposed group.
     control_cases: int
-        Number of cases in the control group
+        Number of cases in the control group.
     control_total: int
         Size of the control group.
 
