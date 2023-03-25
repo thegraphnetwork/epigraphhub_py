@@ -38,10 +38,10 @@ from epigraphhub.data.foph.viz import get_cluster_data
 def build_model(hidden, features, predict_n, look_back=10, batch_size=1):
     """
     Builds and returns the LSTM model with the parameters given
-    :param hidden: number of hidden nodes
-    :param features: number of variables in the example table
-    :param look_back: Number of time-steps to look back before predicting
-    :param batch_size: batch size for batch training
+    :param hidden: Number of hidden nodes.
+    :param features: Number of variables in the example table.
+    :param look_back: Number of time-steps to look back before predicting.
+    :param batch_size: Batch size for batch training.
     :return:
     """
 
@@ -152,8 +152,8 @@ def train(
 
 def plot_training_history(hist):
     """
-    Plot the Loss series from training the model
-    :param hist: Training history object returned by "model.fit()"
+    Plot the Loss series from training the model.
+    :param hist: Training history object returned by "model.fit()".
     """
     df_vloss = pd.DataFrame(hist.history["val_loss"], columns=["val_loss"])
     df_loss = pd.DataFrame(hist.history["loss"], columns=["loss"])
@@ -177,13 +177,13 @@ def plot_predicted_vs_data(
     uncertainty=False,
 ):
     """
-    Plot the model's predictions against data
-    :param predicted: model predictions
-    :param Ydata: observed data
+    Plot the model's predictions against data.
+    :param predicted: Model predictions.
+    :param Ydata: Observed data.
     :param indice:
-    :param label: Name of the locality of the predictions
+    :param label: Name of the locality of the predictions.
     :param pred_window:
-    :param factor: Normalizing factor for the target variable
+    :param factor: Normalizing factor for the target variable.
     """
 
     plt.clf()
@@ -528,19 +528,19 @@ def train_eval_single_canton(
 ):
 
     """
-    Function to train and evaluate the model for one georegion
+    Function to train and evaluate the model for one georegion.
 
     Important:
-    * By default the function is using the clustering cantons and the data since 2020
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
+    * By default the function is using the clustering cantons and the data since 2020.
+    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients.
 
-    params canton: canton of interest
-    params predictors: variables that  will be used in model
-    params vaccine: It determines if the vaccine data from owid will be used or not
-    params smooth: It determines if data will be smoothed or not
-    params ini_date: Determines the beggining of the train dataset
-    params title: If none the title will be: Hospitalizations - canton
-    params path: If none the plot will be save in the directory: images/hosp_{canton}
+    params canton: Canton of interest.
+    params predictors: Variables that  will be used in model.
+    params vaccine: It determines if the vaccine data from owid will be used or not.
+    params smooth: It determines if data will be smoothed or not.
+    params ini_date: Determines the beginning of the train dataset.
+    params title: If none the title will be: Hospitalizations - canton.
+    params path: If none the plot will be save in the directory: images/hosp_{canton}.
     """
 
     # compute the clusters
@@ -621,19 +621,19 @@ def train_eval_all_cantons(
 ):
 
     """
-    Function to make prediction for all the cantons
+    Function to make prediction for all the cantons.
 
     Important:
-    * By default the function is using the clustering cantons and the data since 2020
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
+    * By default the function is using the clustering cantons and the data since 2020.
+    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients.
 
-    params target_curve_name: string to indicate the target column of the predictions
-    params predictors: variables that  will be used in model
-    params vaccine: It determines if the vaccine data from owid will be used or not
-    params smooth: It determines if data will be smoothed or not
-    params ini_date: Determines the beggining of the train dataset
+    params target_curve_name: string to indicate the target column of the predictions.
+    params predictors: variables that  will be used in model.
+    params vaccine: It determines if the vaccine data from owid will be used or not.
+    params smooth: It determines if data will be smoothed or not.
+    params ini_date: Determines the beggining of the train dataset.
 
-    returns: Dataframe with the predictions for all the cantons
+    returns: DataFrame with the predictions for all the cantons.
     """
 
     df_all = pd.DataFrame()
@@ -716,19 +716,19 @@ def train_single_canton(
 ):
 
     """
-    Function to train and evaluate the model for one georegion
+    Function to train and evaluate the model for one georegion.
 
     Important:
-    * By default the function is using the clustering cantons and the data since 2020
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
+    * By default the function is using the clustering cantons and the data since 2020.
+    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients.
 
-    params canton: canton of interest
-    params predictors: variables that  will be used in model
-    params vaccine: It determines if the vaccine data from owid will be used or not
-    params smooth: It determines if data will be smoothed or not
-    params ini_date: Determines the beggining of the train dataset
-    params title: If none the title will be: Hospitalizations - canton
-    params path: If none the plot will be save in the directory: images/hosp_{canton}
+    params canton: canton of interest.
+    params predictors: variables that  will be used in model.
+    params vaccine: It determines if the vaccine data from owid will be used or not.
+    params smooth: It determines if data will be smoothed or not.
+    params ini_date: Determines the beggining of the train dataset.
+    params title: If none the title will be: Hospitalizations - canton.
+    params path: If none the plot will be save in the directory: images/hosp_{canton}.
     """
 
     # compute the clusters
@@ -797,16 +797,16 @@ def train_all_cantons(
     """
 
     Important:
-    * By default the function is using the clustering cantons and the data since 2020
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
+    * By default the function is using the clustering cantons and the data since 2020.
+    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients.
 
-    params target_curve_name: string to indicate the target column of the predictions
-    params predictors: variables that  will be used in model
-    params vaccine: It determines if the vaccine data from owid will be used or not
-    params smooth: It determines if data will be smoothed or not
-    params ini_date: Determines the beggining of the train dataset
+    params target_curve_name: string to indicate the target column of the predictions.
+    params predictors: variables that  will be used in model.
+    params vaccine: It determines if the vaccine data from owid will be used or not.
+    params smooth: It determines if data will be smoothed or not.
+    params ini_date: Determines the beginning of the train dataset.
 
-    returns: Dataframe with the forecast for all the cantons
+    returns: DataFrame with the forecast for all the cantons
     """
 
     # compute the clusters
@@ -932,19 +932,19 @@ def forecast_all_cantons(
     predict_n=14,
 ):
     """
-    Function to make the forecast for all the cantons
+    Function to make the forecast for all the cantons.
 
     Important:
-    * By default the function is using the clustering cantons and the data since 2020
-    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients
+    * By default the function is using the clustering cantons and the data since 2020.
+    * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients.
 
-    params target_curve_name: string to indicate the target column of the predictions
-    params predictors: variables that  will be used in model
-    params vaccine: It determines if the vaccine data from owid will be used or not
-    params smooth: It determines if data will be smoothed or not
-    params ini_date: Determines the beggining of the train dataset
+    params target_curve_name: string to indicate the target column of the predictions.
+    params predictors: variables that  will be used in model.
+    params vaccine: It determines if the vaccine data from owid will be used or not.
+    params smooth: It determines if data will be smoothed or not.
+    params ini_date: Determines the beggining of the train dataset.
 
-    returns: Dataframe with the forecast for all the cantons
+    returns: DataFrame with the forecast for all the cantons.
     """
     df_all = pd.DataFrame()
 
