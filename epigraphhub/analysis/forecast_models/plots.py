@@ -15,25 +15,26 @@ def plot_val(
     save: bool = False,
 ) -> None:
     """
-    Function to plot the output of the model trained in the test and sample data.
+    Function to plot the output of the model trained in the test and sample
+    data.
 
     Parameters
     ----------
     df : pd.DataFrame
-        A dataframe with a datetime index and four columns: 'target', 'lower', 'median', 'upper' and
-        'train_size'.
+        A DataFrame with a datetime index and four columns: 'target', 'lower',
+        'median', 'upper' and 'train_size'.
     title : str
         Title of the plot.
-    xlabel : str, optional
-        Title of the axis x, by default "Date"
-    ylabel : str, optional
-        Title of the axis y, by default "Incidence"
-    path : str, optional
-        Folder to save the plot, by default None
-    name : str, optional
-        Name used to save the plot, by default None
-    save : bool, optional
-        If True the plot is saved, by default False
+    xlabel : str
+        Title of the axis x, by default "Date". It's optional.
+    ylabel : str
+        Title of the axis y, by default "Incidence". It's optional.
+    path : str
+        Folder to save the plot, by default None. It's optional.
+    name : str
+        Name used to save the plot, by default None. It's optional.
+    save : bool
+        If True the plot is saved, by default False. It's optional.
     """
 
     fig, ax = plt.subplots(dpi=150)
@@ -82,25 +83,26 @@ def plot_forecast(
     save: bool = False,
 ) -> None:
     """
-    Function to plot the output of the model trained in the test and sample data.
+    Function to plot the output of the model trained in the test and sample
+    data.
 
     Parameters
     ----------
     df : pd.DataFrame
-        A dataframe with a datetime index and four columns: 'target', 'lower', 'median', 'upper' and
-        'train_size'.
+        A DataFrame with a datetime index and four columns: 'target', 'lower',
+        'median', 'upper' and 'train_size'.
     title : str
         Title of the plot.
-    xlabel : str, optional
-        Title of the axis x, by default "Date"
-    ylabel : str, optional
-        Title of the axis y, by default "Incidence"
-    path : str, optional
-        Folder to save the plot, by default None
-    name : str, optional
-        Name used to save the plot, by default None
-    save : bool, optional
-        If True the plot is saved, by default False
+    xlabel : str
+        Title of the axis x, by default "Date". It's optional.
+    ylabel : str
+        Title of the axis y, by default "Incidence". It's optional.
+    path : str
+        Folder to save the plot, by default None. It's optional.
+    name : str
+        Name used to save the plot, by default None. It's optional.
+    save : bool
+        If True the plot is saved, by default False. It's optional.
     """
 
     plt.figure()
