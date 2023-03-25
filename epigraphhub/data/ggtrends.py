@@ -88,7 +88,7 @@ def related_topics(keywords: list[str], **kwargs: ParamSpecKwargs) -> dict:
         keywords: list of keywords to find topics related to.
         **kwargs:
 
-    Returns: dictionary of dataframes
+    Returns: Dictionary of DataFrames.
 
     """
     trends = _build_payload(keywords, **kwargs)
@@ -103,7 +103,7 @@ def related_queries(keywords: list[str], **kwargs: ParamSpecKwargs) -> dict:
         keywords: list of keywords to find queries related to.
         **kwargs:
 
-    Returns: dictionary of dataframes
+    Returns: Dictionary of DataFrames.
 
     """
     trends = _build_payload(keywords, **kwargs)
