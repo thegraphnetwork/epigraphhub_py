@@ -1,8 +1,9 @@
 """
-Last change on 2022/10/24
+Last change on 2023/04/17
 This module is used for fetching and downloading COVID
 data from Federal Office of Public Health. The data
-of interest consists in the following CSV tables:
+of interest consists in the following CSV tables for daily
+data:
 
 _____________________________________________________________________
 cases                  | COVID19Cases_geoRegion.csv
@@ -23,7 +24,7 @@ covidCertificates      | COVID19Certificates.csv
 Methods
 -------
 
-get_csv_relation(source):
+get_csv_relation(source, freq, by):
     Generator which returns the context of interest for the foph data
     collection. Yields the table name and the respectively url.
 
@@ -45,20 +46,30 @@ from epigraphhub.data._config import FOPH_CSV_PATH, FOPH_LOG_PATH, FOPH_URL
 logger.add(FOPH_LOG_PATH, retention="7 days")
 
 
-def fetch(source=FOPH_URL):
+def fetch(source:str=FOPH_URL, freq:str='daily', by:str='default') -> tuple:
     """
     A generator responsible for accessing FOPH and retrieve the CSV
     relation, such as its Table name and URL as a tuple.
 
     Args:
         source (str) : The url with the csv relation.
+        freq (str)   : The frequency of the data (daily or weekly).
+        by (str)     : Available only for weekly data, fetches cases by
+                       age, sex or default.
 
     Returns:
         table (str)  : Table name as in the json file.
         url (str)    : URL to download the CSV.
     """
     context = requests.get(source).json()
-    tables = context["sources"]["individual"]["csv"]["daily"]
+    tables = context["sources"]["individual"]["csv"][freq]
+    if freq.lower() == 'weekly':
+        if by.lower() == 'age':
+            tables = tables['byAge']
+        elif by.lower() == 'sex':
+            tables = tables['bySex']
+        else:
+            tables = tables[by]
     for table, url in tables.items():
         yield table, url
 
