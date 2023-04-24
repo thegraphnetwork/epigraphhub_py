@@ -35,15 +35,87 @@ remove_csvs():
     Removes the CSVs directory recursively.
 """
 import os
+import json
 import subprocess
-from pathlib import Path
-
 import requests
+import pandas as pd
+from pathlib import Path
 from loguru import logger
+from bs4 import BeautifulSoup
 
-from epigraphhub.data._config import FOPH_CSV_PATH, FOPH_LOG_PATH, FOPH_URL
+from epigraphhub.data._config import (
+    FOPH_CSV_PATH, 
+    FOPH_LOG_PATH, 
+    FOPH_URL, 
+    FOPH_METADATA_URL
+)
 
 logger.add(FOPH_LOG_PATH, retention='7 days')
+
+
+def metadata(table: str = None, filename: str = None, source: str = FOPH_METADATA_URL) -> pd.DataFrame:
+    """
+    Extracts metadata information from FOPH datasets. It is able
+    of retrieving by table name or file name. Returns the relation
+    of all tables if both are None.
+
+    Args:
+        table (str)      : The name of the table.   
+        filename (str)   : The name of the file of the table.
+        source (str)     : The url where the metadata are stored.
+
+    Returns:
+        pd.DataFrame     : Returns a metadata DataFrame, if neither table or filename
+                           are passed in, returns all tables available in source.
+    """
+    resp = requests.get(source).text
+    soup = BeautifulSoup(resp)
+    html_table = soup.find('table')
+    table_rows = html_table.find_all('tr')
+
+    metadatas = []
+    for tr in table_rows:
+        td = tr.find_all('td')
+        row = [tr.text.strip() for tr in td if tr.text.strip()]
+        if row:
+            file, dataset, desc = row
+
+            deprec = False
+            if 'DEPRECATED' in file:
+                deprec = True
+                file = str(file).split('DEPRECATED ')[1]
+
+            file = str(file).split('.(json/csv)')[0]
+
+            metadatas.append(
+                dict(
+                    table=dataset, 
+                    filename=file,
+                    description=desc,
+                    deprecated=deprec
+            ))
+
+    df = pd.DataFrame(metadatas)
+
+    if not table and not filename:
+        return df
+
+    hrefs = html_table.find_all('a', href=True)
+
+    metadata_link = dict()
+    for tag in hrefs:
+        metadata_link[tag.text] = tag['href']
+
+    with open(f'{Path(__file__).parent}/schema.json') as schemas:
+        data = json.load(schemas)
+
+    table_schema = pd.DataFrame(data)
+
+    if table:
+        return pd.DataFrame(table_schema[table])
+    
+    if filename:
+        return pd.DataFrame(table_schema[df[df['filename'] == filename].table.values[0]])
 
 
 def fetch(

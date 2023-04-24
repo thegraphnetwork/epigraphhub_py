@@ -4,6 +4,89 @@ import pytest
 from epigraphhub.data.foph import extract
 
 
+def test_extracting_metadata_tables():
+    metadata_tables = list(extract.metadata().table)
+
+    expected_tables = [
+        'DailyIncomingData',
+        'DailyCasesVaccPersonsIncomingData',
+        'DailyIncomingData',
+        'DailyHospVaccPersonsIncomingData',
+        'DailyIncomingData',
+        'DailyDeathVaccPersonsIncomingData',
+        'DailyIncomingData',
+        'DailyIncomingData',
+        'WeeklyIncomingData',
+        'WeeklyIncomingData',
+        'WeeklyIncomingData',
+        'WeeklyIncomingData',
+        'WeeklyIncomingData',
+        'WeeklyIncomingData',
+        'WeeklyCasesVaccPersonsAgeRangeIncomingData',
+        'WeeklyIncomingData',
+        'WeeklyHospReasonIncomingData',
+        'WeeklyDeathReasonIncomingData',
+        'WeeklyHospVaccPersonsAgeRangeIncomingData',
+        'WeeklyIncomingData',
+        'WeeklyDeathVaccPersonsAgeRangeIncomingData',
+        'WeeklyDeathBreakthroughVaccPersonsAgeRangeIncomingData',
+        'WeeklyIncomingData',
+        'WeeklyIncomingData',
+        'WeeklyCasesVaccPersonsSexIncomingData',
+        'WeeklyIncomingData',
+        'WeeklyHospVaccPersonsSexIncomingData',
+        'WeeklyIncomingData',
+        'WeeklyDeathVaccPersonsSexIncomingData',
+        'WeeklyIncomingData',
+        'WeeklyReportIncomingData',
+        'SentinellaWeeklyVirusTypesData',
+        'SentinellaWeeklyConsulationsData',
+        'AdditionalGeoRegionDailyIncomingData',
+        'AdditionalGeoRegion14dPeriodIncomingData',
+        'DailyReportIncomingData',
+        'ContactTracingIncomingData',
+        'HospCapacityDailyIncomingData',
+        'HospCapacityCertStatusIncomingData',
+        'HospCapacityWeeklyIncomingData',
+        'InternationalQuarantineIncomingData',
+        'InternationalDailyIncomingData',
+        'ReDailyIncomingData',
+        'VaccinationIncomingData',
+        'VaccinationDosesReceivedDeliveredVaccineIncomingData',
+        'VaccinationIncomingData',
+        'VaccinationVaccineIncomingData',
+        'VaccPersonsIncomingData',
+        'VaccPersonsVaccineIncomingData',
+        'VaccinationWeeklyIncomingData',
+        'VaccPersonsWeeklyIncomingData',
+        'VaccPersonsWeeklyAgeRangeVaccineIncomingData',
+        'VaccinationWeeklyIncomingData',
+        'VaccPersonsWeeklyIncomingData',
+        'VaccPersonsWeeklyIndicationIncomingData',
+        'VaccinationWeeklyIndicationIncomingData',
+        'VaccinationWeeklyLocationIncomingData',
+        'VaccinationSymptomsIncomingData',
+        'VaccinationContingentIncomingData',
+        'VirusVariantsWgsDailyIncomingData',
+        'VirusVariantsHospWeeklyIncomingData',
+        'CovidCertificatesDailyIncomingData',
+        'DailyEpiRawIncomingData',
+        'DailyCasesAgeRangeRawIncomingData',
+        'WeeklyEpiAgeRangeSexRawIncomingData',
+        'PopulationAgeRangeSexData',
+        'WasteWaterDailyViralLoadData',
+        'WasteWaterViralLoadOverview',
+        'WeeklyHospBreakthroughVaccPersonsAgeRangeIncomingData'
+    ]
+
+    assert all([t in metadata_tables for t in expected_tables])
+
+    half_of_amt = int(len(expected_tables)/2)
+    for tablename in expected_tables[half_of_amt:]: # takes too long
+        df = extract.metadata(table=tablename)
+        assert isinstance(df, pd.DataFrame)
+        assert not df.empty
+
 def test_fetching_tables_for_daily_data():
     dataset_tables = [
         t for t,url in extract.fetch(freq='daily')
