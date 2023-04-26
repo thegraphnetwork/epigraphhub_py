@@ -17,6 +17,7 @@ COLOMBIA_CLIENT = Socrata("www.datos.gov.co", "078u4PCGpnDfH157kAkVFoWea")
 FOPH_LOG_PATH = "/tmp/foph_fetch.log"
 FOPH_URL = "https://www.covid19.admin.ch/api/data/context"
 FOPH_CSV_PATH = "/tmp/foph/releases"
+FOPH_METADATA_URL = "https://www.covid19.admin.ch/api/data/documentation"
 
 
 # Our World in Data (OWID) COVID data config:
