@@ -44,23 +44,25 @@ from loguru import logger
 from bs4 import BeautifulSoup
 
 from epigraphhub.data._config import (
-    FOPH_CSV_PATH, 
-    FOPH_LOG_PATH, 
-    FOPH_URL, 
-    FOPH_METADATA_URL
+    FOPH_CSV_PATH,
+    FOPH_LOG_PATH,
+    FOPH_URL,
+    FOPH_METADATA_URL,
 )
 
 logger.add(FOPH_LOG_PATH, retention='7 days')
 
 
-def metadata(table: str = None, filename: str = None, source: str = FOPH_METADATA_URL) -> pd.DataFrame:
+def metadata(
+    table: str = None, filename: str = None, source: str = FOPH_METADATA_URL
+) -> pd.DataFrame:
     """
     Extracts metadata information from FOPH datasets. It is able
     of retrieving by table name or file name. Returns the relation
     of all tables if both are None.
 
     Args:
-        table (str)      : The name of the table.   
+        table (str)      : The name of the table.
         filename (str)   : The name of the file of the table.
         source (str)     : The url where the metadata are stored.
 
@@ -89,11 +91,12 @@ def metadata(table: str = None, filename: str = None, source: str = FOPH_METADAT
 
             metadatas.append(
                 dict(
-                    table=dataset, 
+                    table=dataset,
                     filename=file,
                     description=desc,
-                    deprecated=deprec
-            ))
+                    deprecated=deprec,
+                )
+            )
 
     df = pd.DataFrame(metadatas)
 
@@ -113,9 +116,11 @@ def metadata(table: str = None, filename: str = None, source: str = FOPH_METADAT
 
     if table:
         return pd.DataFrame(table_schema[table])
-    
+
     if filename:
-        return pd.DataFrame(table_schema[df[df['filename'] == filename].table.values[0]])
+        return pd.DataFrame(
+            table_schema[df[df['filename'] == filename].table.values[0]]
+        )
 
 
 def fetch(
