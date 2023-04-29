@@ -38,9 +38,13 @@ class WorldPop:
 
     def get_dataset_tables(self, alias: str) -> dict[str, Union[str, pd.DataFrame]]:
         """
-        Generator function that returns dictionaries containing on dataframe and metadata at a time
-        Args:
-            alias: alias for the dataset of interest
+        Generator function that returns dictionaries containing on DataFrame and
+        metadata at a time.
+
+        Parameters
+        ----------
+        alias : str
+            Alias for the dataset of interest.
         """
         if alias not in self._aliases:
             raise NameError(f"'{alias}' is invalid dataset alias")
@@ -59,14 +63,20 @@ class WorldPop:
         self, alias: str, level: str, ISO3_code: str = "BRA"
     ) -> dict[str, Any]:
         """
-        Returns Country specific dataset metadata from given `alias` and `level`
-        Args:
-            alias: Top level category of data
-            level: 2nd level catagory of data
-            ISO3_code: 3-letter country code.
+        Returns Country specific dataset metadata from given `alias` and `level`.
 
-        Returns: dictionary
+        Parameters
+        ----------
+        alias : str
+            Top level category of data.
+        level : str
+            2nd level category of data.
+        ISO3_code: str
+            3-letter country code.
 
+        Returns:
+        --------
+        dict
         """
         if alias not in self._aliases:
             raise NameError(f"'{alias}' is invalid dataset alias")

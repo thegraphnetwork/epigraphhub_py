@@ -26,17 +26,11 @@ def posterior_prevalence(
     b : float
         It's optional. Prior beta parameter beta, by default 1.
 
-    Args
-    ----
-    pop_size: population size
-    positives: number of positives
-    a: prior beta parameter alpha
-    b: prior beta parameter beta
-
     Returns
     -------
-    object: Returns a scipy stats frozen beta distribution that represents the
-    posterior probability of the prevalence.
+    object
+        Returns a scipy stats frozen beta distribution that represents the
+        posterior probability of the prevalence.
     """
     a, b = 1, 1  # prior beta parameters
     pa = a + positives
@@ -56,17 +50,18 @@ def incidence_rate(
 
     Parameters
     ----------
-    pop_size: int
+    pop_size : int
         Population size.
-    new_cases: int
+    new_cases : int
         Number of new cases observed in the period.
-    scaling: float
+    scaling : float
         Number to scale the rate to. If omitted, the rate is return as cases per
         100k.
 
     Returns
     -------
-    A float or a np.ndarray of floats.
+    IR : float or np.ndarray
+        A float or a np.ndarray of floats.
 
     Examples
     --------
@@ -88,18 +83,19 @@ def risk_ratio(
 
     Parameters
     ----------
-    exposed_cases: int
+    exposed_cases : int
         Number of cases in the exposed group.
-    exposed_total: int
+    exposed_total : int
         Size of the exposed group.
-    control_cases: int
+    control_cases : int
         Number of cases in the control group.
-    control_total: int
+    control_total : int
         Size of the control group.
 
     Returns
     -------
-        RelativeRiskResult object
+    object
+        RelativeRiskResult object.
 
     Examples
     --------

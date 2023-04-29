@@ -50,12 +50,17 @@ def fetch(source=FOPH_URL):
     A generator responsible for accessing FOPH and retrieve the CSV
     relation, such as its Table name and URL as a tuple.
 
-    Args:
-        source (str) : The url with the csv relation.
+    Parameters
+    ----------
+    source : str
+        The url with the csv relation.
 
-    Returns:
-        table (str)  : Table name as in the json file.
-        url (str)    : URL to download the CSV.
+    Returns
+    -------
+    table : str
+        Table name as in the json file.
+    url : str
+        URL to download the CSV.
     """
     context = requests.get(source).json()
     tables = context["sources"]["individual"]["csv"]["daily"]
@@ -68,8 +73,10 @@ def download(url):
     This methods runs curl in a URL that corresponds to a CSV file
     and stores it as specified in the URL.
 
-    Args:
-        url (str)    : URL that contains the CSV to download.
+    Parameters
+    ----------
+    url : str
+        URL that contains the CSV to download.
     """
     os.makedirs(FOPH_CSV_PATH, exist_ok=True)
     filename = url.split("/")[-1]

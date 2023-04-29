@@ -44,7 +44,8 @@ def download_data(disease: str, year: int) -> str:
 
     Returns
     -------
-        fname: Name of parquet directory.
+    fname : str
+        Name of parquet directory.
     """
 
     cod_agravo = SINAN.agravos.get(disease.title())
@@ -72,11 +73,13 @@ def parquet_to_df(fname: str) -> pd.DataFrame:
 
     Parameters
     ----------
-    fname: str
+    fname : str
         Name of the parquet files.
+
     Returns
     -------
-    A pandas DataFrame.
+    pd.DataFrame
+        A pandas DataFrame.
     """
 
     df = (
@@ -102,17 +105,19 @@ def parquet_to_df(fname: str) -> pd.DataFrame:
 
 def save_to_pgsql(disease: str, year: int) -> conn.commit:
     """
-    Delete the table if it exists and create a new table
-    according to the disease name and year.
+    Delete the table if it exists and create a new table according to the
+    disease name and year.
     Adds DataFrame data to table.
 
     Parameters
     ----------
     fname: str
         Name of the parquet files.
+
     Returns
     -------
-        conn: Execute query with psycopg2.extras.
+    conn: conn.commit
+        Execute query with psycopg2.extras.
     """
 
     fname = download_data(disease, year)

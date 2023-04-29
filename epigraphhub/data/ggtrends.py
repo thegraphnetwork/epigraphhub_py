@@ -67,12 +67,19 @@ def interest_by_region(
 ) -> pd.DataFrame:
     """
     Fetch trends by region
-    Args:
-        keywords (list[str]): List of keywords
-        resolution (str, optional): spatial resolution can be one of ["country", "region", "city", "dma"]. Defaults to "country".
 
-    Returns:
-        [type]: [description]
+    Parameters
+    ----------
+    keywords : list
+        List of keywords
+    resolution : str, optional
+        Spatial resolution can be one of ["country", "region", "city", "dma"].
+        Defaults to "country".
+    **kwargs : object
+
+    Returns
+    -------
+    pd.DataFrame
     """
     trends = _build_payload(keywords, **kwargs)
     df = trends.interest_by_region(
@@ -84,12 +91,16 @@ def interest_by_region(
 def related_topics(keywords: list[str], **kwargs: ParamSpecKwargs) -> dict:
     """
     Get related topics to keywords provided
-    Args:
-        keywords: list of keywords to find topics related to.
-        **kwargs:
+    Parameters
+    ----------
+    keywords : list
+        List of keywords to find topics related to.
+    **kwargs : object
 
-    Returns: Dictionary of DataFrames.
-
+    Returns
+    -------
+    dict
+        Dictionary of DataFrames.
     """
     trends = _build_payload(keywords, **kwargs)
     dic: dict = trends.related_topics()
@@ -98,13 +109,18 @@ def related_topics(keywords: list[str], **kwargs: ParamSpecKwargs) -> dict:
 
 def related_queries(keywords: list[str], **kwargs: ParamSpecKwargs) -> dict:
     """
-    Get related queries to keywords provided
-    Args:
-        keywords: list of keywords to find queries related to.
-        **kwargs:
+    Get related queries to keywords provided.
 
-    Returns: Dictionary of DataFrames.
+    Parameters
+    ----------
+    keywords : list
+        List of keywords to find queries related to.
+    **kwargs : object
 
+    Returns
+    -------
+    dict
+        Dictionary of DataFrames.
     """
     trends = _build_payload(keywords, **kwargs)
     dic: dict = trends.related_queries()

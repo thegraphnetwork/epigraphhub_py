@@ -37,12 +37,23 @@ from epigraphhub.data.foph.viz import get_cluster_data
 
 def build_model(hidden, features, predict_n, look_back=10, batch_size=1):
     """
-    Builds and returns the LSTM model with the parameters given
-    :param hidden: Number of hidden nodes.
-    :param features: Number of variables in the example table.
-    :param look_back: Number of time-steps to look back before predicting.
-    :param batch_size: Batch size for batch training.
-    :return:
+    Builds and returns the LSTM model with the parameters given.
+
+    Parameters
+    ----------
+    hidden : int
+        Number of hidden nodes.
+    features : int
+        Number of variables in the example table.
+    look_back : int
+        Number of time-steps to look back before predicting.
+    batch_size : int
+        Batch size for batch training.
+
+    Returns
+    -------
+    model : tensor
+        A LSTM model.
     """
 
     inp = keras.Input(
@@ -153,7 +164,11 @@ def train(
 def plot_training_history(hist):
     """
     Plot the Loss series from training the model.
-    :param hist: Training history object returned by "model.fit()".
+
+    Parameters
+    ----------
+    hist : object
+        Training history object returned by "model.fit()".
     """
     df_vloss = pd.DataFrame(hist.history["val_loss"], columns=["val_loss"])
     df_loss = pd.DataFrame(hist.history["loss"], columns=["loss"])
@@ -178,12 +193,19 @@ def plot_predicted_vs_data(
 ):
     """
     Plot the model's predictions against data.
-    :param predicted: Model predictions.
-    :param Ydata: Observed data.
-    :param indice:
-    :param label: Name of the locality of the predictions.
-    :param pred_window:
-    :param factor: Normalizing factor for the target variable.
+
+    Parameters
+    ----------
+    predicted : object
+        Model predictions.
+    Ydata : object
+        Observed data.
+    indice : object
+    label : str
+        Name of the locality of the predictions.
+    pred_window : object
+    factor : object
+        Normalizing factor for the target variable.
     """
 
     plt.clf()
@@ -534,13 +556,22 @@ def train_eval_single_canton(
     * By default the function is using the clustering cantons and the data since 2020.
     * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients.
 
-    params canton: Canton of interest.
-    params predictors: Variables that  will be used in model.
-    params vaccine: It determines if the vaccine data from owid will be used or not.
-    params smooth: It determines if data will be smoothed or not.
-    params ini_date: Determines the beginning of the train dataset.
-    params title: If none the title will be: Hospitalizations - canton.
-    params path: If none the plot will be save in the directory: images/hosp_{canton}.
+    Parameters
+    ----------
+    canton : str
+        Canton of interest.
+    predictors : str
+        Names of variables that will be used in model.
+    vaccine : bool
+        It determines if the vaccine data from owid will be used or not.
+    smooth : bool
+        It determines if data will be smoothed or not.
+    ini_date : str, np.datetime64
+        Determines the beginning of the train dataset.
+    title : str
+        If none the title will be: Hospitalizations - canton.
+    path : str
+        If none the plot will be save in the directory: images/hosp_{canton}.
     """
 
     # compute the clusters
@@ -627,13 +658,23 @@ def train_eval_all_cantons(
     * By default the function is using the clustering cantons and the data since 2020.
     * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients.
 
-    params target_curve_name: string to indicate the target column of the predictions.
-    params predictors: variables that  will be used in model.
-    params vaccine: It determines if the vaccine data from owid will be used or not.
-    params smooth: It determines if data will be smoothed or not.
-    params ini_date: Determines the beggining of the train dataset.
+    Parameters
+    ----------
+    target_curve_name: str
+        A string to indicate the target column of the predictions.
+    predictors:
+        Variables that  will be used in model.
+    vaccine: bool
+        It determines if the vaccine data from owid will be used or not.
+    smooth: bool
+        It determines if data will be smoothed or not.
+    ini_date:
+        Determines the beginning of the train dataset.
 
-    returns: DataFrame with the predictions for all the cantons.
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with the predictions for all the cantons.
     """
 
     df_all = pd.DataFrame()
@@ -722,13 +763,22 @@ def train_single_canton(
     * By default the function is using the clustering cantons and the data since 2020.
     * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients.
 
-    params canton: canton of interest.
-    params predictors: variables that  will be used in model.
-    params vaccine: It determines if the vaccine data from owid will be used or not.
-    params smooth: It determines if data will be smoothed or not.
-    params ini_date: Determines the beggining of the train dataset.
-    params title: If none the title will be: Hospitalizations - canton.
-    params path: If none the plot will be save in the directory: images/hosp_{canton}.
+    Parameters
+    ----------
+    canton: str
+        Canton of interest.
+    predictors: str
+        Names of variables that  will be used in model.
+    vaccine: bool
+        It determines if the vaccine data from owid will be used or not.
+    smooth: bool
+        It determines if data will be smoothed or not.
+    ini_date: str, np.datetime64
+        Determines the beginning of the train dataset.
+    title: str, optional
+        If none the title will be: Hospitalizations - canton.
+    path: str
+        If none the plot will be save in the directory: images/hosp_{canton}.
     """
 
     # compute the clusters
@@ -800,13 +850,23 @@ def train_all_cantons(
     * By default the function is using the clustering cantons and the data since 2020.
     * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients.
 
-    params target_curve_name: string to indicate the target column of the predictions.
-    params predictors: variables that  will be used in model.
-    params vaccine: It determines if the vaccine data from owid will be used or not.
-    params smooth: It determines if data will be smoothed or not.
-    params ini_date: Determines the beginning of the train dataset.
+    Parameters
+    ----------
+    target_curve_name : str
+        String to indicate the target column of the predictions.
+    predictors : str
+        Names of variables that will be used in model.
+    vaccine : bool
+        It determines if the vaccine data from owid will be used or not.
+    smooth : bool
+        It determines if data will be smoothed or not.
+    ini_date : str, np.datetime64
+        Determines the beginning of the train dataset.
 
-    returns: DataFrame with the forecast for all the cantons
+    Returns
+    --------
+    pd.DataFrame
+        DataFrame with the forecast for all the cantons.
     """
 
     # compute the clusters
@@ -938,13 +998,23 @@ def forecast_all_cantons(
     * By default the function is using the clustering cantons and the data since 2020.
     * For the predictor hospCapacity is used as predictor the column ICU_Covid19Patients.
 
-    params target_curve_name: string to indicate the target column of the predictions.
-    params predictors: variables that  will be used in model.
-    params vaccine: It determines if the vaccine data from owid will be used or not.
-    params smooth: It determines if data will be smoothed or not.
-    params ini_date: Determines the beggining of the train dataset.
+    Parameters
+    ----------
+    target_curve_name : str
+        String to indicate the target column of the predictions.
+    predictors : str
+        Names of variables that will be used in model.
+    vaccine : bool
+        It determines if the vaccine data from owid will be used or not.
+    smooth : bool
+        It determines if data will be smoothed or not.
+    ini_date : str, np.datetime64
+        Determines the beggining of the train dataset.
 
-    returns: DataFrame with the forecast for all the cantons.
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with the forecast for all the cantons.
     """
     df_all = pd.DataFrame()
 

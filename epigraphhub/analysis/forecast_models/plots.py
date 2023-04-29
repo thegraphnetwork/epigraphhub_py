@@ -25,16 +25,16 @@ def plot_val(
         'median', 'upper' and 'train_size'.
     title : str
         Title of the plot.
-    xlabel : str
-        Title of the axis x, by default "Date". It's optional.
-    ylabel : str
-        Title of the axis y, by default "Incidence". It's optional.
-    path : str
-        Folder to save the plot, by default None. It's optional.
-    name : str
-        Name used to save the plot, by default None. It's optional.
-    save : bool
-        If True the plot is saved, by default False. It's optional.
+    xlabel : str, optional
+        Title of the axis x, by default "Date".
+    ylabel : str, optional
+        Title of the axis y, by default "Incidence".
+    path : str, optional
+        Folder to save the plot, by default None.
+    name : str, optional
+        Name used to save the plot, by default None.
+    save : bool, optional
+        If True the plot is saved, by default False.
     """
 
     fig, ax = plt.subplots(dpi=150)
@@ -93,16 +93,16 @@ def plot_forecast(
         'median', 'upper' and 'train_size'.
     title : str
         Title of the plot.
-    xlabel : str
-        Title of the axis x, by default "Date". It's optional.
-    ylabel : str
-        Title of the axis y, by default "Incidence". It's optional.
-    path : str
-        Folder to save the plot, by default None. It's optional.
-    name : str
-        Name used to save the plot, by default None. It's optional.
-    save : bool
-        If True the plot is saved, by default False. It's optional.
+    xlabel : str, optional
+        Title of the axis x, by default "Date".
+    ylabel : str, optional
+        Title of the axis y, by default "Incidence".
+    path : str, optional
+        Folder to save the plot, by default None.
+    name : str, optional
+        Name used to save the plot, by default None.
+    save : bool, optional
+        If True the plot is saved, by default False.
     """
 
     plt.figure()

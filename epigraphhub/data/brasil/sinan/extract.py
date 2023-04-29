@@ -12,10 +12,16 @@ def download(disease: str, years: list) -> list:
     Download all parquets available for a disease,
     according to `SINAN.agravos`.
 
-    Attrs:
-        disease (str): The disease to be downloaded.
-        years (list): The years to be downloaded.
-    Returns:
+    Parameters
+    ----------
+    disease : str
+        The disease to be downloaded.
+    years : list
+        The years to be downloaded.
+
+    Returns
+    -------
+    list
         A list with full paths of parquet dirs to upload into db
     """
 
@@ -31,6 +37,15 @@ def download(disease: str, years: list) -> list:
 def metadata_df(disease: str) -> pd.DataFrame:
     """
     Returns a DataFrame containing metadata for a SINAN disease.
+
+    Parameters
+    ----------
+    disease : str
+        A SINAN disease.
+
+    Returns
+    -------
+    pd.DataFrame
     """
     try:
         return SINAN.metadata_df(disease)

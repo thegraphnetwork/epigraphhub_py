@@ -32,10 +32,13 @@ def upload(table, filename):
     the SQL Database, as defined in the connection configuration.
     @see epigraphhub.connection
 
-    Args:
-        table (str)    : Raw table name. Later parsed to SQL format.
-        filename (str) : File name as defined in the CSV URL.
-                         @see .download as above.
+    Parameters
+    ----------
+    table : str
+        Raw table name. Later parsed to SQL format.
+    filename : str
+        File name as defined in the CSV URL.
+        @see .download as above.
     """
     new_df = pd.read_csv(f"{FOPH_CSV_PATH}/{filename}")
     logger.info(f"Reading {filename}")
@@ -73,14 +76,20 @@ def _csv_last_update(filename) -> datetime:
     """
     Method responsible for retrieving the maximum date in a CSV file.
 
-    Args:
-        filename (str)         : The CSV filename.
+    Parameters
+    ----------
+    filename : str
+        The CSV filename.
 
-    Returns:
-        last_update (datetime) : Datetime with the max date in the CSV.
+    Returns
+    -------
+    last_update : datetime
+        Datetime with the max date in the CSV.
 
-    Raises:
-        Exception (Exception)  : Empty dataframe from CSV.
+    Raises
+    ------
+    Exception : Exception
+        Empty DataFrame from CSV.
     """
     df = pd.read_csv(f"{FOPH_CSV_PATH}/{filename}")
     if "date" not in df:
@@ -94,20 +103,25 @@ def _csv_last_update(filename) -> datetime:
 
 def _table_last_update(table) -> datetime:
     """
-    Method responsible for connecting and retrieving the maximum date
-    of a table in the SQL Database.
-    @see epigraphhub.connection : Where the connection is configured.
+    Method responsible for connecting and retrieving the maximum date of a table
+    in the SQL Database. @see epigraphhub.connection : Where the connection is
+    configured.
 
-    Args:
-        table (str)             : Table name as in the CSV file. Later
-                                  tansformed into SQL DB table format.
+    Parameters
+    -----------
+    table : str
+        Table name as in the CSV file. Later transformed into SQL DB table
+        format.
 
-    Returns:
-        last_update (datetime)  : Datetime with the max date in the table.
+    Returns
+    -------
+    last_update : datetime
+        Datetime with the max date in the table.
 
-    Raises:
-        Exception (Exception)   : Connection with the database could not be
-                                  stablished.
+    Raises
+    ------
+    Exception : Exception
+        Connection with the database could not be established.
     """
     engine = get_engine(env.db.default_credential)
     try:

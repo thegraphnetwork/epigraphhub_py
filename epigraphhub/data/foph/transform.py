@@ -21,8 +21,10 @@ def parse_date_region(table):
     Connects to the SQL DB and insert geoRegion and date indexes
     if they are missing.
 
-    Raises:
-        Exception (Exception) : Unable to create index. Bad connection config.
+    Raises
+    ------
+    Exception : Exception
+        Unable to create index. Bad connection config.
     """
     engine = get_engine(env.db.default_credential)
 

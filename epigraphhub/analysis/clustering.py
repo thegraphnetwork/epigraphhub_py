@@ -24,7 +24,7 @@ def get_lag(
     x : np.array
         First curve.
     y : np.array
-        Second curve
+        Second curve.
     maxlags : int, optional
         Max lag allowed when computing the lag between the curves, by default 5.
     smooth : bool, optional
@@ -65,16 +65,19 @@ def plot_xcorr(
     Parameters
     ----------
     inc : pd.DataFrame
-        A DataFrame with datetime index where each column represent a different time series.
+        A DataFrame with datetime index where each column represent a different
+        time series.
     X : str
         The name of a column.
     Y : str
-        The name of another column
+        The name of another column.
     ini_date : str
-        A date represented as string to initiate the computation of the correlation between the series.
+        A date represented as string to initiate the computation of the
+        correlation between the series.
 
     Returns
     -------
+    plotly.graph_objs._figure.Figure
         A plotly.express figure.
     """
 
@@ -165,20 +168,22 @@ def plot_matrix(
 ):
     """
     Plot a heatmap using the values in cmat.
+
     Parameters
     ----------
     cmat : np.array
-        A matrix
+        A matrix.
     columns : list
         The list with the names to be used in the figure.
     title : str
         The title of the figure.
-    label_scale:str
+    label_scale :str
         The name in the color scale bar.
 
     Returns
     -------
-    A plotly figure.
+    plotly.graph_objs._figure.Figure
+        A plotly figure.
 
     """
     fig = px.imshow(
@@ -229,7 +234,7 @@ def compute_clusters(
         Represent the initial date to start to compute the correlation between
         the series. By default None.
     plot : bool, optional
-        If true a dendogram of the clusterization will be returned. By default
+        If true a dendrogram of the clusterization will be returned. By default
         False.
 
     Returns
@@ -238,12 +243,12 @@ def compute_clusters(
         inc_canton: pd.DataFrame
             It's a DataFrame with datetime index where each column represent the
             same time series curve for different regions.
-        cluster: array
-            It's the array with the computed clusters
-        all_regions: array
+        cluster: np.array
+            It's the array with the computed clusters.
+        all_regions: np.array
             It's the array with all the regions used in the clusterization.
-        fig : matplotlib.Figure
-            Plot with the dendorgram of the clusterization.
+        fig: matplotlib.Figure
+            Plot with the dendrogram of the clusterization.
     """
 
     df.sort_index(inplace=True)

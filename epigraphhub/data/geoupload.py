@@ -8,7 +8,7 @@ def upload_geo_file(
     fname: str, table_name: str, schema: str, credential_name: str
 ) -> None:
     """
-    Uploads a georeferenced file to the epigraphhub database
+    Uploads a georeferenced file to the epigraphhub database.
 
     Parameters
     ----------
@@ -29,7 +29,7 @@ def upload_geo_file(
 
 def upload_geotiff(geotiff_file_name, table_name, schema, credential_name):
     """
-    Upload Geotiff file to database
+    Upload Geotiff file to database.
     """
     eng = get_engine(credential_name=credential_name)
     xds = rioxarray.open_rasterio(geotiff_file_name)

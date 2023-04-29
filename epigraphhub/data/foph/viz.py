@@ -79,39 +79,45 @@ def get_cluster_data(
 ):
 
     """
-    This function provides a data frame where each column is associated with a table
-    and region selected.
+    This function provides a data frame where each column is associated with a
+    table and region selected.
 
-    :params schema: string. The schema where the data that you want to get is saved.
+    Parameters
+    ----------
+    schema : str
+        The schema where the data that you want to get is saved.
+    table_name : list
+        List of strings. In this list should be all the tables that you want get
+        the data.
+    georegion : list
+        List of strings. This list contains all the regions of the country of
+        interest or the string 'All' to return all the regions.
+    dict_cols: dict
+        In the keys are the table_names and in the values the columns that you
+        want to use from each table.
+    date_columns : dict
+        In the keys are the table_names and in the values the name of the date
+        column of the table to be used as the index.
+    count_columns: dict
+        In the keys are the table_names and in the values the name of the column
+        which values will be used.
 
-    :params table_name: list of strings. In this list should be all the tables that you
-                        want get the data.
+    columns_name : dict
+        In the keys ate the table_names and in the values the name that will
+        appear in the column associated with each table in the final data frame
+        that will be returned.
 
-    :params georegion: list of strings. This list contains all the regions of the country
-                        of interest or the string 'All' to return all the regions.
+    vaccine : bool
+        If True the data of total vaccinations per hundred for the country in
+        the schema will be added in the final data frame. This data is from our
+        world in data.
 
-    :params dict_cols: dictionary. In the keys are the table_names and in the values
-                      the columns that you want to use from each table
+    smooth : bool
+        If True in the end data frame will be applied a moving average of seven
+        days.
 
-    :params date_columns:dictionary. In the keys are the table_names and in the values
-                          the name of the date column of the table to be used as the
-                          index.
-
-    :params count_columns: dictionary. In the keys are the table_names and in the values
-                        the name of the column which values will be used.
-
-    :params columns_name: dictionary. In the keys ate the table_names and in the values
-                        the name that will appear in the column associated with each
-                    table in the final data frame that will be returned.
-
-    :params vaccine: boolean. If True the data of total vaccinations per hundred for the
-                            country in the schema will be added in the final data frame.
-                            This data is from our world in data.
-
-    :params smooth: boolean. If True in the end data frame will be applied a moving
-                            average of seven days.
-
-    :return: Dataframe
+    :Returns :
+     pd.DataFrame
     """
 
     df_end = pd.DataFrame()

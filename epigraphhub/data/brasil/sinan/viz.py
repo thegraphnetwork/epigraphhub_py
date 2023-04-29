@@ -19,12 +19,15 @@ def parquet(parquets_dir: str) -> pd.DataFrame:
 
     Parameters
     ----------
-        fname (str)            : Path of the parquet dir.
-        clean_after_read (bool): If set to True, will delete the data after
-                                 returning the DataFrame.
+    fname : str
+        Path of the parquet dir.
+    clean_after_read: bool
+        If set to True, will delete the data after returning the DataFrame.
+
     Returns
     -------
-        df (DataFrame)         : A Pandas DataFrame.
+    df : pd.DataFrame
+        A Pandas DataFrame.
     """
 
     df = parquets_to_dataframe(parquet_dir=parquets_dir)
@@ -39,11 +42,15 @@ def table(disease: str) -> pd.DataFrame:
 
     Parameters
     ----------
-        disease (str) : The name of the disease according to SINAN.agravos
-        year (int)    : Year of the wanted data.
+    disease : str
+        The name of the disease according to SINAN.agravos
+    year : int
+        Year of the wanted data.
+
     Returns
     -------
-        df (DataFrame): The data requested in a Pandas DataFrame.
+    df : DataFrame
+        The data requested in a Pandas DataFrame.
 
     """
 
