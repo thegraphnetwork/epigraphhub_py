@@ -33,19 +33,19 @@ def parse_date_region(table):
             connection.execute(
                 f"""
                 CREATE INDEX IF NOT EXISTS region_idx
-                ON switzerland.foph_{table.lower()}_d ('geoRegion');
+                ON switzerland.foph_{table.lower()} (geoRegion);
                 """
             )
-            logger.info(f"geoRegion index updated on foph_{table.lower()}_d")
+            logger.info(f'geoRegion index updated on foph_{table.lower()}')
         except Exception as e:
-            logger.error(f"Could not create region index: {e}")
+            logger.error(f'Could not create region index: {e}')
         try:
             connection.execute(
                 f"""
                 CREATE INDEX IF NOT EXISTS date_idx
-                ON switzerland.foph_{table.lower()}_d (date);
+                ON switzerland.foph_{table.lower()} (date);
                 """
             )
-            logger.info(f"date index updated on foph_{table.lower()}_d")
+            logger.info(f'date index updated on foph_{table.lower()}')
         except Exception as e:
-            logger.info(f"Could not create date index: {e}")
+            logger.info(f'Could not create date index: {e}')

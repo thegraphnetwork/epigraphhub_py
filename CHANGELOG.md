@@ -1,6 +1,13 @@
 Release Notes
 ---
 
+## [2.0.5](https://github.com/thegraphnetwork/epigraphhub_py/compare/2.0.4...2.0.5) (2023-04-26)
+
+
+### Bug Fixes
+
+* **foph:** add tests for foph and weekly data version ([#215](https://github.com/thegraphnetwork/epigraphhub_py/issues/215)) ([c288c4b](https://github.com/thegraphnetwork/epigraphhub_py/commit/c288c4b50f29459d2994066cabebf2b0e043ab8d))
+
 ## [2.0.4](https://github.com/thegraphnetwork/epigraphhub_py/compare/2.0.3...2.0.4) (2023-03-14)
 
 

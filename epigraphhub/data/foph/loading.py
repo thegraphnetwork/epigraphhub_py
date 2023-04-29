@@ -22,7 +22,7 @@ from epigraphhub.connection import get_engine
 from epigraphhub.data._config import FOPH_CSV_PATH, FOPH_LOG_PATH
 from epigraphhub.settings import env
 
-logger.add(FOPH_LOG_PATH, retention="7 days")
+logger.add(FOPH_LOG_PATH, retention='7 days')
 
 
 def upload(table, filename):
@@ -40,30 +40,30 @@ def upload(table, filename):
         File name as defined in the CSV URL.
         @see .download as above.
     """
-    new_df = pd.read_csv(f"{FOPH_CSV_PATH}/{filename}")
-    logger.info(f"Reading {filename}")
+    new_df = pd.read_csv(f'{FOPH_CSV_PATH}/{filename}')
+    logger.info(f'Reading {filename}')
 
     new_df = new_df.rename(columns=str.lower)
-    new_df.index.name = "id_"
-    if "date" not in new_df.columns:
-        new_df["date"] = pd.to_datetime(new_df.datum)
+    new_df.index.name = 'id_'
+    if 'date' not in new_df.columns:
+        new_df['date'] = pd.to_datetime(new_df.datum)
     else:
-        new_df["date"] = pd.to_datetime(new_df.date)
-    logger.info(f"Table {table} passed to DataFrame")
+        new_df['date'] = pd.to_datetime(new_df.date)
+    logger.info(f'Table {table} passed to DataFrame')
 
     engine = get_engine(env.db.default_credential)
     with engine.connect() as conn:
         upsert(
             con=conn,
             df=new_df,
-            table_name=f"foph_{table.lower()}_d",
-            schema="switzerland",
-            if_row_exists="update",
+            table_name=f'foph_{table.lower()}',
+            schema='switzerland',
+            if_row_exists='update',
             chunksize=1000,
             add_new_columns=True,
             create_table=True,
         )
-    logger.info(f"Table foph_{table.lower()}_d updated")
+    logger.info(f'Table foph_{table.lower()} updated')
 
 
 def compare(filename, table) -> bool:
@@ -91,14 +91,14 @@ def _csv_last_update(filename) -> datetime:
     Exception : Exception
         Empty DataFrame from CSV.
     """
-    df = pd.read_csv(f"{FOPH_CSV_PATH}/{filename}")
-    if "date" not in df:
+    df = pd.read_csv(f'{FOPH_CSV_PATH}/{filename}')
+    if 'date' not in df:
         last_update = df.datum.max()
     else:
         last_update = df.date.max()
     if df.empty:
-        raise Exception("Empty file.")
-    return datetime.strptime(str(last_update), "%Y-%m-%d")
+        raise Exception('Empty file.')
+    return datetime.strptime(str(last_update), '%Y-%m-%d')
 
 
 def _table_last_update(table) -> datetime:
@@ -125,13 +125,15 @@ def _table_last_update(table) -> datetime:
     """
     engine = get_engine(env.db.default_credential)
     try:
-        df = pd.read_sql(f"select * from switzerland.foph_{table.lower()}_d;", engine)
-        if "date" not in df:
+        df = pd.read_sql(
+            f'select * from switzerland.foph_{table.lower()};', engine
+        )
+        if 'date' not in df:
             df = df.datum.dropna()
             last_update = df.max()
         df = df.date.dropna()
         last_update = df.max()
-        return datetime.strptime(str(last_update), "%Y-%m-%d %H:%M:%S")
+        return datetime.strptime(str(last_update), '%Y-%m-%d %H:%M:%S')
     except Exception as e:
-        logger.error(f"Could not access {table} table\n{e}")
+        logger.error(f'Could not access {table} table\n{e}')
         raise (e)
