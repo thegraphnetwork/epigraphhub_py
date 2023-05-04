@@ -92,13 +92,13 @@ def get_cluster_data(
     georegion : list
         List of strings. This list contains all the regions of the country of
         interest or the string 'All' to return all the regions.
-    dict_cols: dict
+    dict_cols : dict
         In the keys are the table_names and in the values the columns that you
         want to use from each table.
     date_columns : dict
         In the keys are the table_names and in the values the name of the date
         column of the table to be used as the index.
-    count_columns: dict
+    count_columns : dict
         In the keys are the table_names and in the values the name of the column
         which values will be used.
 
@@ -116,8 +116,9 @@ def get_cluster_data(
         If True in the end data frame will be applied a moving average of seven
         days.
 
-    :Returns :
-     pd.DataFrame
+    Returns
+    -------
+    pd.DataFrame
     """
 
     df_end = pd.DataFrame()
