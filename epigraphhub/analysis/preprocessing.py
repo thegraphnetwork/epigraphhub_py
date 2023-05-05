@@ -25,7 +25,7 @@ def build_lagged_features(
     Parameters
     ----------
     dt : pd.DataFrame
-        Dataframe containing features.
+        DataFrame containing features.
     maxlag : int, optional
         Maximum lags to compute, by default 2.
     dropna : bool, optional
@@ -35,7 +35,7 @@ def build_lagged_features(
     Returns
     -------
     pd.DataFrame
-        Dataframe with the lagged values computed.
+        DataFrame with the lagged values computed.
     """
 
     if type(dt) is pd.DataFrame:
@@ -73,7 +73,7 @@ def preprocess_data(
     Parameters
     ----------
     data : pd.DataFrame
-        Dataframe with datetime index and the target and features in the
+        DataFrame with datetime index and the target and features in the
         columns.
     maxlag : int
         The max number of days used to compute the lagged columns.
@@ -115,7 +115,7 @@ def get_targets(target: pd.Series, predict_n: int) -> dict:
 
     Returns
     -------
-    dictionary
+    dict
         A dictionary with the targets used to train the model.
     """
 
@@ -234,8 +234,7 @@ def normalize_data(
     -------
     Tuple[pd.DataFrame, pd.Series]
         pd.DataFrame: normalized DataFrame.
-        pd.Series: Series of the max
-        values used in the normalization.
+        pd.Series: Series of the max values used in the normalization.
     """
 
     df.fillna(0, inplace=True)

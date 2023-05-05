@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
 
-The functions in this module allow the application of any scikit-learn regressor model.
-There are separate functions to train and evaluate (separate
-the data in train and test datasets), train with all the data available, and make
-forecasts.
+The functions in this module allow the application of any scikit-learn regressor
+model. There are separate functions to train and evaluate (separate the data in
+train and test datasets), train with all the data available, and make forecasts.
 """
 
 import copy
@@ -87,23 +86,32 @@ def train_eval_mult_models(
 ):
 
     """
-    Function to apply a scikit regressor model given a dataset and a target column.
-    This function will train multiple models, each one specilist in predict the X + n
-    days, of the target column, where n is in the range (1, number of days that you
-                                                         want predict).
+    Function to apply a scikit regressor model given a dataset and a target
+    column. This function will train multiple models, each one specialist in
+    predict the X + n days, of the target column, where n is in the range (1,
+    number of days that you want predict).
 
-    This function split the data in train and test dataset and returns the predictions
-    made using the test dataset.
-    Important:
+    This function split the data in train and test dataset and returns the
+    predictions made using the test dataset.
 
-    params model: A model compatible with .fit and .predict scikit-learn methods.
-    params target_name:string. Name of the target column.
-    params data: dataframe. Dataframe with features and target column.
-    params split: float. Determines which percentage of the data will be used to train the model
-    params horizon_forecast: int. Number of days that will be predicted
-    params max_lag: int. Number of the past days that will be used to forecast the next days
+    Parameters
+    ----------
+    model : object
+        A model compatible with .fit and .predict scikit-learn methods.
+    target_name : str
+        Name of the target column.
+    data : pd.DataFrame.
+        DataFrame with features and target column.
+    split : float
+        Determines which percentage of the data will be used to train the model.
+    horizon_forecast : int
+        Number of days that will be predicted.
+    max_lag : int
+        Number of the past days that will be used to forecast the next days.
 
-    returns: DataFrame.
+    Returns
+    -------
+    pd.DataFrame
     """
 
     target = data[target_name]
@@ -163,23 +171,34 @@ def train_eval_one_model(
 ):
 
     """
-    Function to apply a scikit regressor model given a dataset and a target column.
-    This function will train one model specilist in predict the X + n
-    days, of the target column, where n is in the number of days that you want predict.
-    In this case, to make the predictions the mode will use the data os the last n days.
+    Function to apply a scikit regressor model given a dataset and a target
+    column. This function will train one model specialist in predict the X + n
+    days, of the target column, where n is in the number of days that you want
+    predict. In this case, to make the predictions the mode will use the data os
+    the last n days.
 
-    This function split the data in train and test dataset and returns the predictions
-    made using the test dataset.
-    Important:
+    This function split the data in train and test dataset and returns the
+    predictions made using the test dataset.
 
-    params model: A model compatible with .fit and .predict scikit-learn methods.
-    params target_name:string. Name of the target column.
-    params data: dataframe. Dataframe with features and target column.
-    params split: float. Determines which percentage of the data will be used to train the model
-    params horizon_forecast: int. Number of days that will be predicted
-    params max_lag: int. Number of the past days that will be used to forecast the next days
+    Parameters
+    ----------
 
-    returns: DataFrame.
+    model : object
+        A model compatible with .fit and .predict scikit-learn methods.
+    target_name : str
+        Name of the target column.
+    data : pd.DataFrame
+        Dataframe with features and target column.
+    split : float
+        Determines which percentage of the data will be used to train the model
+    horizon_forecast: int.
+        Number of days that will be predicted.
+    max_lag : int.
+        Number of the past days that will be used to forecast the next days.
+
+    Returns
+    -------
+    pd.DataFrame
     """
 
     target = data[target_name]

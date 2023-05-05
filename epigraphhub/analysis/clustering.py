@@ -1,6 +1,6 @@
 """
 The functions in this module allow the user to compute the hierarchical
-clusterization between time series curves of a data frame.
+clusterization between time series curves of a DataFrame.
 """
 
 from typing import Tuple, Union
@@ -18,16 +18,17 @@ def get_lag(
 ) -> Tuple[int, float]:
     """
     Compute the lag and correlation between two series x and y.
+
     Parameters
     ----------
     x : np.array
-        first curve.
+        First curve.
     y : np.array
-        second curve
+        Second curve.
     maxlags : int, optional
-        Max lag allowed when computing the lag between the curves., by default 5
+        Max lag allowed when computing the lag between the curves, by default 5.
     smooth : bool, optional
-        Indicates if a moving average of 7 days will be applied or not, by default True
+        Indicates if a moving average of 7 days will be applied or not, by default True.
 
     Returns
     -------
@@ -59,21 +60,24 @@ def plot_xcorr(
     plot: bool = True,
 ):
     """
-    Plots the Cross correlation between two series identifying the lag
+    Plots the Cross correlation between two series identifying the lag.
 
     Parameters
     ----------
     inc : pd.DataFrame
-        A dataframe with datetime index where each column represent a diferent time series
+        A DataFrame with datetime index where each column represent a different
+        time series.
     X : str
-        The name of a column
+        The name of a column.
     Y : str
-        The name of another column
+        The name of another column.
     ini_date : str
-        A date represented as string to initiate the computation of the correlation between the series
+        A date represented as string to initiate the computation of the
+        correlation between the series.
 
     Returns
     -------
+    plotly.graph_objs._figure.Figure
         A plotly.express figure.
     """
 
@@ -127,7 +131,8 @@ def lag_ccf(
     a: np.array, maxlags: int = 30, smooth: bool = True
 ) -> Tuple[np.array, np.array]:
     """
-    Calculate the full correlation matrix based on the maximum correlation lag
+    Calculate the full correlation matrix based on the maximum correlation lag.
+
     Parameters
     ----------
     a : np.array
@@ -136,13 +141,15 @@ def lag_ccf(
         Max lag allowed when computing the lag between the curves., by default 30
     smooth : bool, optional
         Indicates if a moving average of 7 days will be applied in the data or not.
-        By default True
+        By default True.
 
     Returns
     -------
     Tuple[np.array,np.array]
-        cmat: np.array. Matrix with the correlation computed.
-        lags: np.array. Matrix with the lags computed.
+        cmat: np.array
+            Matrix with the correlation computed.
+        lags: np.array
+            Matrix with the lags computed.
     """
 
     ncols = a.shape[1]
@@ -160,21 +167,23 @@ def plot_matrix(
     cmat: np.array, columns: list, title: str, label_scale: str, plot: bool = True
 ):
     """
-    Plot a heatmap using the values in cmat
+    Plot a heatmap using the values in cmat.
+
     Parameters
     ----------
     cmat : np.array
-        A matrix
+        A matrix.
     columns : list
-        The list with the names to be used in the figure
+        The list with the names to be used in the figure.
     title : str
-        The title of the figure
-    label_scale:str
+        The title of the figure.
+    label_scale :str
         The name in the color scale bar.
 
     Returns
     -------
-    A plotly figure.
+    plotly.graph_objs._figure.Figure
+        A plotly figure.
 
     """
     fig = px.imshow(
@@ -202,36 +211,44 @@ def compute_clusters(
     plot: bool = False,
 ) -> Tuple[pd.DataFrame, np.array, np.array, plt.figure]:
     """
-    Function to apply a hierarquial clusterization in a dataframe.
+    Function to apply a hierarchical clusterization in a DataFrame.
 
     Parameters
     ----------
     df : pd.DataFrame
-        Dataframe with datetime index.
+        DataFrame with datetime index.
     columns : list
-        The list should have 2 columns. The first need to refer to a column with different regions associated
-        with the second column, which represents the curves we want to compute the correlation.
+        The list should have 2 columns. The first need to refer to a column with
+        different regions associated with the second column, which represents
+        the curves we want to compute the correlation.
     t : float
         Represent the value used to compute the distance between the clusters
         and so decide the number of clusters returned.
     drop_values : Union[list,None], optional
-        Param with the georegions that wiil be ignored in the clusterization. By default None
+        Param with the georegions that will be ignored in the clusterization. By
+        default None.
     smooth : bool, optional
-        If true a rooling average of seven days will be applied to the data. By default True
+        If true a rolling average of seven days will be applied to the data. By
+        default True.
     ini_date : Union[str, None], optional
-        Represent the initial date to start to compute the correlation between the series. By default None
+        Represent the initial date to start to compute the correlation between
+        the series. By default None.
     plot : bool, optional
-        If true a dendogram of the clusterization will be returned. By default False
+        If true a dendrogram of the clusterization will be returned. By default
+        False.
 
     Returns
     -------
     Tuple[pd.DataFrame, np.array, np.array, plt.figure]
-        inc_canton: It's a data frame with datetime index where each collumn represent
-                    the same timse series curve for different regions.
-        cluster: array. It's the array with the computed clusters
-        all_regions: array. It'is the array with all the regions used in the
-                            clusterization
-        fig : matplotlib.Figure. Plot with the dendorgram of the clusterization.
+        inc_canton: pd.DataFrame
+            It's a DataFrame with datetime index where each column represent the
+            same time series curve for different regions.
+        cluster: np.array
+            It's the array with the computed clusters.
+        all_regions: np.array
+            It's the array with all the regions used in the clusterization.
+        fig: matplotlib.Figure
+            Plot with the dendrogram of the clusterization.
     """
 
     df.sort_index(inplace=True)
@@ -297,25 +314,28 @@ def plot_clusters(
     Parameters
     ----------
     curve : str
-        Name of the curve used to compute the clusters. It Will be used in the title of the plot.
+        Name of the curve used to compute the clusters. It will be used in the
+        plot title.
     inc_canton : pd.DataFrame
-        Dataframe (table) where each column is the name of the
-        georegion and your values is the time series of the curve selected.
-        This param is the first return of the function compute_clusters.
+        DataFrame (table) where each column is the name of the georegion and
+        your values are the time series of the curve selected. This parameter is
+        the first return value of the compute_clusters function.
     clusters : np.array
         Array of the georegions that will want to see in the same plot.
     ini_date : str, optional
-         Filter the interval that the times series start to be plotted.
-         By default None.
+         Filter the interval from which the time series will be plotted. By
+         default None.
     normalize : bool, optional
-        Decides when normalize the times serie by your biggest value or not. By default False
+        Decides when normalize the times serie by your biggest value or not. By
+        default False.
     smooth : bool, optional
-        If True, a rolling average of seven days will be applied in the data. By default True
+        If True, a rolling average of seven days will be applied in the data. By
+        default True.
 
     Returns
     -------
     list
-        list of matplotlib figure
+        List of matplotlib figure.
     """
 
     if smooth:

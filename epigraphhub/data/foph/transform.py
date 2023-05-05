@@ -21,8 +21,10 @@ def parse_date_region(table):
     Connects to the SQL DB and insert geoRegion and date indexes
     if they are missing.
 
-    Raises:
-        Exception (Exception) : Unable to create index. Bad connection config.
+    Raises
+    ------
+    Exception : Exception
+        Unable to create index. Bad connection config.
     """
     engine = get_engine(env.db.default_credential)
 
@@ -34,9 +36,9 @@ def parse_date_region(table):
                 ON switzerland.foph_{table.lower()} (geoRegion);
                 """
             )
-            logger.info(f'geoRegion index updated on foph_{table.lower()}')
+            logger.info(f"geoRegion index updated on foph_{table.lower()}")
         except Exception as e:
-            logger.error(f'Could not create region index: {e}')
+            logger.error(f"Could not create region index: {e}")
         try:
             connection.execute(
                 f"""
@@ -44,6 +46,6 @@ def parse_date_region(table):
                 ON switzerland.foph_{table.lower()} (date);
                 """
             )
-            logger.info(f'date index updated on foph_{table.lower()}')
+            logger.info(f"date index updated on foph_{table.lower()}")
         except Exception as e:
-            logger.info(f'Could not create date index: {e}')
+            logger.info(f"Could not create date index: {e}")

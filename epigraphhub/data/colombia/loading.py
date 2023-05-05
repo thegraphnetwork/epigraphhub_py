@@ -82,14 +82,19 @@ def _chunked_fetch(maxrecords, start=0, chunk_size=10000):
     positive_cases_covid_d table. Updates the different values into
     a pattern to be easily queried.
 
-    Args:
-        maxrecords (int)   : Total rows count in the Colombia data.
-        start (int)        : Parameter used to delimit the start of the
-                             records in Colombia data.
-        chunk_size (int)   : Size of the chunk to be inserted into SQL DB.
+    Parameters
+    ----------
+    maxrecords : int
+        Total rows count in the Colombia data.
+    start : int
+        Parameter used to delimit the start of the records in Colombia data.
+    chunk_size : int
+        Size of the chunk to be inserted into SQL DB.
 
-    Yields:
-        df_new (DataFrame) : Dataframe with updated rows of fixed size.
+    Yields
+    ------
+    df_new : pd.DataFrame
+        DataFrame with updated rows of fixed size.
     """
     slice_date = datetime.date(datetime.today()) - timedelta(200)
 

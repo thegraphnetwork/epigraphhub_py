@@ -19,9 +19,12 @@ class Tunnel:
         """
         Opens a tunnel to EpigraphHub database
 
-        Args:
-            user: user to use for the connection
-            ssh_key_passphrase: your SSH key passphrase
+        Parameters
+        ----------
+        user : str
+            User to be used for the connection.
+        ssh_key_passphrase: str
+            Your SSH key passphrase.
         """
         if self.host == env.db.host:
             return warnings.warn(

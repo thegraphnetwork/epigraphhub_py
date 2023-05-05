@@ -34,23 +34,24 @@ download_csv(url):
 remove_csvs():
     Removes the CSVs directory recursively.
 """
-import os
 import json
+import os
 import subprocess
-import requests
-import pandas as pd
 from pathlib import Path
-from loguru import logger
+
+import pandas as pd
+import requests
 from bs4 import BeautifulSoup
+from loguru import logger
 
 from epigraphhub.data._config import (
     FOPH_CSV_PATH,
     FOPH_LOG_PATH,
-    FOPH_URL,
     FOPH_METADATA_URL,
+    FOPH_URL,
 )
 
-logger.add(FOPH_LOG_PATH, retention='7 days')
+logger.add(FOPH_LOG_PATH, retention="7 days")
 
 
 def metadata(
@@ -72,22 +73,22 @@ def metadata(
     """
     resp = requests.get(source).text
     soup = BeautifulSoup(resp)
-    html_table = soup.find('table')
-    table_rows = html_table.find_all('tr')
+    html_table = soup.find("table")
+    table_rows = html_table.find_all("tr")
 
     metadatas = []
     for tr in table_rows:
-        td = tr.find_all('td')
+        td = tr.find_all("td")
         row = [tr.text.strip() for tr in td if tr.text.strip()]
         if row:
             file, dataset, desc = row
 
             deprec = False
-            if 'DEPRECATED' in file:
+            if "DEPRECATED" in file:
                 deprec = True
-                file = str(file).split('DEPRECATED ')[1]
+                file = str(file).split("DEPRECATED ")[1]
 
-            file = str(file).split('.(json/csv)')[0]
+            file = str(file).split(".(json/csv)")[0]
 
             metadatas.append(
                 dict(
@@ -103,13 +104,13 @@ def metadata(
     if not table and not filename:
         return df
 
-    hrefs = html_table.find_all('a', href=True)
+    hrefs = html_table.find_all("a", href=True)
 
     metadata_link = dict()
     for tag in hrefs:
-        metadata_link[tag.text] = tag['href']
+        metadata_link[tag.text] = tag["href"]
 
-    with open(f'{Path(__file__).parent}/schema.json') as schemas:
+    with open(f"{Path(__file__).parent}/schema.json") as schemas:
         data = json.load(schemas)
 
     table_schema = pd.DataFrame(data)
@@ -119,34 +120,39 @@ def metadata(
 
     if filename:
         return pd.DataFrame(
-            table_schema[df[df['filename'] == filename].table.values[0]]
+            table_schema[df[df["filename"] == filename].table.values[0]]
         )
 
 
-def fetch(
-    source: str = FOPH_URL, freq: str = 'daily', by: str = 'default'
-) -> tuple:
+def fetch(source: str = FOPH_URL, freq: str = "daily", by: str = "default") -> tuple:
     """
     A generator responsible for accessing FOPH and retrieve the CSV
     relation, such as its Table name and URL as a tuple.
 
-    Args:
-        source (str) : The url with the csv relation.
-        freq (str)   : The frequency of the data (daily or weekly).
-        by (str)     : Available only for weekly data, fetches cases by
-                       age, sex or default.
+    Parameters
+    ----------
+    source : str
+        The url with the csv relation.
+    freq : str
+        The frequency of the data (daily or weekly).
+    by : str
+        Available only for weekly data, fetches cases by age,
+        sex or default.
 
-    Returns:
-        table (str)  : Table name as in the json file.
-        url (str)    : URL to download the CSV.
+    Returns
+    -------
+    table : str
+        Table name as in the json file.
+    url : str
+        URL to download the CSV.
     """
     context = requests.get(source).json()
-    tables = context['sources']['individual']['csv'][freq]
-    if freq.lower() == 'weekly':
-        if by.lower() == 'age':
-            tables = tables['byAge']
-        elif by.lower() == 'sex':
-            tables = tables['bySex']
+    tables = context["sources"]["individual"]["csv"][freq]
+    if freq.lower() == "weekly":
+        if by.lower() == "age":
+            tables = tables["byAge"]
+        elif by.lower() == "sex":
+            tables = tables["bySex"]
         else:
             tables = tables[by]
     for table, url in tables.items():
@@ -158,23 +164,25 @@ def download(url):
     This methods runs curl in a URL that corresponds to a CSV file
     and stores it as specified in the URL.
 
-    Args:
-        url (str)    : URL that contains the CSV to download.
+    Parameters
+    ----------
+    url : str
+        URL that contains the CSV to download.
     """
     os.makedirs(FOPH_CSV_PATH, exist_ok=True)
-    filename = url.split('/')[-1]
+    filename = url.split("/")[-1]
     filepath = Path(FOPH_CSV_PATH) / filename
     subprocess.run(
         [
-            'curl',
-            '--silent',
-            '-f',
-            '-o',
-            f'{str(filepath)}',
+            "curl",
+            "--silent",
+            "-f",
+            "-o",
+            f"{str(filepath)}",
             url,
         ]
     )
-    logger.info(f'{filename} downloaded at {FOPH_CSV_PATH}.')
+    logger.info(f"{filename} downloaded at {FOPH_CSV_PATH}.")
     return str(filepath)
 
 
@@ -183,17 +191,17 @@ def remove(filename: str = None, entire_dir: bool = False):
     Removes recursively the FOPH CSV's folder or filename.
     """
     if entire_dir:
-        subprocess.run(['rm', '-rf', FOPH_CSV_PATH])
-        logger.info(f'{FOPH_CSV_PATH} removed.')
+        subprocess.run(["rm", "-rf", FOPH_CSV_PATH])
+        logger.info(f"{FOPH_CSV_PATH} removed.")
 
     elif filename:
         file_path = Path(FOPH_CSV_PATH) / filename
         if file_path.exists():
             file_path.unlink()
-            logger.info(f'{file_path} removed.')
+            logger.info(f"{file_path} removed.")
         else:
-            raise Exception(f'{file_path} not found.')
+            raise Exception(f"{file_path} not found.")
 
     else:
-        logger.error(f'Set `entire_dir=True` to remove CSV dir')
-        raise Exception('Nothing was selected to remove')
+        logger.error(f"Set `entire_dir=True` to remove CSV dir")
+        raise Exception("Nothing was selected to remove")

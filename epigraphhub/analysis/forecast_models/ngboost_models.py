@@ -102,7 +102,7 @@ class NGBModel:
         """
         Function to apply a ngboost regressor model given a dataset and
         a target column. This function will train multiple models, each
-        one specilist in predict the X + n days, of the target column,
+        one specialist in predict the X + n days, of the target column,
         where n is in the range (1, number of days that you want
         predict). This function split the data in train and test dataset
         and returns the predictions made using the test dataset.
@@ -114,10 +114,10 @@ class NGBModel:
         data : pd.DataFrame
             DataFrame with features and target column.
         ini_date : str, optional
-            Determines the beggining of the train dataset, by default
+            Determines the beginning of the train dataset, by default
             None.
         end_train_date : str, optional
-            Determines the beggining of end of train dataset. If is not
+            Determines the beginning of end of train dataset. If is not
             None, then ratio isn't used, by default None.
         end_date : str, optional
             Determines the end of the dataset used in validation, by
@@ -262,7 +262,7 @@ class NGBModel:
         """
         Function to train multiple ngboost regressor models given a
         dataset and a target column. This function will train multiple
-        models, each one specilist in predict the X + n days, of the
+        models, each one specialist in predict the X + n days, of the
         target column, where n is in the range (1, number of days that
         you want predict). This function will train the model with all
         the data available and will save the model that will be used to
@@ -275,7 +275,7 @@ class NGBModel:
         data : pd.DataFrame
             DataFrame with features and target column.
         ini_date : str, optional
-            Determines the beggining of the train dataset, by default
+            Determines the beginning of the train dataset, by default
             None.
         end_date : str, optional
             Determines the end of the train dataset, by default None.
@@ -346,7 +346,7 @@ class NGBModel:
         data : pd.DataFrame
             DataFrame with features and target column.
         ini_date : str, optional
-            Determines the beggining of the train dataset, by default
+            Determines the beginning of the train dataset, by default
             None.
         end_date : str, optional
             Determines the end of the train dataset, by default None.
@@ -357,7 +357,7 @@ class NGBModel:
         Returns
         -------
         pd.DataFrame
-            A DataFrame with three columns regarding(and a date index):
+            A DataFrame with three columns regarding (and a date index):
 
             - lower: The lower value of the confidence interval of 95%.
             - median: The median value of the confidence interval of
