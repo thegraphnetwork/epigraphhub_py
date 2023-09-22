@@ -44,7 +44,7 @@ jobs:
         miniforge-variant: Mambaforge
 
     - name: Install dependencies
-      run: poetry install
+      run: poetry install --all-extras
 
     - name: Create config file
       run: makim config.create-file
