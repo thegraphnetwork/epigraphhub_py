@@ -1,6 +1,13 @@
 Release Notes
 ---
 
+## [2.1.0](https://github.com/thegraphnetwork/epigraphhub_py/compare/2.0.5...2.1.0) (2023-09-25)
+
+
+### Features
+
+* **deps:** create ml extra packages to shrink package size ([#216](https://github.com/thegraphnetwork/epigraphhub_py/issues/216)) ([8878bb2](https://github.com/thegraphnetwork/epigraphhub_py/commit/8878bb23be88831ca030f740eb6288904088cbf7))
+
 ## [2.0.5](https://github.com/thegraphnetwork/epigraphhub_py/compare/2.0.4...2.0.5) (2023-04-26)
 
 
