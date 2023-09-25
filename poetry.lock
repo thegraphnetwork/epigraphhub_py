@@ -213,7 +213,7 @@ all = ["bokeh (>=1.4.0,<3.0)", "dask[distributed]", "numba", "ujson", "zarr (>=2
 name = "astor"
 version = "0.8.1"
 description = "Read/rewrite/write Python ASTs"
-optional = false
+optional = true
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,>=2.7"
 files = [
     {file = "astor-0.8.1-py2.py3-none-any.whl", hash = "sha256:070a54e890cefb5b3739d19f30f5a5ec840ffc9c50ffa7d23cc9fc1a38ebbfc5"},
@@ -222,13 +222,13 @@ files = [
 
 [[package]]
 name = "astroid"
-version = "2.15.6"
+version = "2.15.7"
 description = "An abstract syntax tree for Python with inference support."
 optional = false
 python-versions = ">=3.7.2"
 files = [
-    {file = "astroid-2.15.6-py3-none-any.whl", hash = "sha256:389656ca57b6108f939cf5d2f9a2a825a3be50ba9d589670f393236e0a03b91c"},
-    {file = "astroid-2.15.6.tar.gz", hash = "sha256:903f024859b7c7687d7a7f3a3f73b17301f8e42dfd9cc9df9d4418172d3e2dbd"},
+    {file = "astroid-2.15.7-py3-none-any.whl", hash = "sha256:958f280532e36ca84a13023f15cb1556fb6792d193acb87e1f3ca536b6fa6bd2"},
+    {file = "astroid-2.15.7.tar.gz", hash = "sha256:c522f2832a900e27a7d284b9b6ef670d2495f760ede3c8c0b004a5641d3c5987"},
 ]
 
 [package.dependencies]
@@ -301,7 +301,7 @@ tests-no-zope = ["cloudpickle", "hypothesis", "mypy (>=1.1.1)", "pympler", "pyte
 name = "autograd"
 version = "1.6.2"
 description = "Efficiently computes derivatives of numpy code."
-optional = false
+optional = true
 python-versions = "*"
 files = [
     {file = "autograd-1.6.2-py3-none-any.whl", hash = "sha256:208dde2a938e63b4f8f5049b1985505139e529068b0d26f8cd7771fd3eb145d5"},
@@ -316,7 +316,7 @@ numpy = ">=1.12"
 name = "autograd-gamma"
 version = "0.5.0"
 description = "Autograd compatible approximations to the gamma family of functions"
-optional = false
+optional = true
 python-versions = "*"
 files = [
     {file = "autograd-gamma-0.5.0.tar.gz", hash = "sha256:f27abb7b8bb9cffc8badcbf59f3fe44a9db39e124ecacf1992b6d952934ac9c4"},
@@ -1537,7 +1537,7 @@ typing = ["typing-extensions (>=4.7.1)"]
 name = "fiona"
 version = "1.9.4.post1"
 description = "Fiona reads and writes spatial data files"
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "Fiona-1.9.4.post1-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:d6483a20037db2209c8e9a0c6f1e552f807d03c8f42ed0c865ab500945a37c4d"},
@@ -1581,7 +1581,7 @@ test = ["Fiona[s3]", "pytest (>=7)", "pytest-cov", "pytz"]
 name = "flake8"
 version = "5.0.4"
 description = "the modular source code checker: pep8 pyflakes and co"
-optional = false
+optional = true
 python-versions = ">=3.6.1"
 files = [
     {file = "flake8-5.0.4-py2.py3-none-any.whl", hash = "sha256:7a1cf6b73744f5806ab95e526f6f0d8c01c66d7bbe349562d22dfca20610b248"},
@@ -1665,7 +1665,7 @@ woff = ["brotli (>=1.0.1)", "brotlicffi (>=0.8.0)", "zopfli (>=0.1.4)"]
 name = "formulaic"
 version = "0.6.4"
 description = "An implementation of Wilkinson formulas."
-optional = false
+optional = true
 python-versions = ">=3.7.2"
 files = [
     {file = "formulaic-0.6.4-py3-none-any.whl", hash = "sha256:570b3c7ab15fe8095e0dc86a4f71217102b23ce7e715053751a6cdcc580d7767"},
@@ -1745,7 +1745,7 @@ files = [
 name = "geoalchemy2"
 version = "0.10.2"
 description = "Using SQLAlchemy with Spatial Databases"
-optional = true
+optional = false
 python-versions = ">=3.6"
 files = [
     {file = "GeoAlchemy2-0.10.2-py2.py3-none-any.whl", hash = "sha256:22350c34c4c31faead91b2f0146b68835dcd66c34122ba1f2277a9dfb6543baa"},
@@ -1778,7 +1778,7 @@ six = "*"
 name = "geopandas"
 version = "0.10.2"
 description = "Geographic pandas extensions"
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "geopandas-0.10.2-py2.py3-none-any.whl", hash = "sha256:1722853464441b603d9be3d35baf8bde43831424a891e82a8545eb8997b65d6c"},
@@ -2167,7 +2167,7 @@ files = [
 name = "interface-meta"
 version = "1.3.0"
 description = "`interface_meta` provides a convenient way to expose an extensible API with enforced method signatures and consistent documentation."
-optional = false
+optional = true
 python-versions = ">=3.7,<4.0"
 files = [
     {file = "interface_meta-1.3.0-py3-none-any.whl", hash = "sha256:de35dc5241431886e709e20a14d6597ed07c9f1e8b4bfcffde2190ca5b700ee8"},
@@ -2262,7 +2262,7 @@ files = [
 name = "ipywidgets"
 version = "8.1.1"
 description = "Jupyter interactive widgets"
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "ipywidgets-8.1.1-py3-none-any.whl", hash = "sha256:2b88d728656aea3bbfd05d32c747cfd0078f9d7e159cf982433b58ad717eed7f"},
@@ -2385,7 +2385,7 @@ format-nongpl = ["idna", "jsonpointer (>1.13)", "rfc3339-validator", "rfc3986-va
 name = "jupyter"
 version = "1.0.0"
 description = "Jupyter metapackage. Install all the Jupyter components in one go."
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "jupyter-1.0.0-py2.py3-none-any.whl", hash = "sha256:5b290f93b98ffbc21c0c7e749f054b3267782166d72fa5e3ed1ed4eaf34a2b78"},
@@ -2429,7 +2429,7 @@ test = ["codecov", "coverage", "ipykernel (>=6.12)", "ipython", "mypy", "pre-com
 name = "jupyter-console"
 version = "6.6.3"
 description = "Jupyter terminal console"
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "jupyter_console-6.6.3-py3-none-any.whl", hash = "sha256:309d33409fcc92ffdad25f0bcdf9a4a9daa61b6f341177570fdac03de5352485"},
@@ -2566,7 +2566,7 @@ test = ["codecov", "ipykernel", "jupyter-server[test]", "openapi-core (>=0.14.0,
 name = "jupyterlab-widgets"
 version = "3.0.9"
 description = "Jupyter interactive widgets for JupyterLab"
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "jupyterlab_widgets-3.0.9-py3-none-any.whl", hash = "sha256:3cf5bdf5b897bf3bccf1c11873aa4afd776d7430200f765e0686bd352487b58d"},
@@ -2766,7 +2766,7 @@ files = [
 name = "lifelines"
 version = "0.27.8"
 description = "Survival analysis in Python, including Kaplan Meier, Nelson Aalen and regression"
-optional = false
+optional = true
 python-versions = ">=3.7"
 files = [
     {file = "lifelines-0.27.8-py3-none-any.whl", hash = "sha256:77851d860eec0bb168bf29bd1ff235de13fdccfdc0f07ddbd3c007ce42af40d3"},
@@ -3491,7 +3491,7 @@ numpy = "*"
 name = "ngboost"
 version = "0.3.13"
 description = "Library for probabilistic predictions via gradient boosting."
-optional = false
+optional = true
 python-versions = ">=3.7.1,<3.11"
 files = [
     {file = "ngboost-0.3.13-py3-none-any.whl", hash = "sha256:ba90519d759370ec6492cef8feaff35bedf312c0ed52ff0f951242a071b20c65"},
@@ -4220,7 +4220,7 @@ pyasn1 = ">=0.4.6,<0.6.0"
 name = "pycodestyle"
 version = "2.9.1"
 description = "Python style guide checker"
-optional = false
+optional = true
 python-versions = ">=3.6"
 files = [
     {file = "pycodestyle-2.9.1-py2.py3-none-any.whl", hash = "sha256:d1735fc58b418fd7c5f658d28d943854f8a849b01a5d0a1e6f3f3fdd0166804b"},
@@ -4311,7 +4311,7 @@ toml = ["tomli (>=1.2.3)"]
 name = "pyflakes"
 version = "2.5.0"
 description = "passive checker of Python programs"
-optional = false
+optional = true
 python-versions = ">=3.6"
 files = [
     {file = "pyflakes-2.5.0-py2.py3-none-any.whl", hash = "sha256:4579f67d887f804e67edb544428f264b7b24f435b263c4614f384135cea553d2"},
@@ -4334,17 +4334,17 @@ plugins = ["importlib-metadata"]
 
 [[package]]
 name = "pylint"
-version = "2.17.5"
+version = "2.17.6"
 description = "python code static checker"
 optional = false
 python-versions = ">=3.7.2"
 files = [
-    {file = "pylint-2.17.5-py3-none-any.whl", hash = "sha256:73995fb8216d3bed149c8d51bba25b2c52a8251a2c8ac846ec668ce38fab5413"},
-    {file = "pylint-2.17.5.tar.gz", hash = "sha256:f7b601cbc06fef7e62a754e2b41294c2aa31f1cb659624b9a85bcba29eaf8252"},
+    {file = "pylint-2.17.6-py3-none-any.whl", hash = "sha256:18a1412e873caf8ffb56b760ce1b5643675af23e6173a247b502406b24c716af"},
+    {file = "pylint-2.17.6.tar.gz", hash = "sha256:be928cce5c76bf9acdc65ad01447a1e0b1a7bccffc609fb7fc40f2513045bd05"},
 ]
 
 [package.dependencies]
-astroid = ">=2.15.6,<=2.17.0-dev0"
+astroid = ">=2.15.7,<=2.17.0-dev0"
 colorama = {version = ">=0.4.5", markers = "sys_platform == \"win32\""}
 dill = {version = ">=0.2", markers = "python_version < \"3.11\""}
 isort = ">=4.2.5,<6"
@@ -4853,7 +4853,7 @@ py = {version = "*", markers = "implementation_name == \"pypy\""}
 name = "qtconsole"
 version = "5.4.4"
 description = "Jupyter Qt console"
-optional = true
+optional = false
 python-versions = ">= 3.7"
 files = [
     {file = "qtconsole-5.4.4-py3-none-any.whl", hash = "sha256:a3b69b868e041c2c698bdc75b0602f42e130ffb256d6efa48f9aa756c97672aa"},
@@ -4879,7 +4879,7 @@ test = ["flaky", "pytest", "pytest-qt"]
 name = "qtpy"
 version = "2.4.0"
 description = "Provides an abstraction layer on top of the various Qt bindings (PyQt5/6 and PySide2/6)."
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "QtPy-2.4.0-py3-none-any.whl", hash = "sha256:4d4f045a41e09ac9fa57fcb47ef05781aa5af294a0a646acc1b729d14225e741"},
@@ -5163,7 +5163,7 @@ setuptools = "*"
 name = "scikit-learn"
 version = "1.3.1"
 description = "A set of python modules for machine learning and data mining"
-optional = false
+optional = true
 python-versions = ">=3.8"
 files = [
     {file = "scikit-learn-1.3.1.tar.gz", hash = "sha256:1a231cced3ee3fa04756b4a7ab532dc9417acd581a330adff5f2c01ac2831fcf"},
@@ -5311,7 +5311,7 @@ files = [
 name = "shapely"
 version = "2.0.1"
 description = "Manipulation and analysis of geometric objects"
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "shapely-2.0.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:b06d031bc64149e340448fea25eee01360a58936c89985cf584134171e05863f"},
@@ -5931,7 +5931,7 @@ files = [
 name = "threadpoolctl"
 version = "3.2.0"
 description = "threadpoolctl"
-optional = false
+optional = true
 python-versions = ">=3.8"
 files = [
     {file = "threadpoolctl-3.2.0-py3-none-any.whl", hash = "sha256:2b7818516e423bdaebb97c723f86a7c6b0a83d3f3b0970328d66f4d9104dc032"},
@@ -6090,13 +6090,13 @@ test = ["black (>=22.3.0,<23.0.0)", "coverage (>=5.2,<6.0)", "isort (>=5.0.6,<6.
 
 [[package]]
 name = "types-pyyaml"
-version = "6.0.12.11"
+version = "6.0.12.12"
 description = "Typing stubs for PyYAML"
 optional = false
 python-versions = "*"
 files = [
-    {file = "types-PyYAML-6.0.12.11.tar.gz", hash = "sha256:7d340b19ca28cddfdba438ee638cd4084bde213e501a3978738543e27094775b"},
-    {file = "types_PyYAML-6.0.12.11-py3-none-any.whl", hash = "sha256:a461508f3096d1d5810ec5ab95d7eeecb651f3a15b71959999988942063bf01d"},
+    {file = "types-PyYAML-6.0.12.12.tar.gz", hash = "sha256:334373d392fde0fdf95af5c3f1661885fa10c52167b14593eb856289e1855062"},
+    {file = "types_PyYAML-6.0.12.12-py3-none-any.whl", hash = "sha256:c05bc6c158facb0676674b7f11fe3960db4f389718e19e62bd2b84d6205cfd24"},
 ]
 
 [[package]]
@@ -6254,7 +6254,7 @@ test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
 name = "widgetsnbextension"
 version = "4.0.9"
 description = "Jupyter interactive widgets for Jupyter Notebook"
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "widgetsnbextension-4.0.9-py3-none-any.whl", hash = "sha256:91452ca8445beb805792f206e560c1769284267a30ceb1cec9f5bcc887d15175"},
@@ -6447,9 +6447,10 @@ docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.link
 testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-ignore-flaky", "pytest-mypy (>=0.9.1)", "pytest-ruff"]
 
 [extras]
-ml = ["GeoAlchemy2", "geopandas", "jupyter", "matplotlib", "plotly", "pytrends", "scikit-learn", "tensorflow"]
+ml = ["ngboost", "pytrends", "scikit-learn", "tensorflow"]
+viz = ["arviz", "matplotlib", "plotly"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.11"
-content-hash = "efbcf266af831757b00dd041818aec7773fdf0965afe98c683be0f6b352a9b48"
+content-hash = "7b53faf992c85b2534c38b5195a315ee121225adabf16c3ef04b83e530d837be"

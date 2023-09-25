@@ -40,7 +40,6 @@ rich = ">=12.4.4,<13"
 numpy = "^1.20.3"
 pandas = "^1.2"
 scipy = "^1.8.0"
-arviz = "^0.12.0"
 sshtunnel = "^0.4.0"
 SQLAlchemy = ">= 1.4.29,<2.0.0"
 psycopg2-binary = "^2.9.3"
@@ -55,20 +54,23 @@ pymc = "^4.2.0"
 loguru = "^0.6.0"
 sodapy = "^2.2.0"
 pangres = "^4.1.2"
-ngboost = "^0.3.13"
 ibis-framework = "^3.2.0"
-pytrends = {version = "^4.7.3", optional = true}
-jupyter = {version = "^1.0.0", optional = true}
-GeoAlchemy2 = {version = "^0.10.0", optional = true}
+jupyter = "^1.0.0"
+GeoAlchemy2 = "^0.10.0"
+geopandas = "^0.10.2"
+# [viz]
+arviz = {version = "^0.12.0", optional = true}
 matplotlib = {version = "^3.5.1", optional = true}
 plotly =  {version = "^5", optional = true}
-geopandas =  {version = "^0.10.2", optional = true}
+# [ml]
+pytrends = {version = "^4.7.3", optional = true}
 tensorflow = {version = "^2.5.0", optional = true}
 scikit-learn = {version = "^1.0.2", optional = true}
+ngboost = {version = "^0.3.13", optional = true}
 
 [tool.poetry.extras]
-ml = ["pytrends", "jupyter", "GeoAlchemy2", "matplotlib", "plotly", "geopandas", "tensorflow",
-"scikit-learn"]
+ml = ["pytrends", "tensorflow", "scikit-learn", "ngboost"]
+viz = ["matplotlib", "plotly", "arviz"]
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.2"
