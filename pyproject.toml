@@ -34,7 +34,6 @@ classifiers = [  #! Update me
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.11"
-
 typer = {extras = ["all"], version = "^0.4.0"}
 rich = ">=12.4.4,<13"
 numpy = "^1.20.3"
@@ -96,6 +95,7 @@ nbsphinx = "^0.8.8"
 makim = "1.6.4"
 containers-sugar = "1.4.2"
 pysus = "^0.8.0"
+docker = "<7"
 
 [tool.black]
 # https://github.com/psf/black
