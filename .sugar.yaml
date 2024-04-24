@@ -1,0 +1,11 @@
+version: 1.0.0
+compose-app: docker-compose
+groups:
+  default:
+    project-name: epigraphhubpy
+    compose-path: docker/compose.yaml
+    env-file: docker/.env
+    services:
+      default: postgres
+      available:
+        - name: postgres
