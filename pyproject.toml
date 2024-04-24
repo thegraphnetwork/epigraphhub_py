@@ -49,7 +49,7 @@ rioxarray = "^0.10.2"
 wget = "^3.2"
 tabulate = "^0.8.9"
 click = "^8.1.0"
-PyYAML = "^5.0"
+PyYAML = ">=5.0"
 pymc = "^4.2.0"
 loguru = "^0.6.0"
 sodapy = "^2.2.0"
@@ -72,32 +72,30 @@ ngboost = {version = "^0.3.13", optional = true}
 ml = ["pytrends", "tensorflow", "scikit-learn", "ngboost"]
 viz = ["matplotlib", "plotly", "arviz"]
 
-[tool.poetry.dev-dependencies]
-bandit = "^1.7.2"
-black = {version = "^22.1", allow-prereleases = true}
-darglint = "^1.8.1"
-isort = {extras = ["colors"], version = "^5.10.1"}
-mypy = "^0.910"
-mypy-extensions = "^0.4.3"
-pre-commit = "^2.15.0"
-pydocstyle = "^6.1.1"
-pylint = "^2.11.1"
-pytest = "^7.0.1"
-pyupgrade = "^2.29.1"
-safety = "^1.10.3"
-coverage = "^6.3"
-coverage-badge = "^1.1.0"
-pytest-html = "^3.1.1"
-pytest-cov = "^3.0.0"
-Sphinx = "^4.4.0"
-myst-parser = "^0.17.0"
-sphinx-pyproject = "^0.1.0"
-nbsphinx = "^0.8.8"
-
 [tool.poetry.group.dev.dependencies]
-makim = "1.6.4"
-containers-sugar = "1.4.2"
-pysus = "^0.8.0"
+bandit = ">=1.7.2"
+black = {version = ">=22.1", allow-prereleases = true}
+darglint = ">=1.8.1"
+isort = {extras = ["colors"], version = ">=5.10.1"}
+mypy = ">=0.910,<1"
+mypy-extensions = ">=0.4.3,<0.5"
+pre-commit = ">=2.15.0"
+pydocstyle = ">=6.1.1"
+pylint = ">=2.11.1"
+pytest = ">=7.0.1"
+pyupgrade = ">=2.29.1"
+safety = ">=1.10.3"
+coverage = ">=6.3"
+coverage-badge = ">=1.1.0"
+pytest-html = ">=3.1.1"
+pytest-cov = ">=3.0.0"
+Sphinx = ">=4.4.0"
+myst-parser = ">=0.17.0"
+sphinx-pyproject = ">=0.1.0"
+nbsphinx = ">=0.8.8"
+makim = "1.15.0"
+containers-sugar = "1.11.2"
+pysus = ">=0.8.0,<=0.9"
 
 [tool.black]
 # https://github.com/psf/black
