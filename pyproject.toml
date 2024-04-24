@@ -64,7 +64,7 @@ plotly =  {version = "^5", optional = true}
 # [ml]
 pytrends = {version = "^4.7.3", optional = true}
 tensorflow = {version = "^2.5.0", optional = true}
-scikit-learn = {version = "^1.0.2", optional = true}
+scikit-learn = {version = ">=1.0.2,<1.4", optional = true}
 ngboost = {version = "^0.3.13", optional = true}
 
 [tool.poetry.extras]
