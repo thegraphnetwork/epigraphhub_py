@@ -72,7 +72,7 @@ ngboost = {version = "^0.3.13", optional = true}
 ml = ["pytrends", "tensorflow", "scikit-learn", "ngboost"]
 viz = ["matplotlib", "plotly", "arviz"]
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 bandit = "^1.7.2"
 black = {version = "^22.1", allow-prereleases = true}
 darglint = "^1.8.1"
@@ -93,8 +93,6 @@ Sphinx = "^4.4.0"
 myst-parser = "^0.17.0"
 sphinx-pyproject = "^0.1.0"
 nbsphinx = "^0.8.8"
-
-[tool.poetry.group.dev.dependencies]
 makim = "1.6.4"
 containers-sugar = "1.4.2"
 pysus = "^0.8.0"

@@ -6581,4 +6581,4 @@ viz = ["arviz", "matplotlib", "plotly"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.11"
-content-hash = "2286fd13e0885f55f93e2453bbcc9264d2f5b1417b9ec1c3b79773d849159116"
+content-hash = "14a061de6fcda9b70aa9845b989dd622544c416e89786ee626f8fe6ed4b9ddbb"
