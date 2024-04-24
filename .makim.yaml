@@ -1,7 +1,7 @@
 version: 1.0.0
 groups:
   tests:
-    tasks:
+    targets:
       linter:
         help: Use this target to review linter
         run: |
@@ -27,14 +27,14 @@ groups:
           poetry run bandit -ll --recursive epigraphhub_py tests
 
   config:
-    tasks:
+    targets:
       create-file:
         help: Configuration file
         run: |
           bash scripts/dev/create-config-file.sh
 
   containers:
-    tasks:
+    targets:
       wait:
         help: Wait for a service
         args:
@@ -51,7 +51,7 @@ groups:
           timeout {{ args.timeout }} ./docker/healthcheck.sh {{ args.service }}
 
   clean:
-    tasks:
+    targets:
       cleanup:
         help: Cleaning cache
         run: |
@@ -76,7 +76,7 @@ groups:
         -p "@semantic-release/git" \
         -p "@google/semantic-release-replace-plugin" \
         semantic-release
-    tasks:
+    targets:
       ci:
         help: Run semantic-release on CI
         run: |
