@@ -18,15 +18,15 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - uses: conda-incubator/setup-miniconda@v2
+    - uses: conda-incubator/setup-miniconda@v3
       with:
         miniconda-version: "latest"
-        mamba-version: "*"
         environment-file: conda/dev.yaml
         channels: conda-forge,nodefaults
         activate-environment: epigraphhubpy
-        use-mamba: true
-        miniforge-variant: Mambaforge
+        auto-update-conda: true
+        conda-solver: libmamba
+        python-version: "${{ matrix.python_version }}"
 
     - name: Install dependencies
       run: poetry install

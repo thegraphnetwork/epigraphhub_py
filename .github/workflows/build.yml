@@ -58,14 +58,14 @@ jobs:
         envsubst < .env.tpl > .env
 
     - uses: conda-incubator/setup-miniconda@v3
-        with:
-          miniconda-version: "latest"
-          environment-file: conda/dev.yaml
-          channels: conda-forge,nodefaults
-          activate-environment: epigraphhubpy
-          auto-update-conda: true
-          conda-solver: libmamba
-          python-version: "${{ matrix.python_version }}"
+      with:
+        miniconda-version: "latest"
+        environment-file: conda/dev.yaml
+        channels: conda-forge,nodefaults
+        activate-environment: epigraphhubpy
+        auto-update-conda: true
+        conda-solver: libmamba
+        python-version: "${{ matrix.python_version }}"
 
     - name: Install dependencies
       run: |
