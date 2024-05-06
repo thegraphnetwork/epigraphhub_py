@@ -81,3 +81,8 @@ groups:
         help: Run semantic-release on CI
         run: |
           {{ app }} --ci
+
+      dry:
+        help: Run semantic-release on CI
+        run: |
+          {{ app }} --dry-run
