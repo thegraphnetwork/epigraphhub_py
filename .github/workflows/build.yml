@@ -1,6 +1,10 @@
-name: build
+name: main
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 env:
   POSTGRES_HOST: localhost
@@ -12,13 +16,33 @@ env:
   POSTGRES_EPIGRAPH_DB: dev_epigraphhub
 
 jobs:
-  build:
+  check-branch:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: check-pr-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Check if the PR's branch is updated
+        uses: osl-incubator/gh-check-pr-is-updated@1.0.0
+        with:
+          remote_branch: origin/main
+          pr_sha: ${{ github.event.pull_request.head.sha }}
+
+
+  tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9"]
+        python_version: ["3.9"]
     concurrency:
-      group: ci-${{ github.ref }}
+      group: ci-tests-${{ github.ref }}
       cancel-in-progress: true
 
     defaults:
@@ -26,25 +50,27 @@ jobs:
         shell: bash -l {0}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Create environment variables file
       run: |
         cd docker
         envsubst < .env.tpl > .env
 
-    - uses: conda-incubator/setup-miniconda@v2
+    - uses: conda-incubator/setup-miniconda@v3
       with:
         miniconda-version: "latest"
-        mamba-version: "*"
         environment-file: conda/dev.yaml
         channels: conda-forge,nodefaults
         activate-environment: epigraphhubpy
-        use-mamba: true
-        miniforge-variant: Mambaforge
+        auto-update-conda: true
+        conda-solver: libmamba
+        python-version: "${{ matrix.python_version }}"
 
     - name: Install dependencies
-      run: poetry install --all-extras
+      run: |
+        poetry check
+        poetry install --all-extras
 
     - name: Create config file
       run: makim config.create-file

@@ -1,6 +1,11 @@
 name: release
 
-on: [workflow_dispatch]
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
   build:
@@ -11,32 +16,32 @@ jobs:
         shell: bash -l {0}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
-    - uses: conda-incubator/setup-miniconda@v2
+    - uses: conda-incubator/setup-miniconda@v3
       with:
         miniconda-version: "latest"
-        mamba-version: "*"
         environment-file: conda/dev.yaml
         channels: conda-forge,nodefaults
         activate-environment: epigraphhubpy
-        use-mamba: true
-        miniforge-variant: Mambaforge
+        auto-update-conda: true
+        conda-solver: libmamba
+        python-version: "${{ matrix.python_version }}"
+
+    - name: Install dependencies
+      run: poetry install
+
+    - name: Test Release
+      if: ${{ github.event_name != 'workflow_dispatch' }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: makim release.dry
 
     - name: Release
+      if: ${{ github.event_name == 'workflow_dispatch' }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
       run: |
         poetry config pypi-token.pypi ${PYPI_TOKEN}
-        npx --yes \
-          -p semantic-release \
-          -p conventional-changelog-conventionalcommits \
-          -p "@semantic-release/commit-analyzer" \
-          -p "@semantic-release/release-notes-generator" \
-          -p "@semantic-release/changelog" \
-          -p "@semantic-release/exec" \
-          -p "@semantic-release/github" \
-          -p "@semantic-release/git" \
-          -p "@google/semantic-release-replace-plugin" \
-          semantic-release --ci
+        makim release.ci
