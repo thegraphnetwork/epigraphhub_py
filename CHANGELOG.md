@@ -1,6 +1,16 @@
 Release Notes
 ---
 
+## [2.1.1](https://github.com/thegraphnetwork/epigraphhub_py/compare/2.1.0...2.1.1) (2024-05-06)
+
+
+### Bug Fixes
+
+* Fix release workflow ([#219](https://github.com/thegraphnetwork/epigraphhub_py/issues/219)) ([5f472da](https://github.com/thegraphnetwork/epigraphhub_py/commit/5f472dac50738663702217ad5188e9a8ef39c1e0))
+* Fix semantic-release-replace-plugin ([#222](https://github.com/thegraphnetwork/epigraphhub_py/issues/222)) ([447db5d](https://github.com/thegraphnetwork/epigraphhub_py/commit/447db5de4c105f124e986ab6d3d5674bd51d7993))
+* Keep flexible the dependencies upper bound ([#218](https://github.com/thegraphnetwork/epigraphhub_py/issues/218)) ([f1c5a61](https://github.com/thegraphnetwork/epigraphhub_py/commit/f1c5a615f25cfeda3ec108f3e227d54f354d39a4))
+* Pin down conventionalcommits to [@7](https://github.com/7).0.2 ([#221](https://github.com/thegraphnetwork/epigraphhub_py/issues/221)) ([4c9c8a8](https://github.com/thegraphnetwork/epigraphhub_py/commit/4c9c8a83271502aa1c2dbc245547f962290fe0a8))
+
 ## [2.1.0](https://github.com/thegraphnetwork/epigraphhub_py/compare/2.0.5...2.1.0) (2023-09-25)
 
 
